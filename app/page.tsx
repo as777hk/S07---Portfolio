@@ -1,254 +1,125 @@
 import Link from "next/link";
-import {
-  ArrowDown,
-  ArrowRight,
-  ArrowUpRight,
-  Box,
-  Braces,
-  Fingerprint,
-  Layers3,
-  Network,
-  ScanEye,
-  ShieldCheck
-} from "lucide-react";
-import CyberAtlas from "@/components/cyber-atlas";
+import { ArrowDown, ArrowUpRight, Fingerprint, Radar, Shield, ShieldAlert, Workflow, Binary, ScanSearch, AudioWaveform, GitBranch, Zap } from "lucide-react";
 import Reveal from "@/components/reveal";
-import ProjectCard from "@/components/project-card";
-import { projects, notes, focus } from "@/lib/content";
 
-const creativeDirections = [
-  { icon: Layers3, title: "Motion & interaction", text: "Interfaces that respond with purpose, rhythm and clarity." },
-  { icon: Box, title: "3D / CGI exploration", text: "Spatial thinking, visual systems and rendered worlds." },
-  { icon: Braces, title: "Creative code", text: "Experiments where engineering becomes a visual material." }
+const projects = [
+  { id: "01", tag: "SECURITY STUDY / WEB", title: "ATTACK SURFACE", text: "A visual exploration of routes, inputs, assets and trust boundaries across a web application.", type: "surface", chips: ["WEB SECURITY", "RECON", "THREAT MAPPING"] },
+  { id: "02", tag: "NETWORK / VISUAL EXPERIMENT", title: "PACKET ANATOMY", text: "A creative-code study turning abstract network movement into something observable and easier to reason about.", type: "packets", chips: ["NETWORKS", "DATA FLOW", "CREATIVE CODE"] },
+  { id: "03", tag: "SECURE PRODUCT / CONCEPT", title: "TRUST BY DESIGN", text: "An interface concept exploring clear security states, permissions and sensitive user actions.", type: "trust", chips: ["SECURE UX", "PRIVACY", "INTERACTION"] }
+];
+const steps = [
+  ["01", "OBSERVE", "Understand the environment before touching the system. Context comes first."],
+  ["02", "MAP", "Trace entry points, relationships, dependencies and the boundaries that matter."],
+  ["03", "TEST", "Explore carefully in owned or explicitly authorised environments. Keep evidence."],
+  ["04", "EXPLAIN", "Turn findings into clear notes, practical fixes and something others can learn from."]
 ];
 
-const featuredProjects = [
-  projects.find((project) => project.slug === "secure-surface")!,
-  projects.find((project) => project.slug === "security-field-notes")!,
-  projects.find((project) => project.slug === "network-study")!
-];
+function Portrait() {
+  return <div className="portrait-stage">
+    <div className="portrait-frame">
+      <div className="portrait-head"><span>IDENTITY SCAN / 001</span><b>ACTIVE</b></div>
+      <svg viewBox="0 0 620 720" role="img" aria-label="Abstract holographic portrait silhouette" className="portrait-svg">
+        <defs>
+          <linearGradient id="silhouette" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#116c91" stopOpacity=".2"/><stop offset=".58" stopColor="#071b2c"/><stop offset="1" stopColor="#020812"/></linearGradient>
+          <linearGradient id="edge" x1="0" x2="1"><stop stopColor="#9af5ff"/><stop offset=".65" stopColor="#21bfe9"/><stop offset="1" stopColor="#f13f5d"/></linearGradient>
+          <pattern id="scanGrid" width="18" height="18" patternUnits="userSpaceOnUse"><path d="M18 0H0V18" fill="none" stroke="#40dafa" strokeOpacity=".2"/><circle r="1" fill="#7beaff" fillOpacity=".5"/></pattern>
+          <clipPath id="bodyClip"><path d="M310 48c-81 0-132 59-132 163 0 67 21 119 58 148l-8 53c-21 18-66 36-108 53-51 20-72 63-79 142l-8 116h554l-8-116c-7-79-28-122-79-142-42-17-87-35-108-53l-8-53c37-29 58-81 58-148C442 107 391 48 310 48Z"/></clipPath>
+        </defs>
+        <path d="M310 48c-81 0-132 59-132 163 0 67 21 119 58 148l-8 53c-21 18-66 36-108 53-51 20-72 63-79 142l-8 116h554l-8-116c-7-79-28-122-79-142-42-17-87-35-108-53l-8-53c37-29 58-81 58-148C442 107 391 48 310 48Z" fill="url(#silhouette)" stroke="url(#edge)" strokeWidth="2"/>
+        <g clipPath="url(#bodyClip)">
+          <rect x="30" y="35" width="560" height="695" fill="url(#scanGrid)"/>
+          <path d="M178 196c-3-102 51-161 132-161 88 0 137 58 132 165-15-30-39-53-62-65-31 34-99 59-202 61Z" fill="#020912" stroke="#35d5f6" strokeOpacity=".7"/>
+          <path d="M226 171c15-46 43-69 84-69 46 0 77 29 87 80 10 52 0 113-23 151-17 28-38 43-64 43s-49-15-66-43c-24-41-34-111-18-162Z" fill="#0a2a40" fillOpacity=".6" stroke="#5de6ff" strokeOpacity=".65"/>
+          <path d="M249 240h39m44 0h39m-94 0 12 10m55-10-12 10m-40 46c14 8 32 8 46 0" fill="none" stroke="#a2f3ff" strokeOpacity=".7" strokeWidth="2"/>
+          <path d="m247 348-15 89 78 84 78-84-15-89" fill="#071c2c" stroke="#37cce9" strokeOpacity=".7" strokeWidth="2"/>
+          <path d="m112 470 120-49 78 55 78-55 120 49 50 270H62Z" fill="#061321" stroke="#2cc9f0" strokeOpacity=".7" strokeWidth="2"/>
+          <path d="M310 456v284M232 421l-28 64 106 108 106-108-28-64M90 552h440M82 631h456" stroke="#37b8df" strokeOpacity=".42" fill="none" strokeWidth="2"/>
+          <path d="M80 210h84l28 24h48m300-24h-84l-28 24h-48M70 610h115l32-31h93m240 31H435l-32-31h-93" fill="none" stroke="#f13f5d" strokeOpacity=".65" strokeWidth="2"/>
+        </g>
+        <path d="M36 574h78m392 0h78M310 18v40m0 620v35" stroke="#f13f5d" strokeWidth="2"/>
+      </svg>
+      <div className="portrait-foot"><span>HUMAN / NOT A MACHINE</span><span>01 — 04</span></div>
+      <i className="portrait-scan"/>
+    </div>
+    <div className="portrait-orbit orbit-one"/><div className="portrait-orbit orbit-two"/>
+    <div className="portrait-stamp">SAM <small>SECURITY MINDED</small></div>
+  </div>;
+}
 
-const method = [
-  { n: "01", title: "Observe", text: "Start with the system, its purpose, assets and assumptions." },
-  { n: "02", title: "Map", text: "Make data flows, dependencies and trust boundaries visible." },
-  { n: "03", title: "Test responsibly", text: "Learn inside owned or explicitly authorised environments." },
-  { n: "04", title: "Explain", text: "Document evidence, uncertainty and practical remediation." }
-];
+function Visual({ type }: { type: string }) {
+  if (type === "surface") return <div className="project-visual">
+    <div className="radar"><i/><i/><i/><i/><b/></div>
+    <div className="scan-window"><span>ATTACK SURFACE / MAP</span>{["PUBLIC ROUTE","AUTH FLOW","API EDGE","INPUT LAYER"].map(x=><div key={x}><b/><i/><em>{x}</em></div>)}</div>
+  </div>;
+  if (type === "packets") return <div className="project-visual packet-visual"><div className="packet-plane"/><div className="packet-path path-a"/><div className="packet-path path-b"/><div className="packet-core"><Binary size={44}/></div><span className="visual-readout">FLOW / TRACE<br/><b>0x7F-A9-2C</b></span></div>;
+  return <div className="project-visual trust-visual"><div className="trust-ring ring-a"/><div className="trust-ring ring-b"/><div className="trust-ring ring-c"/><div className="trust-core"><Fingerprint size={54}/></div><span className="trust-chip chip-a">IDENTITY / VERIFIED</span><span className="trust-chip chip-b">PERMISSION / SCOPED</span><span className="trust-chip chip-c">DATA / PROTECTED</span></div>;
+}
 
 export default function HomePage() {
-  return (
-    <div className="home-page cinema-home">
-      <section className="wrap cinema-hero">
-        <div className="cinema-topline">
-          <span><i /> SAMIUN ISLAM / PERSONAL PORTFOLIO</span>
-          <span>CYBERSECURITY <b>×</b> CREATIVE TECHNOLOGY <em>2026—</em></span>
+  return <div className="home-page">
+    <section className="hero-section" id="top"><div className="wrap">
+      <div className="hero-meta"><span><i className="status-dot"/> PERSONAL DIGITAL SPACE / 001</span><span>CYBERSECURITY <b>×</b> CREATIVE TECHNOLOGY <em>2026</em></span></div>
+      <div className="hero-layout">
+        <div className="hero-copy">
+          <Reveal><p className="eyebrow"><i/> LOOK BENEATH THE SURFACE</p></Reveal>
+          <Reveal delay={.08}><h1 className="hero-title"><span>SAM</span><i>SAM</i></h1></Reveal>
+          <Reveal delay={.16}><p className="hero-lead">I explore the space where <b>cybersecurity</b>, systems thinking and creative technology meet.</p><p className="hero-description">Curious about how digital systems work, where they fail, and how thoughtful engineering can make them stronger.</p></Reveal>
+          <Reveal delay={.24}><div className="hero-actions"><Link href="#work" className="primary-button">EXPLORE SELECTED WORK <ArrowUpRight size={16}/></Link><Link href="#about" className="text-button">A LITTLE ABOUT ME <ArrowDown size={14}/></Link></div></Reveal>
+          <div className="hero-note"><span>01 / INTRODUCTION</span><span>SCROLL TO ENTER THE SYSTEM <i/></span></div>
         </div>
+        <Reveal delay={.16}><Portrait/></Reveal>
+      </div>
+      <div className="hero-baseline"><span>SECURITY FIRST</span><i/><span>CREATIVE BY DESIGN</span></div>
+    </div></section>
 
-        <div className="cinema-layout">
-          <div className="cinema-copy">
-            <Reveal>
-              <p className="cinema-kicker">LOOK CLOSER. QUESTION THE SYSTEM.</p>
-            </Reveal>
-            <Reveal delay={0.07}>
-              <h1 className="cinema-name">SAMIUN<span>.</span></h1>
-            </Reveal>
-            <Reveal delay={0.13}>
-              <div className="cinema-role">
-                <span>CYBERSECURITY</span>
-                <b>+</b>
-                <span>CREATIVE TECHNOLOGY</span>
-              </div>
-            </Reveal>
-            <Reveal delay={0.2}>
-              <p className="cinema-intro">
-                I&apos;m <strong>Samiun Islam.</strong> Cybersecurity is my primary pursuit — understanding how digital systems behave, where trust breaks down, and how technology can be made safer. I use creative code and visual experimentation to explore and communicate complex ideas.
-              </p>
-            </Reveal>
-            <Reveal delay={0.27}>
-              <div className="cinema-actions">
-                <Link href="/security" className="cinema-button cinema-button-primary" data-cursor="EXPLORE CYBERSECURITY">
-                  Explore my security focus <ArrowUpRight size={17} />
-                </Link>
-                <Link href="/work" className="cinema-button cinema-button-quiet" data-cursor="VIEW SELECTED WORK">
-                  Selected work <ArrowRight size={16} />
-                </Link>
-              </div>
-            </Reveal>
-          </div>
+    <section className="section manifesto-section" id="security"><div className="wrap">
+      <div className="section-meta"><span>02 / THE MINDSET</span><span>THINK LIKE AN ATTACKER. BUILD LIKE A DEFENDER.</span></div>
+      <div className="manifesto-grid">
+        <Reveal><p className="eyebrow"><i/> SECURITY IS A WAY OF THINKING</p><h2>EVERY SYSTEM<br/><span>LEAVES A</span><br/><em>TRACE.</em></h2></Reveal>
+        <Reveal delay={.1} className="manifesto-copy"><h3>The interesting part is rarely what you can see at first glance.</h3><p>It is the hidden route, the overlooked permission, the connection no one mapped. Cybersecurity keeps me curious because every system has layers — and understanding those layers changes how we build, test and protect technology.</p><Link href="#field-notes" className="inline-link">FOLLOW THE THREAD <ArrowUpRight size={15}/></Link><div className="signal-row"><span className="signal-bars">{Array.from({length:14},(_,i)=><i key={i}/>)}</span><span>ANALYSIS IN PROGRESS</span><b>LIVE / 0x01</b></div></Reveal>
+      </div>
+      <div className="pillar-grid">
+        {[
+          [Radar,"01","RECONNAISSANCE","See the surface. Understand the environment. Ask better questions."],
+          [ShieldAlert,"02","OFFENSIVE THINKING","Study how weaknesses emerge and how they can be responsibly explained."],
+          [Shield,"03","DEFENSIVE DESIGN","Make security part of the system from the beginning."],
+          [Workflow,"04","CREATIVE SYSTEMS","Use code and visual thinking to make complex ideas easier to explore."]
+        ].map(([Icon,n,title,copy]: any,i)=><Reveal key={n} delay={i*.07} className="pillar"><span>{n}</span><Icon size={28}/><h3>{title}</h3><p>{copy}</p><small>DISCOVER / MAP</small></Reveal>)}
+      </div>
+    </div></section>
 
-          <Reveal delay={0.12} className="cinema-visual">
-            <div className="cinema-visual-head">
-              <span>FIELD STUDY / 001</span>
-              <span className="cinema-live"><i /> INTERACTIVE VISUAL</span>
-            </div>
-            <div className="cinema-visual-frame" data-cursor="EXPLORE THE SECURITY MAP">
-              <div className="cinema-visual-grid" />
-              <div className="cinema-visual-glow" />
-              <CyberAtlas />
-              <span className="visual-edge-label visual-edge-left">NODE / AUTH</span>
-              <span className="visual-edge-label visual-edge-right">EDGE / TRUST</span>
-              <span className="visual-coordinate">SECTOR 07 / TRUST BOUNDARY A</span>
-            </div>
-            <div className="cinema-visual-foot">
-              <span>AN ORIGINAL VISUAL METAPHOR</span>
-              <span>NOT LIVE SECURITY TELEMETRY</span>
-            </div>
-          </Reveal>
-        </div>
+    <section className="section work-section" id="work"><div className="wrap">
+      <div className="section-meta"><span>03 / SELECTED EXPLORATIONS</span><span>SMALL STUDIES. BIG QUESTIONS.</span></div>
+      <div className="section-heading"><Reveal><p className="eyebrow"><i/> THE WORK</p><h2>CURIOSITY<br/><em>IN ACTION.</em></h2></Reveal><Reveal delay={.1}><p>A growing collection of security-focused concepts, technical experiments and visual studies. Each one is a way to investigate an idea more deeply.</p></Reveal></div>
+      <div className="project-list">{projects.map((project,i)=><Reveal key={project.id} delay={i*.08} className="project-row">
+        <div className="project-meta"><span>{project.id}</span><span>{project.tag}</span><ArrowUpRight size={17}/></div>
+        <div className="project-grid"><Visual type={project.type}/><div className="project-copy"><h3>{project.title}</h3><p>{project.text}</p><div className="chip-row">{project.chips.map(x=><span key={x}>{x}</span>)}</div><small>CONCEPT / EXPLORATION</small></div></div>
+      </Reveal>)}</div>
+      <p className="work-disclaimer">NOTE / These are concept and learning studies, not client case studies or claims of completed security engagements.</p>
+    </div></section>
 
-        <div className="cinema-bottomline">
-          <span className="cinema-scroll"><ArrowDown size={14} /> SCROLL TO EXPLORE</span>
-          <span className="cinema-principle"><b>01</b> SECURITY FIRST / CURIOSITY ALWAYS</span>
-          <span className="cinema-status"><i /> OPEN TO THOUGHTFUL COLLABORATION</span>
-        </div>
-        <div className="cinema-watermark" aria-hidden="true">SAMIUN</div>
-      </section>
+    <section className="section method-section" id="field-notes"><div className="wrap">
+      <div className="section-meta"><span>04 / FIELD NOTES</span><span>THE PROCESS MATTERS</span></div>
+      <div className="section-heading method-heading"><Reveal><p className="eyebrow"><i/> HOW I APPROACH A PROBLEM</p><h2>FOLLOW<br/><em>THE EVIDENCE.</em></h2></Reveal><Reveal delay={.1}><p>Curiosity starts the investigation. A repeatable process keeps it useful. This is the loop I come back to when exploring a system or shaping a new idea.</p></Reveal></div>
+      <div className="timeline">{steps.map(([n,title,body],i)=><Reveal key={n} delay={i*.07} className="timeline-row"><span>{n}</span><i/><div><h3>{title}</h3><p>{body}</p></div><ArrowUpRight size={16}/></Reveal>)}</div>
+      <div className="permission-note"><span>PRINCIPLE / ALWAYS</span><b>ONLY TEST WHAT YOU OWN OR HAVE PERMISSION TO TEST.</b></div>
+    </div></section>
 
-      <section className="wrap home-manifesto cinema-manifesto">
-        <div className="home-section-meta">
-          <span>01 / POINT OF VIEW</span>
-          <span>SECURITY IS A WAY OF THINKING</span>
-        </div>
-        <Reveal>
-          <h2>LOOK BEYOND<br />THE INTERFACE.<br /><span>UNDERSTAND WHAT&apos;S BENEATH.</span></h2>
-        </Reveal>
-        <div className="manifesto-bottom">
-          <p>Every product is a system of people, data, permissions and dependencies. I&apos;m interested in understanding those relationships — and making them easier to reason about.</p>
-          <Link href="/about" className="home-inline-link" data-cursor="READ THE STORY">The thinking behind it <ArrowUpRight size={15} /></Link>
-        </div>
-      </section>
+    <section className="section creative-section" id="creative"><div className="wrap">
+      <div className="section-meta"><span>05 / BEYOND THE TERMINAL</span><span>CREATIVE TECHNOLOGY</span></div>
+      <div className="creative-grid"><Reveal><p className="eyebrow"><i/> THE OTHER SIDE OF THE SIGNAL</p><h2>CODE CAN<br/>BE A <em>MEDIUM.</em></h2><p>Cybersecurity is the focus. Creative technology is the playground around it — where code becomes motion, interfaces become experiences, and visual experiments make technical ideas tangible.</p><Link href="#contact" className="inline-link">LET'S MAKE SOMETHING <ArrowUpRight size={15}/></Link></Reveal>
+        <Reveal delay={.12} className="creative-cards"><div><AudioWaveform/><small>01 / MOTION</small><h3>INTERACTION<br/>& MOTION</h3><p>Transitions and behaviours with intention.</p></div><div><GitBranch/><small>02 / SPATIAL</small><h3>3D / GENERATIVE<br/>EXPERIMENTS</h3><p>Digital spaces shaped through code.</p></div><div><Zap/><small>03 / ENGINEERING</small><h3>CREATIVE<br/>DEVELOPMENT</h3><p>Useful systems with a distinctive visual language.</p></div></Reveal>
+      </div>
+    </div></section>
 
-      <section className="wrap home-focus cinema-focus">
-        <div className="home-section-heading">
-          <div>
-            <span className="home-section-label"><i /> 02 / PRIMARY DISCIPLINE</span>
-            <h2>THE SECURITY<br /><span>LANDSCAPE.</span></h2>
-          </div>
-          <p>These are the areas I&apos;m developing through structured learning, hands-on labs, responsible practice and technical documentation.</p>
-        </div>
-        <div className="focus-rows">
-          {focus.map((item, index) => {
-            const icons = [ShieldCheck, Network, ScanEye, Fingerprint];
-            const Icon = icons[index];
-            return (
-              <Reveal key={item.n} delay={index * 0.055}>
-                <Link href="/security" className="focus-row" data-cursor="EXPLORE SECURITY">
-                  <span className="focus-row-number">{item.n}</span>
-                  <Icon className="focus-row-icon" size={21} />
-                  <div><h3>{item.title}</h3><p>{item.text}</p></div>
-                  <span className="focus-row-tag">{index === 0 ? "APPSEC" : index === 1 ? "NETWORKS" : index === 2 ? "RESEARCH" : "ENGINEERING"}</span>
-                  <ArrowUpRight className="focus-row-arrow" size={18} />
-                </Link>
-              </Reveal>
-            );
-          })}
-        </div>
-        <div className="focus-disclaimer">CURRENT PRACTICE / LEARNING, LAB WORK & DOCUMENTED STUDIES — NOT A CLAIM OF CERTIFICATION</div>
-      </section>
+    <section className="section about-section" id="about"><div className="wrap">
+      <div className="section-meta"><span>06 / THE PERSON BEHIND THE PROCESS</span><span>ABOUT SAM</span></div>
+      <div className="about-grid"><Reveal><p className="eyebrow"><i/> A LITTLE CONTEXT</p><h2>STAY<br/>CURIOUS.<br/><em>STAY SHARP.</em></h2></Reveal><Reveal delay={.1}><h3>I'm Sam — a curious builder with a strong pull toward cybersecurity and the systems that power our digital world.</h3><p>I enjoy exploring how websites and applications behave beneath the interface, learning how vulnerabilities happen, and understanding the engineering decisions that make products resilient. I also care about the experience around the technology: how it looks, moves and communicates.</p><div className="chip-row"><span>CYBERSECURITY</span><span>WEB TECHNOLOGY</span><span>CREATIVE CODE</span><span>VISUAL EXPERIMENTS</span></div><div className="about-status"><span><i/> CURRENTLY LEARNING & BUILDING</span><span>BASED IN BANGLADESH / UTC+6</span></div></Reveal></div>
+    </div></section>
 
-      <section className="wrap cinema-method">
-        <div className="home-section-meta">
-          <span>03 / THE PROCESS</span>
-          <span>FROM CURIOSITY TO CLARITY</span>
-        </div>
-        <div className="cinema-method-head">
-          <h2>HOW I<br /><span>THINK.</span></h2>
-          <p>Good security work starts before the tools. It starts with a clear question, a defined scope and the discipline to explain what the evidence actually shows.</p>
-        </div>
-        <div className="cinema-method-grid">
-          {method.map((item, index) => (
-            <Reveal className="cinema-method-card" key={item.n} delay={index * 0.07}>
-              <span className="cinema-method-number">{item.n}</span>
-              <h3>{item.title}</h3>
-              <p>{item.text}</p>
-              <span className="cinema-method-line" />
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      <section className="home-work-section cinema-work">
-        <div className="wrap home-work">
-          <div className="home-section-meta">
-            <span>04 / SELECTED WORK</span>
-            <span>STUDIES · EXPERIMENTS · DOCUMENTATION</span>
-          </div>
-          <div className="home-work-heading">
-            <h2>IDEAS INTO<br /><span>PROOF OF WORK.</span></h2>
-            <p>A growing collection at the intersection of cybersecurity, engineering and visual exploration. Each item is labelled honestly as a concept, experiment or study.</p>
-          </div>
-          <div className="project-grid home-project-grid">
-            {featuredProjects.map((project, index) => (
-              <ProjectCard key={project.slug} item={project} index={index} />
-            ))}
-          </div>
-          <div className="home-work-footer">
-            <span>MORE WORK / MORE QUESTIONS / MORE TO LEARN</span>
-            <Link href="/work" className="cinema-button cinema-button-outline" data-cursor="VIEW THE PROJECT INDEX">View all work <ArrowUpRight size={16} /></Link>
-          </div>
-        </div>
-      </section>
-
-      <section className="wrap home-creative cinema-creative">
-        <div className="home-section-meta">
-          <span>05 / THE WIDER PRACTICE</span>
-          <span>CREATIVE TECHNOLOGY</span>
-        </div>
-        <div className="home-creative-layout">
-          <div className="creative-headline">
-            <span className="home-section-label"><i /> THE COMPLEMENTARY DISCIPLINE</span>
-            <h2>ENGINEERING<br />MEETS <span>IMAGINATION.</span></h2>
-            <p>Alongside security, I explore motion, 3D, interactive interfaces and creative code — ways to prototype ideas and make complex systems more tangible.</p>
-            <Link href="/experiments" className="home-inline-link" data-cursor="ENTER THE LAB">Enter the visual lab <ArrowUpRight size={15} /></Link>
-          </div>
-          <div className="creative-cards">
-            {creativeDirections.map(({ icon: Icon, title, text }, index) => (
-              <Reveal key={title} delay={index * 0.07} className="creative-card">
-                <div className="creative-card-top"><Icon size={22} /><span>0{index + 1}</span></div>
-                <h3>{title}</h3>
-                <p>{text}</p>
-                <span className="creative-card-line" />
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="wrap home-notes cinema-notes">
-        <div className="home-section-meta">
-          <span>06 / FIELD NOTES</span>
-          <span>THOUGHTS MADE TRACEABLE</span>
-        </div>
-        <div className="home-notes-layout">
-          <div>
-            <span className="home-section-label"><i /> THINKING IN PUBLIC</span>
-            <h2>DOCUMENT<br /><span>THE DETAILS.</span></h2>
-            <p>Notes make learning visible. They keep scope, evidence, uncertainty and remediation in the same place.</p>
-            <Link href="/notes" className="home-inline-link" data-cursor="OPEN THE NOTEBOOK">Open the notebook <ArrowUpRight size={15} /></Link>
-          </div>
-          <div className="home-note-list">
-            {notes.slice(0, 2).map((note) => (
-              <Link key={note.slug} href={"/notes/" + note.slug} className="home-note-row" data-cursor="READ FIELD NOTE">
-                <span>{note.number}</span>
-                <div><small>{note.category}</small><h3>{note.title}</h3><p>{note.excerpt}</p></div>
-                <ArrowUpRight size={17} />
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="wrap home-contact cinema-contact">
-        <div className="home-contact-panel">
-          <div className="home-section-meta"><span>07 / NEXT CONNECTION</span><span>OPEN CHANNEL</span></div>
-          <h2>LET&apos;S BUILD<br /><span>WITH INTENTION.</span></h2>
-          <div className="home-contact-bottom">
-            <p>For thoughtful conversations, collaborations and interesting technical questions.</p>
-            <Link href="/contact" className="cinema-button cinema-button-primary" data-cursor="START A CONVERSATION">Get in touch <ArrowUpRight size={16} /></Link>
-          </div>
-          <div className="home-contact-stamp">S / 001</div>
-        </div>
-      </section>
-    </div>
-  );
+    <section className="section contact-section" id="contact"><div className="wrap">
+      <div className="section-meta"><span>07 / OPEN CHANNEL</span><span>END OF TRANSMISSION</span></div>
+      <div className="contact-panel"><Reveal><p className="eyebrow"><i/> HAVE SOMETHING INTERESTING?</p><h2>LET'S BUILD<br/><em>WHAT'S NEXT.</em></h2><p>Have a question, a collaboration in mind, or an interesting problem worth exploring? Start a conversation.</p><a className="primary-button" href="https://github.com/as777hk" target="_blank" rel="noreferrer">OPEN GITHUB PROFILE <ArrowUpRight size={16}/></a><small>PUBLIC CONTACT CHANNEL / GITHUB</small></Reveal><div className="contact-art"><div className="contact-orbit"><div><Fingerprint size={70}/></div></div><span>CHANNEL / OPEN<br/><b>ENCRYPTED BY INTENT</b><br/>CHANNEL READY</span></div></div>
+    </div></section>
+  </div>;
 }
