@@ -1,8 +1,34 @@
-import type {Metadata} from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
-import {ArrowUpRight,Box,Code2,Layers3,Orbit} from "lucide-react";
+import { ArrowUpRight, Box, Code2, Layers3, Orbit } from "lucide-react";
 import Reveal from "@/components/reveal";
 import SectionTitle from "@/components/section-title";
-export const metadata:Metadata={title:"Experiments",description:"3D, VFX, motion and creative coding explorations."};
-const data=[{no:"01",tag:"SPATIAL STUDY",title:"Signal in space",text:"A network object exploring depth, connected points and pointer-reactive movement.",Icon:Orbit},{no:"02",tag:"MOTION STUDY",title:"Movement with meaning",text:"A motion language for revealing content, showing state and guiding attention.",Icon:Layers3},{no:"03",tag:"CREATIVE CODE",title:"Interfaces as instruments",text:"Browser experiments that turn code, geometry and interaction into visual material.",Icon:Code2},{no:"04",tag:"3D / CGI DIRECTION",title:"Objects and atmosphere",text:"A space for future modelling, compositing and CGI explorations.",Icon:Box}];
-export default function ExperimentsPage(){return <div className="wrap inner"><section className="page-hero"><Reveal><span className="eyebrow"><i/> CREATIVE STUDIO / EXPERIMENTS</span></Reveal><Reveal delay={.06}><h1>PLAY WITH<br/><b>THE POSSIBLE.</b></h1></Reveal><Reveal delay={.12}><p>A visual playground for 3D, motion, VFX-inspired ideas and creative code. Some experiments exist simply to discover a new way of seeing.</p></Reveal></section><section className="section"><SectionTitle overline="VISUAL RESEARCH / 01" title="A studio for curiosity." text="These are directions and studies, not claims of completed client work. The lab will grow with original assets and documented process."/><div className="experiment-grid">{data.map(({no,tag,title,text,Icon},i)=><Reveal key={no} className="experiment-card" delay={i*.05}><div><Icon size={27}/><span>{no}</span><i/></div><small>{tag} / IN PROGRESS</small><h3>{title}</h3><p>{text}</p></Reveal>)}</div></section><section className="callout"><div><Code2 size={18}/> BUILD / BREAK / LEARN</div><h2>The most interesting work often starts as a question.</h2><Link href="/work" className="text-link">See the project index <ArrowUpRight size={15}/></Link></section></div>}
+
+export const metadata: Metadata = { title: "Experiments", description: "3D, VFX, motion and creative coding explorations by Samiun Islam." };
+
+const experiments = [
+  { no: "01", tag: "SPATIAL STUDY", title: "Connected in space", text: "A 3D network study exploring depth, connected points and pointer-reactive movement.", Icon: Orbit },
+  { no: "02", tag: "MOTION STUDY", title: "Movement with meaning", text: "A motion language for revealing content, showing state and guiding attention.", Icon: Layers3 },
+  { no: "03", tag: "CREATIVE CODE", title: "Interfaces as instruments", text: "Browser experiments that turn code, geometry and interaction into visual material.", Icon: Code2 },
+  { no: "04", tag: "3D / CGI DIRECTION", title: "Objects and atmosphere", text: "A space for modelling, compositing and CGI explorations as the visual practice grows.", Icon: Box }
+];
+
+export default function ExperimentsPage() {
+  return <div className="wrap inner">
+    <section className="page-hero">
+      <Reveal><span className="eyebrow"><i /> CREATIVE PRACTICE / EXPERIMENTS</span></Reveal>
+      <Reveal delay={0.06}><h1>PLAY WITH<br /><b>THE POSSIBLE.</b></h1></Reveal>
+      <Reveal delay={0.12}><p>A visual playground for 3D, motion, VFX-inspired ideas and creative code. Some experiments exist simply to discover a new way of seeing.</p></Reveal>
+    </section>
+    <section className="section">
+      <SectionTitle overline="VISUAL RESEARCH / 01" title="A studio for curiosity." text="These are directions and studies, not claims of completed client work. The lab will grow with original assets and documented process." />
+      <div className="experiment-grid">
+        {experiments.map(({ no, tag, title, text, Icon }, index) => <Reveal key={no} className="experiment-card" delay={index * 0.05}>
+          <div><Icon size={27} /><span>{no}</span><i /></div>
+          <small>{tag} / IN PROGRESS</small><h3>{title}</h3><p>{text}</p>
+        </Reveal>)}
+      </div>
+    </section>
+    <section className="callout"><div><Code2 size={18} /> BUILD / BREAK / LEARN</div><h2>The most interesting work often starts as a question.</h2><Link href="/work" className="text-link">See the project index <ArrowUpRight size={15} /></Link></section>
+  </div>;
+}
