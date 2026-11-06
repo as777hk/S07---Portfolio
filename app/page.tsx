@@ -78,7 +78,7 @@ export default function HomePage() {
               <div className="core-crosshair core-crosshair-two" />
               <div className="core-readout readout-top"><small>STRUCTURE</small><b>CONNECTED</b></div>
               <div className="core-readout readout-side"><small>MODE</small><b>OBSERVE / MAP</b></div>
-              <span className="core-coordinate">23.8103° N / 90.4125° E</span>
+              <span className="core-coordinate">GLOBAL / CONNECTED SYSTEMS</span>
             </div>
             <div className="hero-visual-foot">
               <span>AN INTERACTIVE VISUAL METAPHOR</span>
