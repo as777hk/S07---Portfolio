@@ -26,7 +26,7 @@ export default function SignalCore() {
 
       const count = 460;
       const positions = new Float32Array(count * 3);
-      const points: THREE.Vector3[] = [];
+      const points: import("three").Vector3[] = [];
       const golden = Math.PI * (3 - Math.sqrt(5));
       for (let i = 0; i < count; i++) {
         const y = 1 - (i / (count - 1)) * 2;
@@ -72,7 +72,7 @@ export default function SignalCore() {
       ring.rotation.x = 1.08;
       group.add(ring);
 
-      const nodes: THREE.Mesh[] = [];
+      const nodes: import("three").Mesh[] = [];
       for (let i = 0; i < 7; i++) {
         const node = new THREE.Mesh(
           new THREE.SphereGeometry(0.025, 10, 10),
