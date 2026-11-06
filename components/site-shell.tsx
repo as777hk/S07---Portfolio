@@ -112,7 +112,7 @@ function CursorTrail() {
 
   return (
     <div ref={layerRef} className="cursor-layer" aria-hidden="true">
-      {Array.from({ length: 7 }, (_, index) => (
+      {Array.from({ length: 11 }, (_, index) => (
         <span className="cursor-echo" key={index}>
           <svg viewBox="0 0 24 30">
             <path d="M3 2.5 20.5 18 12.4 18.6 9.1 27.2Z" />
@@ -132,14 +132,20 @@ function CursorTrail() {
 
 function OpeningSequence() {
   const [active, setActive] = useState(false);
+  const [stage, setStage] = useState(0);
+  const stages = ["MAPPING THE DIGITAL SURFACE", "TRACING CONNECTIONS", "REVEALING THE INTERFACE"];
 
   useEffect(() => {
     try {
       if (window.sessionStorage.getItem("samiun-opening-seen")) return;
       window.sessionStorage.setItem("samiun-opening-seen", "1");
       setActive(true);
-      const timer = window.setTimeout(() => setActive(false), 1780);
-      return () => window.clearTimeout(timer);
+      const timers = [
+        window.setTimeout(() => setStage(1), 620),
+        window.setTimeout(() => setStage(2), 1320),
+        window.setTimeout(() => setActive(false), 2580)
+      ];
+      return () => timers.forEach(window.clearTimeout);
     } catch {
       return;
     }
@@ -148,14 +154,28 @@ function OpeningSequence() {
   if (!active) return null;
   return (
     <div className="opening-sequence" aria-hidden="true">
-      <div className="opening-top"><span>SAMIUN / PERSONAL ARCHIVE</span><span>INITIALIZING EXPERIENCE</span></div>
-      <div className="opening-center">
-        <span className="opening-index">SYSTEM / 001</span>
-        <strong>SAMIUN<span>.</span></strong>
-        <div className="opening-track"><i /></div>
-        <span className="opening-caption">SECURITY IS THE FOUNDATION. CURIOSITY IS THE METHOD.</span>
+      <div className="opening-mesh" />
+      <div className="opening-scan" />
+      <div className="opening-top">
+        <span><i /> SAMIUN / PERSONAL PORTFOLIO</span>
+        <span>CYBERSECURITY × CREATIVE TECHNOLOGY</span>
       </div>
-      <div className="opening-bottom"><span>CYBERSECURITY</span><span>CREATIVE TECHNOLOGY</span><span>2026 — PRESENT</span></div>
+      <div className="opening-center">
+        <span className="opening-index">FIELD STUDY / 001</span>
+        <strong>SAMIUN<span>.</span></strong>
+        <div className="opening-status"><i /> {stages[stage]}</div>
+        <div className="opening-track"><i /></div>
+        <div className="opening-stages">
+          <span className={stage >= 0 ? "done" : ""}>01 / MAP</span>
+          <span className={stage >= 1 ? "done" : ""}>02 / TRACE</span>
+          <span className={stage >= 2 ? "done" : ""}>03 / REVEAL</span>
+        </div>
+      </div>
+      <div className="opening-bottom">
+        <span>LOOK CLOSER</span>
+        <span>QUESTION THE SYSTEM</span>
+        <span>EST. 2026</span>
+      </div>
     </div>
   );
 }

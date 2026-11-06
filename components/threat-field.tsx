@@ -2,174 +2,209 @@
 
 import { useEffect, useRef } from "react";
 
-type Point = { x: number; y: number };
+type Node = { x: number; y: number; vx: number; vy: number; radius: number; phase: number };
+type Packet = { x: number; y: number; vx: number; vy: number; life: number; size: number; angle: number };
 
 export default function ThreatField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d", { alpha: true });
-    if (!canvas || !ctx) return;
+    const context = canvas?.getContext("2d", { alpha: true });
+    if (!canvas || !context) return;
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const finePointer = window.matchMedia("(pointer: fine)").matches;
     let width = 0;
     let height = 0;
-    let pixelRatio = 1;
-    let raf = 0;
+    let ratio = 1;
+    let frame = 0;
     let lastFrame = 0;
-    let time = 0;
-    let pointer: Point = { x: -1000, y: -1000 };
-    let target: Point = { x: -1000, y: -1000 };
+    let elapsed = 0;
+    let visible = !document.hidden;
+    let pointer = { x: -2000, y: -2000, tx: -2000, ty: -2000 };
+    let nodes: Node[] = [];
+    let packets: Packet[] = [];
+    let seed = 713;
+    const random = () => {
+      seed = (seed * 16807) % 2147483647;
+      return (seed - 1) / 2147483646;
+    };
+
+    const makeNodes = () => {
+      const isSmall = width < 700;
+      const count = Math.max(isSmall ? 48 : 74, Math.min(isSmall ? 78 : 142, Math.round((width * height) / (isSmall ? 11800 : 10400))));
+      nodes = Array.from({ length: count }, (_, index) => {
+        const x = random() * width;
+        const y = random() * height;
+        const angle = random() * Math.PI * 2;
+        const speed = 0.055 + random() * 0.13;
+        return {
+          x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+          radius: 0.55 + random() * 1.15, phase: random() * Math.PI * 2 + index * 0.03
+        };
+      });
+    };
 
     const resize = () => {
       width = window.innerWidth;
       height = window.innerHeight;
-      pixelRatio = Math.min(window.devicePixelRatio || 1, 1.25);
-      canvas.width = Math.round(width * pixelRatio);
-      canvas.height = Math.round(height * pixelRatio);
+      ratio = Math.min(window.devicePixelRatio || 1, 1.35);
+      canvas.width = Math.round(width * ratio);
+      canvas.height = Math.round(height * ratio);
       canvas.style.width = width + "px";
       canvas.style.height = height + "px";
-      ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+      context.setTransform(ratio, 0, 0, ratio, 0, 0);
+      makeNodes();
     };
 
-    const pointerMove = (event: PointerEvent) => {
-      target = { x: event.clientX, y: event.clientY };
-    };
-    const pointerLeave = () => {
-      target = { x: -1000, y: -1000 };
-    };
-
-    const drawContour = (
-      centerX: number,
-      centerY: number,
-      radiusX: number,
-      radiusY: number,
-      layer: number,
-      phase: number,
-      opacity: number
-    ) => {
-      const points: Point[] = [];
-      const steps = 148;
-      const scale = 0.17 + (layer / 21) * 0.86;
-
-      for (let i = 0; i <= steps; i++) {
-        const angle = (i / steps) * Math.PI * 2;
-        const ripple =
-          1 +
-          Math.sin(angle * 4 + layer * 0.23 + phase) * 0.052 +
-          Math.cos(angle * 7 - layer * 0.17 + phase * 0.7) * 0.027 +
-          Math.sin(angle * 13 + phase * 0.42) * 0.014;
-        let x = centerX + Math.cos(angle) * radiusX * scale * ripple;
-        let y = centerY + Math.sin(angle) * radiusY * scale * ripple;
-
-        const dx = x - pointer.x;
-        const dy = y - pointer.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        const influence = Math.exp(-(distance * distance) / 36000) * 0.075;
-        x += dx * influence;
-        y += dy * influence;
-        points.push({ x, y });
+    const onMove = (event: PointerEvent) => {
+      pointer.tx = event.clientX;
+      pointer.ty = event.clientY;
+      if (finePointer && packets.length < 75 && Math.random() > 0.62) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 0.22 + Math.random() * 0.9;
+        packets.push({
+          x: pointer.tx, y: pointer.ty,
+          vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+          life: 1, size: 1.2 + Math.random() * 2.1, angle: angle
+        });
       }
+    };
+    const onLeave = () => { pointer.tx = -2000; pointer.ty = -2000; };
+    const onVisibility = () => { visible = !document.hidden; if (visible && !reducedMotion) frame = requestAnimationFrame(draw); };
 
-      ctx.beginPath();
-      points.forEach((point, index) => {
-        if (index === 0) ctx.moveTo(point.x, point.y);
-        else ctx.lineTo(point.x, point.y);
-      });
-      ctx.closePath();
-      const accent = layer % 7 === 0;
-      const secondary = layer % 5 === 0;
-      ctx.strokeStyle = accent
-        ? "rgba(255, 91, 68, " + opacity * 1.55 + ")"
-        : secondary
-          ? "rgba(184, 224, 194, " + opacity * 1.15 + ")"
-          : "rgba(147, 173, 167, " + opacity + ")";
-      ctx.lineWidth = accent ? 1.05 : 0.72;
-      ctx.stroke();
-
-      if (layer % 4 === 0) {
-        const angle = phase * 0.34 + layer * 0.83;
-        const pulseIndex = Math.floor((((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2)) / (Math.PI * 2) * steps);
-        const pulse = points[pulseIndex];
-        if (pulse) {
-          ctx.beginPath();
-          ctx.arc(pulse.x, pulse.y, accent ? 1.9 : 1.35, 0, Math.PI * 2);
-          ctx.fillStyle = accent ? "rgba(255, 118, 91, .72)" : "rgba(205, 235, 208, .55)";
-          ctx.fill();
-        }
-      }
+    const drawPacket = (packet: Packet) => {
+      const alpha = Math.max(0, packet.life) * 0.74;
+      context.save();
+      context.translate(packet.x, packet.y);
+      context.rotate(packet.angle + elapsed * 0.15);
+      context.fillStyle = "rgba(255, 87, 108, " + alpha + ")";
+      context.beginPath();
+      context.moveTo(0, -packet.size * 1.9);
+      context.lineTo(packet.size, packet.size);
+      context.lineTo(-packet.size * 0.85, packet.size * 0.55);
+      context.closePath();
+      context.fill();
+      context.restore();
     };
 
     const draw = (timestamp: number) => {
+      if (!visible) return;
       if (timestamp - lastFrame < 32 && !reducedMotion) {
-        raf = requestAnimationFrame(draw);
+        frame = requestAnimationFrame(draw);
         return;
       }
+      const delta = Math.min(2, (timestamp - (lastFrame || timestamp)) / 16.67);
       lastFrame = timestamp;
-      time = reducedMotion ? 0 : timestamp * 0.00028;
-      pointer.x += (target.x - pointer.x) * 0.075;
-      pointer.y += (target.y - pointer.y) * 0.075;
+      if (!reducedMotion) elapsed += Math.max(0.4, delta);
+      pointer.x += (pointer.tx - pointer.x) * 0.075;
+      pointer.y += (pointer.ty - pointer.y) * 0.075;
 
-      ctx.clearRect(0, 0, width, height);
+      context.clearRect(0, 0, width, height);
+      const maxDistance = width < 700 ? 112 : 154;
+      const influenceRadius = width < 700 ? 120 : 178;
 
-      const mainRadius = Math.max(width * 0.36, height * 0.56);
-      for (let layer = 0; layer < 22; layer++) {
-        drawContour(
-          width * 0.76,
-          height * 0.43,
-          mainRadius,
-          mainRadius * 0.68,
-          layer,
-          time + layer * 0.025,
-          0.085
-        );
+      for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        if (!reducedMotion) {
+          const dx = node.x - pointer.x;
+          const dy = node.y - pointer.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          if (distance < influenceRadius && distance > 0.1) {
+            const force = (1 - distance / influenceRadius) * 0.018;
+            node.vx += (dx / distance) * force;
+            node.vy += (dy / distance) * force;
+          }
+          node.vx += Math.sin(elapsed * 0.008 + node.phase) * 0.002;
+          node.vy += Math.cos(elapsed * 0.007 + node.phase) * 0.002;
+          node.vx *= 0.992;
+          node.vy *= 0.992;
+          const speed = Math.hypot(node.vx, node.vy);
+          if (speed > 0.42) { node.vx *= 0.42 / speed; node.vy *= 0.42 / speed; }
+          node.x += node.vx * delta;
+          node.y += node.vy * delta;
+          if (node.x < -8) node.x = width + 8;
+          if (node.x > width + 8) node.x = -8;
+          if (node.y < -8) node.y = height + 8;
+          if (node.y > height + 8) node.y = -8;
+        }
+
+        for (let j = i + 1; j < nodes.length; j++) {
+          const other = nodes[j];
+          const dx = node.x - other.x;
+          const dy = node.y - other.y;
+          const distance = Math.hypot(dx, dy);
+          if (distance < maxDistance) {
+            const alpha = (1 - distance / maxDistance) * 0.105;
+            const warm = (i * 7 + j * 3) % 11 === 0;
+            context.strokeStyle = warm
+              ? "rgba(255, 83, 105, " + (alpha * 1.35) + ")"
+              : "rgba(157, 186, 201, " + alpha + ")";
+            context.lineWidth = warm ? 0.85 : 0.58;
+            context.beginPath();
+            context.moveTo(node.x, node.y);
+            context.lineTo(other.x, other.y);
+            context.stroke();
+          }
+        }
+
+        const pulse = reducedMotion ? 0.72 : 0.56 + Math.sin(elapsed * 0.022 + node.phase) * 0.2;
+        context.beginPath();
+        context.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+        context.fillStyle = node.phase % 3 > 1.8
+          ? "rgba(255, 111, 126, " + (0.32 + pulse * 0.38) + ")"
+          : "rgba(179, 211, 220, " + (0.2 + pulse * 0.3) + ")";
+        context.fill();
       }
 
-      const secondaryRadius = Math.max(width * 0.17, height * 0.27);
-      for (let layer = 0; layer < 13; layer++) {
-        drawContour(
-          width * 0.06,
-          height * 0.84,
-          secondaryRadius,
-          secondaryRadius * 0.78,
-          layer,
-          -time * 0.7 + layer * 0.05,
-          0.052
-        );
+      if (finePointer) {
+        const near = nodes.filter((node) => Math.hypot(node.x - pointer.x, node.y - pointer.y) < influenceRadius * 1.08);
+        if (near.length) {
+          context.beginPath();
+          context.arc(pointer.x, pointer.y, 42 + Math.sin(elapsed * 0.03) * 4, 0, Math.PI * 2);
+          context.strokeStyle = "rgba(255, 91, 110, .22)";
+          context.lineWidth = 0.8;
+          context.setLineDash([2, 7]);
+          context.stroke();
+          context.setLineDash([]);
+          near.slice(0, 7).forEach((node) => {
+            context.beginPath();
+            context.moveTo(pointer.x, pointer.y);
+            context.lineTo(node.x, node.y);
+            context.strokeStyle = "rgba(255, 91, 110, .15)";
+            context.lineWidth = 0.7;
+            context.stroke();
+          });
+        }
       }
 
-      ctx.save();
-      ctx.globalAlpha = 0.18;
-      ctx.setLineDash([2, 11]);
-      ctx.lineWidth = 0.7;
-      ctx.strokeStyle = "rgba(185, 209, 195, .35)";
-      ctx.beginPath();
-      ctx.moveTo(width * 0.04, height * 0.18);
-      ctx.bezierCurveTo(width * 0.28, height * 0.1, width * 0.48, height * 0.33, width * 0.72, height * 0.15);
-      ctx.bezierCurveTo(width * 0.84, height * 0.07, width * 0.91, height * 0.13, width * 1.04, height * 0.06);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(width * -0.04, height * 0.66);
-      ctx.bezierCurveTo(width * 0.22, height * 0.55, width * 0.35, height * 0.82, width * 0.58, height * 0.68);
-      ctx.bezierCurveTo(width * 0.78, height * 0.56, width * 0.87, height * 0.76, width * 1.04, height * 0.61);
-      ctx.stroke();
-      ctx.restore();
+      packets = packets.filter((packet) => packet.life > 0.03);
+      packets.forEach((packet) => {
+        if (!reducedMotion) {
+          packet.x += packet.vx * delta;
+          packet.y += packet.vy * delta;
+          packet.life -= 0.013 * delta;
+        }
+        drawPacket(packet);
+      });
 
-      if (!reducedMotion) raf = requestAnimationFrame(draw);
+      if (!reducedMotion) frame = requestAnimationFrame(draw);
     };
 
     resize();
-    window.addEventListener("resize", resize);
-    window.addEventListener("pointermove", pointerMove, { passive: true });
-    window.addEventListener("pointerleave", pointerLeave);
+    window.addEventListener("resize", resize, { passive: true });
+    window.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("pointerleave", onLeave);
+    document.addEventListener("visibilitychange", onVisibility);
     draw(0);
 
     return () => {
-      cancelAnimationFrame(raf);
+      cancelAnimationFrame(frame);
       window.removeEventListener("resize", resize);
-      window.removeEventListener("pointermove", pointerMove);
-      window.removeEventListener("pointerleave", pointerLeave);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerleave", onLeave);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
 
