@@ -87,7 +87,7 @@ export default function HomePage() {
               <CyberAtlas />
               <span className="visual-edge-label visual-edge-left">NODE / AUTH</span>
               <span className="visual-edge-label visual-edge-right">EDGE / TRUST</span>
-              <span className="visual-coordinate">23° 48&apos; N / 90° 24&apos; E</span>
+              <span className="visual-coordinate">SECTOR 07 / TRUST BOUNDARY A</span>
             </div>
             <div className="cinema-visual-foot">
               <span>AN ORIGINAL VISUAL METAPHOR</span>
