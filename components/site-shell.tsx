@@ -90,6 +90,7 @@ function CursorTrail() {
 
       pointer.style.transform = "translate3d(" + x + "px," + y + "px,0) rotate(" + angle + "deg)";
       halo.style.transform = "translate3d(" + x + "px," + y + "px,0)";
+      label.style.transform = "translate3d(" + (x + 24) + "px," + (y + 20) + "px,0)";
       frame = requestAnimationFrame(animate);
     };
 
