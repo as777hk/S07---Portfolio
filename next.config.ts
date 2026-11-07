@@ -1,5 +1,5 @@
 import type { NextConfig } from "next";
-const config:NextConfig={poweredByHeader:false,reactStrictMode:true,async redirects(){return [
+const config:NextConfig={poweredByHeader:false,reactStrictMode:true,async rewrites(){return {beforeFiles:[{source:"/",destination:"/sam-live-builder.html"}],afterFiles:[],fallback:[]};},async redirects(){return [
 {source:"/about",destination:"/#about",permanent:true},
 {source:"/contact",destination:"/#contact",permanent:true},
 {source:"/security",destination:"/#security",permanent:true},
