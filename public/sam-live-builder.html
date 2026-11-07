@@ -229,6 +229,22 @@
       .security-brand-card, .tool-logo-chip { transition: none; }
     }
 
+    /* The final galaxy is a real Hubble image, revealed as the last build layer. */
+    #vortex-card .galaxy-real-photo {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      opacity: 0;
+      clip-path: circle(0% at 62% 48%);
+      filter: saturate(1.04) contrast(1.06) brightness(.78);
+      pointer-events: none;
+      will-change: clip-path, opacity;
+    }
+
     /* Layer states during live construction */
     [data-build-layer] {
       transition: opacity 0.14s cubic-bezier(0.22, 1, 0.36, 1), filter 0.16s ease-out;
@@ -951,6 +967,7 @@
 
         <div class="lg:col-span-4">
           <div id="vortex-card" data-build-layer data-wave="8" data-build-type="media" class="relative h-64 rounded-xl bg-[#0a0c12] border border-zinc-800 overflow-hidden p-6 flex flex-col justify-between cursor-pointer">
+            <img id="galaxy-photo" class="galaxy-real-photo" src="https://science.nasa.gov/wp-content/uploads/2023/04/m101-jpg.webp" alt="NASA and ESA Hubble Space Telescope image of the real Pinwheel Galaxy M101" loading="lazy" decoding="async" fetchpriority="low" />
             <canvas id="vortex-canvas" width="380" height="256" class="absolute inset-0 w-full h-full"></canvas>
             <div class="relative z-10 font-mono text-[10px] text-zinc-400">SAM // SEC_OPS</div>
             <div class="relative z-10 pointer-events-none">
@@ -1293,33 +1310,29 @@
       const color = layer.type === 'media' ? '#f472b6' : '#67e8f9';
 
       if (layer.type === 'text') {
-        const chars = layer.textChars || [];
-        const index = Math.min(chars.length - 1, Math.max(0, Math.floor(chars.length * progress)));
-        const next = chars[index];
-        if (!next) return;
-        const caret = next.getBoundingClientRect();
-        if (caret.width <= 0 || caret.height <= 0) return;
+        // Use the already-cached layer bounds; avoid a per-frame character layout read.
+        const caretX = rect.left + rect.width * progress;
+        const caretY = rect.top + Math.min(rect.height - 2, Math.max(2, rect.height * 0.58));
+        const caretHeight = Math.max(8, Math.min(22, rect.height * 0.82));
 
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
-        // Clearly mark the active character as the live writing position.
         ctx.fillStyle = 'rgba(34,211,238,.2)';
-        ctx.fillRect(caret.left - 2, caret.top - 1, Math.max(4, caret.width + 3), caret.height + 2);
+        ctx.fillRect(caretX - 2, caretY - caretHeight * 0.5, 5, caretHeight);
         ctx.strokeStyle = '#a5f3fc';
         ctx.shadowColor = '#22d3ee';
         ctx.shadowBlur = 11;
         ctx.lineWidth = 2.2;
         ctx.globalAlpha = 0.98;
         ctx.beginPath();
-        ctx.moveTo(caret.left - 2, caret.top - 1);
-        ctx.lineTo(caret.left - 2, caret.bottom + 1);
-        ctx.moveTo(caret.left - 4, caret.top - 1);
-        ctx.lineTo(caret.left + 3, caret.top - 1);
-        ctx.moveTo(caret.left - 4, caret.bottom + 1);
-        ctx.lineTo(caret.left + 3, caret.bottom + 1);
+        ctx.moveTo(caretX - 1, caretY - caretHeight * 0.5);
+        ctx.lineTo(caretX - 1, caretY + caretHeight * 0.5);
+        ctx.moveTo(caretX - 4, caretY - caretHeight * 0.5);
+        ctx.lineTo(caretX + 3, caretY - caretHeight * 0.5);
+        ctx.moveTo(caretX - 4, caretY + caretHeight * 0.5);
+        ctx.lineTo(caretX + 3, caretY + caretHeight * 0.5);
         ctx.stroke();
 
-        // A slim progress rail shows how far the current text layer has been typed.
         const railY = Math.min(window.innerHeight - 2, rect.bottom - 2);
         ctx.shadowBlur = 0;
         ctx.globalAlpha = 0.34;
@@ -1395,6 +1408,11 @@
     }
 
     function initBuildLayers() {
+      const galaxyPhoto = document.getElementById('galaxy-photo');
+      if (galaxyPhoto) {
+        galaxyPhoto.style.opacity = '0';
+        galaxyPhoto.style.clipPath = 'circle(0% at 62% 48%)';
+      }
       const els = Array.from(document.querySelectorAll('[data-build-layer]'));
       buildLayers = els.map((el, index) => {
         const hasChildElements = el.children.length > 0;
@@ -1415,6 +1433,7 @@
           wave: Number(el.dataset.wave || 1),
           type,
           textChars,
+          galaxyPhoto: el.id === 'vortex-card' ? el.querySelector('.galaxy-real-photo') : null,
           lastTypedCount: 0,
           lastCaretIndex: -1,
           hasChildren: hasChildElements,
@@ -1537,6 +1556,10 @@
         layer.el.style.removeProperty('--build-opacity');
         layer.el.classList.remove('layer-unbuilt', 'layer-skeleton', 'layer-building');
         layer.el.classList.add('layer-done');
+        if (layer.galaxyPhoto) {
+          layer.galaxyPhoto.style.opacity = '1';
+          layer.galaxyPhoto.style.clipPath = 'circle(150% at 62% 48%)';
+        }
       });
       completedLayersCount = totalBuildLayers;
       buildPhase = 'COMPLETED';
@@ -1864,113 +1887,39 @@
       vortexCtx.setTransform(vortexDpr, 0, 0, vortexDpr, 0, 0);
     }
 
+    const galaxyDustStars = Array.from({ length: 34 }, (_, i) => {
+      const seedX = Math.sin(i * 127.1 + 18.7) * 43758.5453;
+      const seedY = Math.sin(i * 269.5 + 63.1) * 24634.6345;
+      return {
+        x: seedX - Math.floor(seedX),
+        y: seedY - Math.floor(seedY),
+        phase: i * 1.618,
+        size: i % 11 === 0 ? 1.35 : 0.65,
+        bright: i % 7 === 0
+      };
+    });
+
     function drawVortexAnimation(ctx, width, height, time) {
       if (!width || !height) return;
       ctx.clearRect(0, 0, width, height);
-
-      const cx = width * 0.62;
-      const cy = height * 0.48;
-      const rx = width * 0.42;
-      const ry = height * 0.43;
-      const rotation = time * 0.045;
-
       ctx.save();
       ctx.globalCompositeOperation = 'screen';
 
-      // Soft interstellar nebula, kept inside the existing card.
-      const nebula = ctx.createRadialGradient(cx, cy, 1, cx, cy, Math.max(rx, ry));
-      nebula.addColorStop(0, 'rgba(224,231,255,.23)');
-      nebula.addColorStop(0.22, 'rgba(129,140,248,.13)');
-      nebula.addColorStop(0.54, 'rgba(91,33,182,.075)');
-      nebula.addColorStop(1, 'rgba(15,23,42,0)');
-      ctx.fillStyle = nebula;
-      ctx.fillRect(0, 0, width, height);
-
-      // Distant stars: deterministic placement with subtle twinkle.
-      for (let i = 0; i < 105; i++) {
-        const seedA = Math.sin(i * 127.1 + 18.7) * 43758.5453;
-        const seedB = Math.sin(i * 269.5 + 63.1) * 24634.6345;
-        const fx = seedA - Math.floor(seedA);
-        const fy = seedB - Math.floor(seedB);
-        const x = fx * width;
-        const y = fy * height;
-        const twinkle = 0.2 + (0.5 + 0.5 * Math.sin(time * (0.7 + fx) + i)) * 0.55;
-        const size = i % 17 === 0 ? 1.35 : 0.65;
+      // The real NASA galaxy photograph supplies the spiral structure.
+      // This lightweight dust pass adds only a few restrained twinkling stars.
+      galaxyDustStars.forEach(star => {
+        const twinkle = 0.22 + (0.5 + 0.5 * Math.sin(time * 0.85 + star.phase)) * 0.42;
         ctx.globalAlpha = twinkle;
-        ctx.fillStyle = i % 9 === 0 ? '#c4b5fd' : '#dbeafe';
-        ctx.fillRect(x, y, size, size);
-        if (i % 17 === 0) {
-          ctx.globalAlpha = twinkle * 0.22;
-          ctx.fillRect(x - 3, y, 7, 1);
-          ctx.fillRect(x, y - 3, 1, 7);
+        ctx.fillStyle = star.bright ? '#e0d7ff' : '#dbeafe';
+        const x = star.x * width;
+        const y = star.y * height;
+        ctx.fillRect(x, y, star.size, star.size);
+        if (star.bright) {
+          ctx.globalAlpha = twinkle * 0.18;
+          ctx.fillRect(x - 2, y, 5, 0.7);
+          ctx.fillRect(x, y - 2, 0.7, 5);
         }
-      }
-
-      // Four flowing spiral arms with dense star clusters and a tilted galactic disc.
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate(rotation);
-      ctx.scale(1, 0.52);
-
-      for (let arm = 0; arm < 4; arm++) {
-        for (let j = 0; j < 112; j++) {
-          const radial = 0.045 + (j / 112) * 0.93;
-          const scatter = Math.sin(j * 8.17 + arm * 13.4) * 0.085;
-          const theta = arm * (Math.PI / 2) + radial * 5.45 + scatter - time * 0.12;
-          const distance = radial * Math.min(rx, ry) * 1.72;
-          const x = Math.cos(theta) * distance;
-          const y = Math.sin(theta) * distance;
-          const brightness = (1 - radial * 0.34) * (0.48 + 0.52 * Math.sin(j * 1.91 + arm));
-          const pointSize = 0.45 + (1 - radial) * 1.05 + (j % 19 === 0 ? 0.55 : 0);
-          ctx.globalAlpha = Math.max(0.12, Math.min(0.9, brightness));
-          ctx.fillStyle = j % 13 === 0 ? '#fef3c7' : (j % 4 === 0 ? '#c4b5fd' : '#bfdbfe');
-          ctx.beginPath();
-          ctx.arc(x, y, pointSize, 0, Math.PI * 2);
-          ctx.fill();
-
-          if (j % 20 === 0) {
-            ctx.globalAlpha = brightness * 0.22;
-            ctx.shadowColor = '#a5b4fc';
-            ctx.shadowBlur = 9;
-            ctx.beginPath();
-            ctx.arc(x, y, pointSize * 2.3, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.shadowBlur = 0;
-          }
-        }
-      }
-
-      // Luminous central bulge and fine rotating galactic rings.
-      const core = ctx.createRadialGradient(0, 0, 1, 0, 0, 34);
-      core.addColorStop(0, 'rgba(255,248,220,.98)');
-      core.addColorStop(0.12, 'rgba(224,231,255,.84)');
-      core.addColorStop(0.34, 'rgba(167,139,250,.42)');
-      core.addColorStop(1, 'rgba(99,102,241,0)');
-      ctx.globalAlpha = 0.95;
-      ctx.fillStyle = core;
-      ctx.beginPath();
-      ctx.ellipse(0, 0, 38, 18, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      for (let ring = 0; ring < 3; ring++) {
-        ctx.beginPath();
-        ctx.ellipse(0, 0, 25 + ring * 13, 11 + ring * 5, 0, time * 0.12 + ring, time * 0.12 + ring + Math.PI * 1.65);
-        ctx.strokeStyle = ring === 1 ? 'rgba(196,181,253,.5)' : 'rgba(191,219,254,.34)';
-        ctx.lineWidth = ring === 1 ? 1.1 : 0.7;
-        ctx.globalAlpha = 0.58 - ring * 0.1;
-        ctx.stroke();
-      }
-      ctx.restore();
-
-      // Fine edge stars and a quiet center sparkle.
-      ctx.globalAlpha = 0.92;
-      ctx.fillStyle = '#fff7ed';
-      ctx.shadowColor = '#c4b5fd';
-      ctx.shadowBlur = 12;
-      ctx.beginPath();
-      ctx.arc(cx, cy, 1.8 + Math.sin(time * 2) * 0.35, 0, Math.PI * 2);
-      ctx.fill();
-
+      });
       ctx.restore();
     }
 
@@ -1980,6 +1929,29 @@
       vortexObserver.observe(vortexCanvas.parentElement);
     }
     requestAnimationFrame(resizeVortexCanvas);
+
+    // Avoid animating large canvases while their sections are off-screen.
+    let vfxSceneVisible = false;
+    let galaxyCanvasVisible = false;
+    let lastVfxDrawAt = 0;
+    let lastGalaxyDrawAt = 0;
+    let lastModalDrawAt = 0;
+    if ('IntersectionObserver' in window) {
+      const canvasVisibilityObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.target === vortexCanvas || entry.target === vortexCanvas.parentElement) {
+            galaxyCanvasVisible = entry.isIntersecting;
+          }
+          if (entry.target === vfxContainer) vfxSceneVisible = entry.isIntersecting;
+        });
+      }, { rootMargin: '140px 0px' });
+      canvasVisibilityObserver.observe(vortexCanvas);
+      if (vfxContainer) canvasVisibilityObserver.observe(vfxContainer);
+    } else {
+      vfxSceneVisible = true;
+      galaxyCanvasVisible = true;
+    }
+
     const hudXY = document.getElementById('hud-xy');
     let lastFrameTime = performance.now();
 
@@ -1992,9 +1964,10 @@
       lastFrameTime = now;
       const t = now * 0.001;
 
-      trailCtx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
+      const isBuildActive = buildPhase === 'OPENING' || buildPhase === 'SCROLL';
+      if (isBuildActive) trailCtx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
 
-      if (buildPhase === 'OPENING' || buildPhase === 'SCROLL') {
+      if (isBuildActive) {
         const activeLayers = [];
         let progressTotal = 0;
         let completedNow = 0;
@@ -2040,45 +2013,60 @@
           const inViewport = rect.bottom > -220 && rect.top < window.innerHeight + 220 && rect.width > 3;
 
           if (p <= 0.001) {
+            if (layer.state !== 'UNBUILT') {
+              layer.el.style.opacity = '';
+              layer.el.style.filter = '';
+              layer.el.style.clipPath = '';
+              layer.el.style.removeProperty('--build-opacity');
+              layer.el.classList.remove('layer-skeleton', 'layer-building', 'layer-done');
+              layer.el.classList.add('layer-unbuilt');
+            }
             layer.state = 'UNBUILT';
             layer.stage = 'BOX';
-            layer.el.style.opacity = '';
-            layer.el.style.filter = '';
-            layer.el.style.clipPath = '';
-            layer.el.style.removeProperty('--build-opacity');
-            layer.el.classList.remove('layer-skeleton', 'layer-building', 'layer-done');
-            layer.el.classList.add('layer-unbuilt');
           } else if (p >= 0.999) {
+            if (layer.state !== 'DONE') {
+              layer.el.style.opacity = '';
+              layer.el.style.filter = '';
+              layer.el.style.clipPath = '';
+              layer.el.style.removeProperty('--build-opacity');
+              layer.el.classList.remove('layer-unbuilt', 'layer-skeleton', 'layer-building');
+              layer.el.classList.add('layer-done');
+            }
             layer.state = 'DONE';
             layer.stage = 'CONTENT';
             layer.progress = 1;
             completedNow++;
-            layer.el.style.opacity = '';
-            layer.el.style.filter = '';
-            layer.el.style.clipPath = '';
-            layer.el.style.removeProperty('--build-opacity');
-            layer.el.classList.remove('layer-unbuilt', 'layer-skeleton', 'layer-building');
-            layer.el.classList.add('layer-done');
+            if (layer.galaxyPhoto) {
+              layer.galaxyPhoto.style.opacity = '1';
+              layer.galaxyPhoto.style.clipPath = 'circle(150% at 62% 48%)';
+            }
           } else {
+            if (layer.state !== 'BUILDING') {
+              layer.el.classList.remove('layer-unbuilt', 'layer-skeleton', 'layer-done');
+              layer.el.classList.add('layer-building');
+            }
             layer.state = 'BUILDING';
             layer.stage = 'CONTENT';
             layer.progress = p;
-            layer.el.classList.remove('layer-unbuilt', 'layer-skeleton', 'layer-done');
-            layer.el.classList.add('layer-building');
 
             if (layer.type === 'text') {
-              layer.el.style.setProperty('--build-opacity', '1');
-              layer.el.style.clipPath = '';
-              layer.el.style.filter = 'none';
+              if (layer.el.style.getPropertyValue('--build-opacity') !== '1') layer.el.style.setProperty('--build-opacity', '1');
+              if (layer.el.style.clipPath) layer.el.style.clipPath = '';
+              if (layer.el.style.filter !== 'none') layer.el.style.filter = 'none';
               updateTextTyping(layer, p);
             } else if (layer.type === 'media') {
-              layer.el.style.setProperty('--build-opacity', '1');
-              layer.el.style.clipPath = `inset(0 ${100 - p * 100}% 0 0)`;
-              layer.el.style.filter = p < 0.88 ? `blur(${(1 - p) * 0.9}px) saturate(0.9)` : 'none';
+              if (layer.el.style.getPropertyValue('--build-opacity') !== '1') layer.el.style.setProperty('--build-opacity', '1');
+              layer.el.style.clipPath = 'inset(0 ' + (100 - p * 100) + '% 0 0)';
+              const mediaFilter = p < 0.88 ? 'blur(' + ((1 - p) * 0.9) + 'px) saturate(0.9)' : 'none';
+              if (layer.el.style.filter !== mediaFilter) layer.el.style.filter = mediaFilter;
+              if (layer.galaxyPhoto) {
+                layer.galaxyPhoto.style.opacity = String(Math.min(1, 0.18 + p * 0.82));
+                layer.galaxyPhoto.style.clipPath = 'circle(' + Math.max(1, p * 152) + '% at 62% 48%)';
+              }
             } else {
               layer.el.style.setProperty('--build-opacity', String(Math.min(1, 0.16 + p * 0.84)));
-              layer.el.style.clipPath = '';
-              layer.el.style.filter = 'none';
+              if (layer.el.style.clipPath) layer.el.style.clipPath = '';
+              if (layer.el.style.filter !== 'none') layer.el.style.filter = 'none';
             }
           }
 
@@ -2128,11 +2116,10 @@
             targetX = r.left + r.width * 0.62 + Math.cos(theta) * r.width * 0.34 * radialStep;
             targetY = r.top + r.height * 0.48 + Math.sin(theta) * r.height * 0.31 * radialStep;
           } else if (targetLayer.type === 'text' && targetLayer.textChars.length) {
-            const baseChar = Math.min(targetLayer.textChars.length - 1, Math.floor(progress * targetLayer.textChars.length));
-            const charIndex = Math.min(targetLayer.textChars.length - 1, baseChar + laneIndex);
-            const charRect = targetLayer.textChars[charIndex].getBoundingClientRect();
-            targetX = charRect.left + Math.max(1, charRect.width * 0.85);
-            targetY = charRect.top + charRect.height * 0.58;
+            // Approximate the active typing point from the cached layer bounds instead
+            // of forcing a layout measurement for every agent on every animation frame.
+            targetX = r.left + r.width * progress;
+            targetY = r.top + r.height * (0.28 + (laneIndex / laneCount) * 0.42);
           } else if (targetLayer.type === 'media') {
             targetX = r.left + r.width * progress;
             targetY = r.top + r.height * (0.22 + (laneIndex / laneCount) * 0.58);
@@ -2205,15 +2192,22 @@
         if (Math.abs(scrollVelocity) < 0.02) scrollVelocity = 0;
       }
 
-      drawVfxScene();
-
-      drawVortexAnimation(vortexCtx, vortexWidth, vortexHeight, t);
-
-      if (modalOpen) {
-        modalCtx.fillStyle = '#07080d';
-        modalCtx.fillRect(0, 0, modalCanvas.width, modalCanvas.height);
-        if (vfxSourceImg && vfxSourceImg.complete && vfxSourceImg.naturalWidth > 0) {
-          modalCtx.drawImage(vfxSourceImg, 0, 0, modalCanvas.width, modalCanvas.height);
+      if (document.visibilityState === 'visible') {
+        if (vfxSceneVisible && now - lastVfxDrawAt >= 50) {
+          drawVfxScene();
+          lastVfxDrawAt = now;
+        }
+        if (galaxyCanvasVisible && now - lastGalaxyDrawAt >= 42) {
+          drawVortexAnimation(vortexCtx, vortexWidth, vortexHeight, t);
+          lastGalaxyDrawAt = now;
+        }
+        if (modalOpen && now - lastModalDrawAt >= 33) {
+          modalCtx.fillStyle = '#07080d';
+          modalCtx.fillRect(0, 0, modalCanvas.width, modalCanvas.height);
+          if (vfxSourceImg && vfxSourceImg.complete && vfxSourceImg.naturalWidth > 0) {
+            modalCtx.drawImage(vfxSourceImg, 0, 0, modalCanvas.width, modalCanvas.height);
+          }
+          lastModalDrawAt = now;
         }
       }
 
