@@ -49,7 +49,7 @@
     }
     /* Layer states during live construction */
     [data-build-layer] {
-      transition: opacity 0.22s cubic-bezier(0.22, 1, 0.36, 1), filter 0.26s ease-out, clip-path 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+      transition: opacity 0.14s cubic-bezier(0.22, 1, 0.36, 1), filter 0.16s ease-out;
     }
     body.build-mode [data-build-layer].layer-unbuilt {
       opacity: 0 !important;
@@ -1414,22 +1414,27 @@
         let progressTotal = 0;
         let completedNow = 0;
         let waveNow = 1;
-        const scrollY = maxObservedScrollY;
         const velocity = Math.abs(scrollVelocity);
         const speedRatio = Math.min(4, velocity / 1.15);
 
         buildLayers.forEach(layer => {
-          const p = buildPhase === 'OPENING'
-            ? (layer.isOpening
-                ? Math.max(0, Math.min(1, (now - openingStartedAt - layer.openingDelay) / openingLayerDurationMs))
-                : 0)
-            : (layer.isOpening
-                ? 1
-                : Math.max(0, Math.min(1, (scrollY - layer.timelineStart) / layer.timelineSpan)));
-          layer.progress = p;
-          progressTotal += p;
           layer.screenRect = layer.el.getBoundingClientRect();
           const rect = layer.screenRect;
+          const openingProgress = layer.isOpening
+            ? Math.max(0, Math.min(1, (now - openingStartedAt - layer.openingDelay) / openingLayerDurationMs))
+            : 0;
+          const revealStartLine = window.innerHeight * 0.94;
+          const revealFinishLine = window.innerHeight * 0.62;
+          const viewportProgress = Math.max(0, Math.min(1,
+            (revealStartLine - rect.top) / (revealStartLine - revealFinishLine)
+          ));
+          const targetProgress = buildPhase === 'OPENING'
+            ? openingProgress
+            : (layer.isOpening ? 1 : viewportProgress);
+          // Keep completed/revealed content stable when the visitor scrolls upward.
+          const p = Math.max(layer.progress || 0, targetProgress);
+          layer.progress = p;
+          progressTotal += p;
           const inViewport = rect.bottom > -220 && rect.top < window.innerHeight + 220 && rect.width > 3;
 
           if (p <= 0.001) {
@@ -1458,8 +1463,8 @@
             layer.progress = p;
             const opacity = Math.min(1, 0.18 + p * 0.92);
             layer.el.style.setProperty('--build-opacity', String(opacity));
-            layer.el.style.clipPath = `inset(0 ${100 - p * 100}% 0 0)`;
-            layer.el.style.filter = p < 0.82 ? `blur(${(1 - p) * 1.6}px)` : 'none';
+            layer.el.style.clipPath = '';
+            layer.el.style.filter = p < 0.82 ? `blur(${(1 - p) * 0.85}px)` : 'none';
             layer.el.classList.remove('layer-unbuilt', 'layer-skeleton', 'layer-done');
             layer.el.classList.add('layer-building');
           }
