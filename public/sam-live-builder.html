@@ -471,7 +471,7 @@
             <div data-build-layer data-wave="1" data-build-type="text" class="font-display text-xl sm:text-2xl uppercase tracking-wide text-red-500 leading-tight">
               CYBERSECURITY &amp;<br />RED TEAM SPECIALIST
             </div>
-            <p data-build-layer data-wave="1" data-build-type="text" class="text-xs text-zinc-300 leading-relaxed max-w-xs">
+            <p data-build-layer data-wave="1" data-build-type="text" data-opening-speed="46" class="text-xs text-zinc-300 leading-relaxed max-w-xs">
               Breaking systems to make them unbreakable. I uncover critical vulnerabilities, simulate adversary attacks, and engineer zero-trust defenses from the first packet to the kernel.
             </p>
             <div class="pt-1">
@@ -1451,7 +1451,8 @@
         layer.isOpening = true;
         layer.openingDelay = index * openingSlotMs;
         if (layer.type === 'text') {
-          layer.openingDuration = Math.max(950, (layer.textChars || []).length / 20 * 1000);
+          const openingSpeed = Math.max(1, Number(layer.el.dataset.openingSpeed) || 20);
+          layer.openingDuration = Math.max(950, (layer.textChars || []).length / openingSpeed * 1000);
         } else if (layer.type === 'media') {
           layer.openingDuration = 1900;
         } else {
@@ -1866,97 +1867,110 @@
     function drawVortexAnimation(ctx, width, height, time) {
       if (!width || !height) return;
       ctx.clearRect(0, 0, width, height);
+
       const cx = width * 0.62;
-      const cy = height * 0.46;
-      const radius = Math.min(width, height) * 0.31;
-      const pulse = 0.82 + Math.sin(time * 2.2) * 0.12;
+      const cy = height * 0.48;
+      const rx = width * 0.42;
+      const ry = height * 0.43;
+      const rotation = time * 0.045;
 
       ctx.save();
-      ctx.translate(cx, cy);
       ctx.globalCompositeOperation = 'screen';
 
-      // Three rotating elliptical circuit orbits.
-      for (let ring = 0; ring < 3; ring++) {
-        ctx.save();
-        ctx.rotate(time * (ring % 2 ? -0.2 : 0.16) + ring * 0.72);
-        ctx.strokeStyle = ring === 1 ? '#f87171' : '#38bdf8';
-        ctx.globalAlpha = 0.2 + ring * 0.055;
-        ctx.lineWidth = ring === 0 ? 1.05 : 0.7;
-        ctx.beginPath();
-        ctx.ellipse(0, 0, radius * (1 + ring * 0.28), radius * (0.42 + ring * 0.16), 0, 0.22, Math.PI * 1.78);
-        ctx.stroke();
-        ctx.restore();
+      // Soft interstellar nebula, kept inside the existing card.
+      const nebula = ctx.createRadialGradient(cx, cy, 1, cx, cy, Math.max(rx, ry));
+      nebula.addColorStop(0, 'rgba(224,231,255,.23)');
+      nebula.addColorStop(0.22, 'rgba(129,140,248,.13)');
+      nebula.addColorStop(0.54, 'rgba(91,33,182,.075)');
+      nebula.addColorStop(1, 'rgba(15,23,42,0)');
+      ctx.fillStyle = nebula;
+      ctx.fillRect(0, 0, width, height);
+
+      // Distant stars: deterministic placement with subtle twinkle.
+      for (let i = 0; i < 105; i++) {
+        const seedA = Math.sin(i * 127.1 + 18.7) * 43758.5453;
+        const seedB = Math.sin(i * 269.5 + 63.1) * 24634.6345;
+        const fx = seedA - Math.floor(seedA);
+        const fy = seedB - Math.floor(seedB);
+        const x = fx * width;
+        const y = fy * height;
+        const twinkle = 0.2 + (0.5 + 0.5 * Math.sin(time * (0.7 + fx) + i)) * 0.55;
+        const size = i % 17 === 0 ? 1.35 : 0.65;
+        ctx.globalAlpha = twinkle;
+        ctx.fillStyle = i % 9 === 0 ? '#c4b5fd' : '#dbeafe';
+        ctx.fillRect(x, y, size, size);
+        if (i % 17 === 0) {
+          ctx.globalAlpha = twinkle * 0.22;
+          ctx.fillRect(x - 3, y, 7, 1);
+          ctx.fillRect(x, y - 3, 1, 7);
+        }
       }
 
-      // Interconnected rotating agent nodes.
-      const nodes = [];
-      const count = 18;
-      for (let i = 0; i < count; i++) {
-        const angle = (Math.PI * 2 * i) / count + time * (i % 2 ? -0.12 : 0.12);
-        const orbit = radius * (0.54 + (i % 3) * 0.2);
-        nodes.push({
-          x: Math.cos(angle) * orbit * 1.32,
-          y: Math.sin(angle) * orbit * 0.78,
-          angle
-        });
+      // Four flowing spiral arms with dense star clusters and a tilted galactic disc.
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(rotation);
+      ctx.scale(1, 0.52);
+
+      for (let arm = 0; arm < 4; arm++) {
+        for (let j = 0; j < 112; j++) {
+          const radial = 0.045 + (j / 112) * 0.93;
+          const scatter = Math.sin(j * 8.17 + arm * 13.4) * 0.085;
+          const theta = arm * (Math.PI / 2) + radial * 5.45 + scatter - time * 0.12;
+          const distance = radial * Math.min(rx, ry) * 1.72;
+          const x = Math.cos(theta) * distance;
+          const y = Math.sin(theta) * distance;
+          const brightness = (1 - radial * 0.34) * (0.48 + 0.52 * Math.sin(j * 1.91 + arm));
+          const pointSize = 0.45 + (1 - radial) * 1.05 + (j % 19 === 0 ? 0.55 : 0);
+          ctx.globalAlpha = Math.max(0.12, Math.min(0.9, brightness));
+          ctx.fillStyle = j % 13 === 0 ? '#fef3c7' : (j % 4 === 0 ? '#c4b5fd' : '#bfdbfe');
+          ctx.beginPath();
+          ctx.arc(x, y, pointSize, 0, Math.PI * 2);
+          ctx.fill();
+
+          if (j % 20 === 0) {
+            ctx.globalAlpha = brightness * 0.22;
+            ctx.shadowColor = '#a5b4fc';
+            ctx.shadowBlur = 9;
+            ctx.beginPath();
+            ctx.arc(x, y, pointSize * 2.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+          }
+        }
       }
 
-      ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 0.65;
-      ctx.globalAlpha = 0.2;
+      // Luminous central bulge and fine rotating galactic rings.
+      const core = ctx.createRadialGradient(0, 0, 1, 0, 0, 34);
+      core.addColorStop(0, 'rgba(255,248,220,.98)');
+      core.addColorStop(0.12, 'rgba(224,231,255,.84)');
+      core.addColorStop(0.34, 'rgba(167,139,250,.42)');
+      core.addColorStop(1, 'rgba(99,102,241,0)');
+      ctx.globalAlpha = 0.95;
+      ctx.fillStyle = core;
       ctx.beginPath();
-      nodes.forEach((node, i) => {
-        const next = nodes[(i + 3) % count];
-        ctx.moveTo(node.x, node.y);
-        ctx.lineTo(next.x, next.y);
-      });
-      ctx.stroke();
-
-      nodes.forEach((node, i) => {
-        const active = (i + Math.floor(time * 2.4)) % 6 === 0;
-        ctx.save();
-        ctx.translate(node.x, node.y);
-        ctx.rotate(node.angle);
-        ctx.strokeStyle = active ? '#f87171' : '#67e8f9';
-        ctx.fillStyle = active ? 'rgba(248,113,113,.22)' : 'rgba(103,232,249,.15)';
-        ctx.globalAlpha = active ? 0.95 : 0.72;
-        ctx.shadowColor = active ? '#f87171' : '#38bdf8';
-        ctx.shadowBlur = active ? 9 : 4;
-        ctx.lineWidth = 0.9;
-        ctx.beginPath();
-        ctx.moveTo(0, -4.5);
-        ctx.lineTo(3.8, -1.2);
-        ctx.lineTo(2.8, 3.2);
-        ctx.lineTo(-2.8, 3.2);
-        ctx.lineTo(-3.8, -1.2);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-      });
-
-      // Central rotating hex-core.
-      ctx.rotate(-time * 0.42);
-      ctx.globalAlpha = 0.9;
-      ctx.strokeStyle = '#f87171';
-      ctx.shadowColor = '#f87171';
-      ctx.shadowBlur = 10;
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      for (let i = 0; i < 6; i++) {
-        const angle = (Math.PI / 3) * i - Math.PI / 6;
-        const x = Math.cos(angle) * 13 * pulse;
-        const y = Math.sin(angle) * 13 * pulse;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.closePath();
-      ctx.stroke();
-      ctx.fillStyle = 'rgba(248,113,113,.13)';
+      ctx.ellipse(0, 0, 38, 18, 0, 0, Math.PI * 2);
       ctx.fill();
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = '#e0f2fe';
-      ctx.fillRect(-2, -2, 4, 4);
+
+      for (let ring = 0; ring < 3; ring++) {
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 25 + ring * 13, 11 + ring * 5, 0, time * 0.12 + ring, time * 0.12 + ring + Math.PI * 1.65);
+        ctx.strokeStyle = ring === 1 ? 'rgba(196,181,253,.5)' : 'rgba(191,219,254,.34)';
+        ctx.lineWidth = ring === 1 ? 1.1 : 0.7;
+        ctx.globalAlpha = 0.58 - ring * 0.1;
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Fine edge stars and a quiet center sparkle.
+      ctx.globalAlpha = 0.92;
+      ctx.fillStyle = '#fff7ed';
+      ctx.shadowColor = '#c4b5fd';
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 1.8 + Math.sin(time * 2) * 0.35, 0, Math.PI * 2);
+      ctx.fill();
+
       ctx.restore();
     }
 
@@ -2076,13 +2090,18 @@
         activeLayers.sort((a, b) => a.progress - b.progress);
         activeLayers.forEach(layer => drawLayerWorkOverlay(trailCtx, layer));
 
-        const follow = 1 - Math.exp(-dt * (8 + Math.min(18, velocity * 3.2)));
+        const follow = 1 - Math.exp(-dt * (20 + Math.min(48, velocity * 24)));
         const responsiveAgentCap = window.innerWidth < 640 ? 6 : window.innerWidth < 1024 ? 12 : 20;
-        const activeAgentCount = Math.min(responsiveAgentCap, agents.length, activeLayers.length * 3);
+        const galaxyLayer = activeLayers.find(layer => layer.el.id === 'vortex-card') || null;
+        const activeAgentCount = galaxyLayer
+          ? Math.min(responsiveAgentCap, agents.length)
+          : Math.min(responsiveAgentCap, agents.length, activeLayers.length * 3);
         agents.forEach((ag, idx) => {
-          const targetLayer = idx < activeAgentCount && activeLayers.length
-            ? activeLayers[idx % activeLayers.length]
-            : null;
+          const targetLayer = galaxyLayer
+            ? galaxyLayer
+            : (idx < activeAgentCount && activeLayers.length
+              ? activeLayers[idx % activeLayers.length]
+              : null);
           if (!targetLayer || !targetLayer.screenRect) {
             ag.targetLayer = null;
             ag.taskRect = null;
@@ -2100,7 +2119,15 @@
           let targetX;
           let targetY;
 
-          if (targetLayer.type === 'text' && targetLayer.textChars.length) {
+          if (targetLayer.el.id === 'vortex-card') {
+            // As the final security card builds, the agents descend into it and form
+            // four slow spiral arms like a miniature Milky Way.
+            const arm = idx % 4;
+            const radialStep = 0.12 + ((idx * 7) % 17) / 20;
+            const theta = arm * (Math.PI / 2) + radialStep * 5.2 + t * (idx % 2 ? 0.16 : -0.16);
+            targetX = r.left + r.width * 0.62 + Math.cos(theta) * r.width * 0.34 * radialStep;
+            targetY = r.top + r.height * 0.48 + Math.sin(theta) * r.height * 0.31 * radialStep;
+          } else if (targetLayer.type === 'text' && targetLayer.textChars.length) {
             const baseChar = Math.min(targetLayer.textChars.length - 1, Math.floor(progress * targetLayer.textChars.length));
             const charIndex = Math.min(targetLayer.textChars.length - 1, baseChar + laneIndex);
             const charRect = targetLayer.textChars[charIndex].getBoundingClientRect();
@@ -2145,7 +2172,7 @@
 
         agents.forEach(ag => {
           if (ag.targetLayer) {
-            drawAgentBuildTrace(trailCtx, ag);
+            if (ag.targetLayer.el.id !== 'vortex-card') drawAgentBuildTrace(trailCtx, ag);
             drawAgentCursorWithTrail(trailCtx, ag);
           }
         });
