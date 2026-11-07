@@ -895,8 +895,12 @@
     if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual';
     window.scrollTo(0, 0);
 
-    let buildPhase = 'BUILDING';
+    let buildPhase = 'OPENING';
     let currentWave = 1;
+    let openingLayers = [];
+    let openingStartedAt = 0;
+    const openingLayerDurationMs = 760;
+    let openingTotalDurationMs = openingLayerDurationMs;
     const MAX_WAVE = 8;
     let scrollVelocity = 0;
     let lastScrollSoundAt = 0;
@@ -970,13 +974,35 @@
           startY: 0,
           timelineStart: 0,
           timelineSpan: 1,
-          screenRect: null
+          screenRect: null,
+          isOpening: false,
+          openingDelay: 0
         };
       });
       totalBuildLayers = buildLayers.length;
       completedLayersCount = 0;
       currentWave = 1;
       cacheScrollTimeline();
+
+      openingLayers = buildLayers.filter(layer => {
+        const rect = layer.el.getBoundingClientRect();
+        return rect.width > 2 && rect.height > 0 && rect.bottom > 0 && rect.top < window.innerHeight;
+      }).sort((a, b) => {
+        const ra = a.el.getBoundingClientRect();
+        const rb = b.el.getBoundingClientRect();
+        return Math.abs(ra.top - rb.top) > 18 ? ra.top - rb.top : ra.left - rb.left;
+      });
+
+      const stagger = openingLayers.length > 1
+        ? Math.min(34, 1080 / (openingLayers.length - 1))
+        : 0;
+      openingLayers.forEach((layer, index) => {
+        layer.isOpening = true;
+        layer.openingDelay = index * stagger;
+      });
+      openingTotalDurationMs = openingLayers.length
+        ? openingLayerDurationMs + (openingLayers.length - 1) * stagger
+        : openingLayerDurationMs;
     }
 
     function cacheScrollTimeline() {
@@ -1014,9 +1040,11 @@
 
     function startLiveBuild() {
       document.body.classList.add('build-mode');
+      window.scrollTo(0, 0);
       initBuildLayers();
       initAgents();
-      buildPhase = 'BUILDING';
+      buildPhase = 'OPENING';
+      openingStartedAt = performance.now();
       currentWave = 1;
       maxObservedScrollY = 0;
       lastScrollY = 0;
@@ -1082,7 +1110,7 @@
       lastScrollY = nextY;
       lastScrollAt = now;
       const finishThreshold = Math.max(0, maxScrollRange - Math.max(12, window.innerHeight * 0.012));
-      if (maxObservedScrollY >= finishThreshold) finishBuildInstantly();
+      if (buildPhase === 'SCROLL' && maxObservedScrollY >= finishThreshold) finishBuildInstantly();
     }, { passive: true });
 
     // =========================================================================
@@ -1090,14 +1118,15 @@
     // =========================================================================
     function drawAgentCursorWithTrail(ctx, ag) {
       const color = ag.color || '#38bdf8';
-      const history = Array.isArray(ag.history) ? ag.history : [];
+      const history = Array.isArray(ag.history) ? ag.history.slice(-5) : [];
 
+      // Thin, short-lived signal trace keeps the swarm readable over portfolio content.
       if (history.length > 1) {
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
         ctx.strokeStyle = color;
         ctx.globalAlpha = 0.2;
-        ctx.lineWidth = 1.25;
+        ctx.lineWidth = 0.75;
         ctx.lineCap = 'round';
         ctx.beginPath();
         history.forEach((pt, i) => {
@@ -1105,15 +1134,6 @@
           else ctx.lineTo(pt.x, pt.y);
         });
         ctx.stroke();
-        history.slice(-3).forEach((pt, i) => {
-          ctx.save();
-          ctx.globalAlpha = 0.12 + i * 0.08;
-          ctx.translate(pt.x, pt.y);
-          ctx.rotate(Math.PI / 4);
-          ctx.fillStyle = color;
-          ctx.fillRect(-1.5, -1.5, 3, 3);
-          ctx.restore();
-        });
         ctx.restore();
       }
 
@@ -1122,66 +1142,85 @@
       ctx.rotate(Number.isFinite(ag.angle) ? ag.angle : 0);
       ctx.globalCompositeOperation = 'screen';
       ctx.shadowColor = color;
-      ctx.shadowBlur = 9;
-
-      // Segmented orbital ring around each cyber agent.
+      ctx.shadowBlur = 3.5;
       ctx.strokeStyle = color;
-      ctx.globalAlpha = 0.48;
-      ctx.lineWidth = 1;
-      for (let i = 0; i < 3; i++) {
-        const start = (i * Math.PI * 2) / 3 + 0.18;
-        ctx.beginPath();
-        ctx.arc(0, 0, 13 + (i % 2) * 1.5, start, start + 0.72);
-        ctx.stroke();
+      ctx.fillStyle = color + '30';
+      ctx.lineWidth = 0.95;
+      ctx.lineJoin = 'miter';
+
+      // Five tiny cursor-like silhouettes; each stays within roughly a 10×13 px footprint.
+      switch ((ag.id || 0) % 5) {
+        case 0: // Split-tip pointer
+          ctx.beginPath();
+          ctx.moveTo(0, -7);
+          ctx.lineTo(-3.5, -1.2);
+          ctx.lineTo(-1.1, -0.4);
+          ctx.lineTo(-2.1, 4.6);
+          ctx.lineTo(0.4, 2.8);
+          ctx.lineTo(3.1, 5.2);
+          ctx.lineTo(2, -0.4);
+          ctx.lineTo(4.2, -1.1);
+          ctx.closePath();
+          break;
+        case 1: // Slim arrowhead
+          ctx.beginPath();
+          ctx.moveTo(0, -7);
+          ctx.lineTo(4.4, 1);
+          ctx.lineTo(1, 0.2);
+          ctx.lineTo(0.2, 5);
+          ctx.lineTo(-1.2, 0.2);
+          ctx.lineTo(-4.1, 1);
+          ctx.closePath();
+          break;
+        case 2: // Twin-chevron cursor
+          ctx.beginPath();
+          ctx.moveTo(-4.2, -4.5);
+          ctx.lineTo(0, -7);
+          ctx.lineTo(4.2, -4.5);
+          ctx.lineTo(1.8, -0.8);
+          ctx.lineTo(4.3, 2.2);
+          ctx.lineTo(0, 5.3);
+          ctx.lineTo(-4.3, 2.2);
+          ctx.lineTo(-1.8, -0.8);
+          ctx.closePath();
+          break;
+        case 3: // Micro circuit pointer
+          ctx.beginPath();
+          ctx.moveTo(0, -7);
+          ctx.lineTo(4, -1.4);
+          ctx.lineTo(1.4, -0.2);
+          ctx.lineTo(2.5, 4.6);
+          ctx.lineTo(0, 2.5);
+          ctx.lineTo(-2.5, 4.6);
+          ctx.lineTo(-1.4, -0.2);
+          ctx.lineTo(-4, -1.4);
+          ctx.closePath();
+          break;
+        default: // Hex-point cursor
+          ctx.beginPath();
+          ctx.moveTo(0, -6.8);
+          ctx.lineTo(3.8, -3.1);
+          ctx.lineTo(3.2, 1.8);
+          ctx.lineTo(0, 5.2);
+          ctx.lineTo(-3.2, 1.8);
+          ctx.lineTo(-3.8, -3.1);
+          ctx.closePath();
+          break;
       }
-
-      // Angular cyber drone / blade cursor.
-      ctx.globalAlpha = 0.96;
-      ctx.beginPath();
-      ctx.moveTo(0, -13);
-      ctx.lineTo(5, -7);
-      ctx.lineTo(11, -3);
-      ctx.lineTo(6, 2);
-      ctx.lineTo(9, 8);
-      ctx.lineTo(3, 7);
-      ctx.lineTo(0, 12);
-      ctx.lineTo(-3, 7);
-      ctx.lineTo(-9, 8);
-      ctx.lineTo(-6, 2);
-      ctx.lineTo(-11, -3);
-      ctx.lineTo(-5, -7);
-      ctx.closePath();
-      ctx.fillStyle = color + '28';
       ctx.fill();
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 1.45;
       ctx.stroke();
 
-      // Circuit traces and a glowing hex-core.
-      ctx.shadowBlur = 5;
-      ctx.lineWidth = 1;
+      // One tiny luminous core and a short rear signal notch.
+      ctx.shadowBlur = 1.5;
+      ctx.fillStyle = '#ffffff';
+      ctx.globalAlpha = 0.78;
+      ctx.fillRect(-0.7, -1, 1.4, 1.4);
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = 0.66;
       ctx.beginPath();
-      ctx.moveTo(0, -8); ctx.lineTo(0, -3);
-      ctx.moveTo(-7, -2); ctx.lineTo(-3, 0);
-      ctx.moveTo(7, -2); ctx.lineTo(3, 0);
-      ctx.moveTo(-5, 6); ctx.lineTo(-2, 3);
-      ctx.moveTo(5, 6); ctx.lineTo(2, 3);
+      ctx.moveTo(0, 5);
+      ctx.lineTo(0, 7.2);
       ctx.stroke();
-      ctx.beginPath();
-      for (let i = 0; i < 6; i++) {
-        const a = (Math.PI / 3) * i - Math.PI / 6;
-        const x = Math.cos(a) * 3.5;
-        const y = Math.sin(a) * 3.5;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.closePath();
-      ctx.fillStyle = color;
-      ctx.fill();
-      ctx.shadowBlur = 0;
-      ctx.fillRect(-8.5, -2.8, 2.2, 2.2);
-      ctx.fillRect(6.3, -2.8, 2.2, 2.2);
-      ctx.fillRect(-1.1, -11.2, 2.2, 2.2);
       ctx.restore();
     }
 
@@ -1378,7 +1417,13 @@
         const speedRatio = Math.min(4, velocity / 1.15);
 
         buildLayers.forEach(layer => {
-          const p = Math.max(0, Math.min(1, (scrollY - layer.timelineStart) / layer.timelineSpan));
+          const p = buildPhase === 'OPENING'
+            ? (layer.isOpening
+                ? Math.max(0, Math.min(1, (now - openingStartedAt - layer.openingDelay) / openingLayerDurationMs))
+                : 0)
+            : (layer.isOpening
+                ? 1
+                : Math.max(0, Math.min(1, (scrollY - layer.timelineStart) / layer.timelineSpan)));
           layer.progress = p;
           progressTotal += p;
           layer.screenRect = layer.el.getBoundingClientRect();
@@ -1406,29 +1451,15 @@
             layer.el.classList.remove('layer-unbuilt', 'layer-skeleton', 'layer-building');
             layer.el.classList.add('layer-done');
           } else {
-            const boxPhase = 0.28;
-            const contentProgress = Math.max(0, Math.min(1, (p - boxPhase) / (1 - boxPhase)));
-            if (p < boxPhase) {
-              layer.state = 'SKELETON';
-              layer.stage = 'BOX';
-              layer.progress = p / boxPhase;
-              layer.el.style.opacity = '';
-              layer.el.style.filter = '';
-              layer.el.style.clipPath = '';
-              layer.el.style.removeProperty('--build-opacity');
-              layer.el.classList.remove('layer-unbuilt', 'layer-building', 'layer-done');
-              layer.el.classList.add('layer-skeleton');
-            } else {
-              layer.state = 'BUILDING';
-              layer.stage = 'CONTENT';
-              layer.progress = contentProgress;
-              const opacity = Math.min(1, contentProgress * 1.18);
-              layer.el.style.setProperty('--build-opacity', String(opacity));
-              layer.el.style.clipPath = `inset(0 ${100 - contentProgress * 100}% 0 0)`;
-              layer.el.style.filter = contentProgress < 0.85 ? `blur(${(1 - contentProgress) * 1.4}px)` : 'none';
-              layer.el.classList.remove('layer-unbuilt', 'layer-skeleton', 'layer-done');
-              layer.el.classList.add('layer-building');
-            }
+            layer.state = 'BUILDING';
+            layer.stage = 'CONTENT';
+            layer.progress = p;
+            const opacity = Math.min(1, 0.08 + p * 1.02);
+            layer.el.style.setProperty('--build-opacity', String(opacity));
+            layer.el.style.clipPath = `inset(0 ${100 - p * 100}% 0 0)`;
+            layer.el.style.filter = p < 0.82 ? `blur(${(1 - p) * 1.6}px)` : 'none';
+            layer.el.classList.remove('layer-unbuilt', 'layer-skeleton', 'layer-done');
+            layer.el.classList.add('layer-building');
           }
 
           if (p > 0.02 && inViewport) waveNow = Math.max(waveNow, layer.wave);
@@ -1471,15 +1502,27 @@
 
         agents.forEach(ag => drawAgentCursorWithTrail(trailCtx, ag));
 
+        if (buildPhase === 'OPENING' && now - openingStartedAt >= openingTotalDurationMs) {
+          openingLayers.forEach(layer => {
+            layer.state = 'DONE';
+            layer.progress = 1;
+            layer.el.style.opacity = '';
+            layer.el.style.filter = '';
+            layer.el.style.clipPath = '';
+            layer.el.style.removeProperty('--build-opacity');
+            layer.el.classList.remove('layer-unbuilt', 'layer-skeleton', 'layer-building');
+            layer.el.classList.add('layer-done');
+          });
+          buildPhase = 'SCROLL';
+          maxObservedScrollY = Math.max(maxObservedScrollY, window.scrollY);
+        }
+
         completedLayersCount = completedNow;
         currentWave = waveNow;
         const pct = Math.min(100, (progressTotal / Math.max(1, totalBuildLayers)) * 100);
         barStatusLabel.textContent = `20 AGENTS · WAVE ${currentWave}/${MAX_WAVE} · ${completedLayersCount}/${totalBuildLayers}`;
         barProgressFill.style.width = `${pct}%`;
         barSpeedBtn.textContent = velocity < 0.035 ? 'HOLD' : `SCROLL ${Math.max(0.1, speedRatio).toFixed(1)}x`;
-        if (window.scrollY > 24 || pct > 2) barReplayBtn.classList.remove('hidden');
-        else barReplayBtn.classList.add('hidden');
-
         scrollVelocity *= Math.exp(-dt * 4.8);
         if (Math.abs(scrollVelocity) < 0.02) scrollVelocity = 0;
       }
@@ -1487,7 +1530,7 @@
       drawVfxScene();
 
       vortexCtx.clearRect(0, 0, vortexCanvas.width, vortexCanvas.height);
-      agents.forEach((ag, idx) => {
+      if (buildPhase !== 'COMPLETED') agents.forEach((ag, idx) => {
         ag.orbitAngle += 0.022 + (idx % 4) * 0.006;
         const rad = 32 + (idx % 5) * 18 + Math.sin(t * 2 + idx) * 8;
         const vx = vortexCanvas.width * 0.62 + Math.cos(ag.orbitAngle) * rad;
@@ -1517,7 +1560,8 @@
         window.scrollTo(0, 0);
         document.body.classList.add('build-mode');
         trailCanvas.style.display = 'block';
-        buildPhase = 'BUILDING';
+        buildPhase = 'OPENING';
+        openingStartedAt = performance.now();
         maxObservedScrollY = 0;
         lastScrollY = 0;
         initBuildLayers();
@@ -1527,7 +1571,8 @@
 
     initBuildLayers();
     initAgents();
-    buildPhase = 'BUILDING';
+    buildPhase = 'OPENING';
+    openingStartedAt = performance.now();
     preloader.style.display = 'none';
     barAgentDots.classList.remove('hidden');
     barAgentDots.classList.add('flex');
