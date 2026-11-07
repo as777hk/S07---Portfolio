@@ -1299,61 +1299,96 @@
         if (!next) return;
         const caret = next.getBoundingClientRect();
         if (caret.width <= 0 || caret.height <= 0) return;
+
         ctx.save();
-        ctx.strokeStyle = '#67e8f9';
-        ctx.shadowColor = '#67e8f9';
-        ctx.shadowBlur = 5;
-        ctx.lineWidth = 1.25;
-        ctx.globalAlpha = 0.84;
+        ctx.globalCompositeOperation = 'screen';
+        // Clearly mark the active character as the live writing position.
+        ctx.fillStyle = 'rgba(34,211,238,.2)';
+        ctx.fillRect(caret.left - 2, caret.top - 1, Math.max(4, caret.width + 3), caret.height + 2);
+        ctx.strokeStyle = '#a5f3fc';
+        ctx.shadowColor = '#22d3ee';
+        ctx.shadowBlur = 11;
+        ctx.lineWidth = 2.2;
+        ctx.globalAlpha = 0.98;
         ctx.beginPath();
-        ctx.moveTo(caret.left - 1, caret.top + 1);
-        ctx.lineTo(caret.left - 1, caret.bottom - 1);
+        ctx.moveTo(caret.left - 2, caret.top - 1);
+        ctx.lineTo(caret.left - 2, caret.bottom + 1);
+        ctx.moveTo(caret.left - 4, caret.top - 1);
+        ctx.lineTo(caret.left + 3, caret.top - 1);
+        ctx.moveTo(caret.left - 4, caret.bottom + 1);
+        ctx.lineTo(caret.left + 3, caret.bottom + 1);
         ctx.stroke();
+
+        // A slim progress rail shows how far the current text layer has been typed.
+        const railY = Math.min(window.innerHeight - 2, rect.bottom - 2);
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 0.34;
+        ctx.fillStyle = 'rgba(103,232,249,.3)';
+        ctx.fillRect(rect.left, railY, rect.width, 2);
+        ctx.globalAlpha = 0.96;
+        ctx.fillStyle = '#67e8f9';
+        ctx.fillRect(rect.left, railY, Math.max(2, rect.width * progress), 2);
         ctx.restore();
         return;
       }
 
       ctx.save();
+      ctx.globalCompositeOperation = 'screen';
       ctx.strokeStyle = color;
-      ctx.fillStyle = 'rgba(56, 189, 248, 0.035)';
-      ctx.globalAlpha = layer.type === 'media' ? 0.54 : 0.42;
-      ctx.setLineDash([4, 3]);
-      ctx.lineWidth = 0.9;
+      ctx.fillStyle = layer.type === 'media' ? 'rgba(244,114,182,.055)' : 'rgba(34,211,238,.065)';
+      ctx.globalAlpha = layer.type === 'media' ? 0.78 : 0.72;
+      ctx.setLineDash([7, 4]);
+      ctx.lineDashOffset = -performance.now() * 0.025;
+      ctx.lineWidth = 1.35;
       ctx.strokeRect(rect.left, rect.top, rect.width, rect.height);
       ctx.fillRect(rect.left, rect.top, rect.width, rect.height);
       ctx.setLineDash([]);
+      ctx.lineDashOffset = 0;
 
-      // Photoshop-style transform handles and anchor points.
-      const handle = 4;
+      // Larger Photoshop-style transform handles and vector anchor points.
+      const handle = 6;
       const points = [
         [rect.left, rect.top], [rect.left + rect.width / 2, rect.top], [rect.right, rect.top],
         [rect.right, rect.top + rect.height / 2], [rect.right, rect.bottom],
         [rect.left + rect.width / 2, rect.bottom], [rect.left, rect.bottom],
         [rect.left, rect.top + rect.height / 2]
       ];
-      ctx.globalAlpha = 0.9;
+      ctx.globalAlpha = 0.98;
       points.forEach(([x, y]) => {
-        ctx.fillStyle = '#08121c';
+        ctx.fillStyle = '#06131d';
         ctx.fillRect(x - handle / 2, y - handle / 2, handle, handle);
         ctx.strokeStyle = color;
-        ctx.lineWidth = 0.85;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 6;
+        ctx.lineWidth = 1.25;
         ctx.strokeRect(x - handle / 2, y - handle / 2, handle, handle);
       });
 
+      // A visible progress rail and scan head show the active construction point.
+      if (rect.width > 22 && rect.height > 12) {
+        const railY = rect.bottom - 3;
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 0.42;
+        ctx.fillStyle = color;
+        ctx.fillRect(rect.left + 1, railY, Math.max(1, rect.width - 2), 2);
+        ctx.globalAlpha = 0.98;
+        ctx.fillStyle = '#e0f2fe';
+        ctx.fillRect(rect.left + 1, railY, Math.max(2, (rect.width - 2) * progress), 2);
+      }
+
       if (layer.type === 'media') {
-        // The scan edge follows the media's left-to-right paint-in mask.
         const scanX = rect.left + rect.width * progress;
-        ctx.globalAlpha = 0.85;
-        ctx.strokeStyle = '#f9a8d4';
+        ctx.globalAlpha = 0.98;
+        ctx.strokeStyle = '#fce7f3';
         ctx.shadowColor = '#f472b6';
-        ctx.shadowBlur = 7;
-        ctx.lineWidth = 1.25;
+        ctx.shadowBlur = 13;
+        ctx.lineWidth = 2.2;
         ctx.beginPath();
         ctx.moveTo(scanX, rect.top);
         ctx.lineTo(scanX, rect.bottom);
         ctx.stroke();
       } else {
-        // Vector shape perimeter is traced like a pen/path tool.
+        // Trace a bright vector perimeter like an active pen/path tool.
         drawRectBuildPath(ctx, rect, progress, color);
       }
       ctx.restore();
@@ -1615,27 +1650,31 @@
       ctx.save();
       ctx.globalCompositeOperation = 'screen';
       ctx.strokeStyle = ag.color;
-      ctx.lineWidth = 0.75;
-      ctx.globalAlpha = 0.22;
+      ctx.shadowColor = ag.color;
+      ctx.shadowBlur = 7;
+      ctx.lineCap = 'round';
+      ctx.lineWidth = 1.4;
+      ctx.globalAlpha = 0.48;
       ctx.beginPath();
       ctx.moveTo(r.left + 2, y);
-      ctx.lineTo(Math.max(r.left + 2, frontX - 3), y);
+      ctx.lineTo(Math.max(r.left + 2, frontX - 5), y);
       ctx.stroke();
 
-      // The bright moving head marks exactly where this agent is assembling.
-      ctx.globalAlpha = 0.52;
-      ctx.lineWidth = 1;
+      // Brighter moving head marks the precise point each agent is assembling.
+      ctx.globalAlpha = 0.94;
+      ctx.lineWidth = 1.35;
       ctx.beginPath();
-      ctx.moveTo(frontX, y - 3.2);
-      ctx.lineTo(frontX, y + 3.2);
-      ctx.moveTo(frontX - 3, y);
-      ctx.lineTo(frontX + 3, y);
+      ctx.moveTo(frontX, y - 5);
+      ctx.lineTo(frontX, y + 5);
+      ctx.moveTo(frontX - 4.5, y);
+      ctx.lineTo(frontX + 4.5, y);
       ctx.stroke();
 
-      ctx.globalAlpha = 0.34;
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = 0.62;
       ctx.fillStyle = ag.color;
-      for (let x = r.left + 10; x < frontX - 7; x += 24) {
-        ctx.fillRect(x, y - 0.5, 1, 1);
+      for (let x = r.left + 10; x < frontX - 7; x += 18) {
+        ctx.fillRect(x, y - 0.7, 1.4, 1.4);
       }
       ctx.restore();
     }
@@ -1978,7 +2017,8 @@
           } else {
             // No fixed per-layer speed cap: the scroll timeline drives progress.
             // Velocity only controls how quickly the rendered progress catches up smoothly.
-            const catchUp = 1 - Math.exp(-dt * (14 + Math.min(20, velocity * 14)));
+            const layerSpeed = layer.type === 'text' ? 5 : 7; // writing 5, visual reveal 7
+            const catchUp = 1 - Math.exp(-dt * (layerSpeed + Math.min(layerSpeed * 1.4, velocity * layerSpeed)));
             p = Math.max(previousProgress, previousProgress + (targetProgress - previousProgress) * catchUp);
           }
           layer.progress = p;
@@ -2104,7 +2144,10 @@
         });
 
         agents.forEach(ag => {
-          if (ag.targetLayer) drawAgentCursorWithTrail(trailCtx, ag);
+          if (ag.targetLayer) {
+            drawAgentBuildTrace(trailCtx, ag);
+            drawAgentCursorWithTrail(trailCtx, ag);
+          }
         });
 
         if (buildPhase === 'OPENING' && now - openingStartedAt >= openingTotalDurationMs) {
