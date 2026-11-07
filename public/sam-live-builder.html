@@ -1014,15 +1014,14 @@
         const value = textNode.nodeValue || '';
         const fragment = document.createDocumentFragment();
         // Preserve spaces as ordinary text nodes; keep each word together to protect line layout.
-        value.split(/(\\s+)/).forEach(part => {
+        value.split(/(\s+)/).forEach(part => {
           if (!part) return;
-          if (/^\\s+$/.test(part)) {
+          if (/^\s+$/.test(part)) {
             fragment.appendChild(document.createTextNode(part));
             return;
           }
           const word = document.createElement('span');
           word.className = 'build-word';
-          word.setAttribute('aria-hidden', 'true');
           for (let i = 0; i < part.length; i++) {
             const char = document.createElement('span');
             char.className = 'build-char';
