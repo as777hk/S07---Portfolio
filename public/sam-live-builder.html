@@ -227,6 +227,7 @@
     @media (prefers-reduced-motion: reduce) {
       #hero-portrait-card::before { animation: none; }
       .security-brand-card, .tool-logo-chip { transition: none; }
+      #vortex-card .galaxy-real-photo { animation: none; transform: none; }
     }
 
     /* The final galaxy is a real Hubble image, revealed as the last build layer. */
@@ -242,7 +243,19 @@
       clip-path: circle(0% at 62% 48%);
       filter: saturate(1.04) contrast(1.06) brightness(.78);
       pointer-events: none;
-      will-change: clip-path, opacity;
+      transform: scale(1.24) rotate(0deg);
+      transform-origin: 50% 50%;
+      animation: milky-way-live-rotation 64s linear infinite;
+      animation-play-state: paused;
+      will-change: clip-path, opacity, transform;
+    }
+    @keyframes milky-way-live-rotation {
+      from { transform: scale(1.24) rotate(0deg); }
+      to { transform: scale(1.24) rotate(360deg); }
+    }
+    #vortex-card.layer-building .galaxy-real-photo,
+    #vortex-card.layer-done .galaxy-real-photo {
+      animation-play-state: running;
     }
 
     /* Layer states during live construction */
@@ -1166,6 +1179,7 @@
     let lastScrollAt = performance.now();
     let maxScrollRange = 1;
     let maxObservedScrollY = 0;
+    let lastScrollMetricsAt = 0;
     let galaxyFinishStartedAt = 0;
     let soundEnabled = false;
     let audioCtx = null;
@@ -1441,6 +1455,7 @@
           origText: el.dataset.origText || '',
           state: 'UNBUILT',
           progress: 0,
+          completedAt: 0,
           stage: 'BOX',
           startY: 0,
           timelineStart: 0,
@@ -1530,6 +1545,7 @@
       openingStartedAt = performance.now();
       currentWave = 1;
       maxObservedScrollY = 0;
+      lastScrollMetricsAt = 0;
       galaxyFinishStartedAt = 0;
       lastScrollY = 0;
       scrollVelocity = 0;
@@ -1965,6 +1981,13 @@
       lastFrameTime = now;
       const t = now * 0.001;
 
+      // Keep the bottom threshold aligned with the live document height as images/fonts settle.
+      if (now - lastScrollMetricsAt >= 220) {
+        const liveScrollRange = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+        if (Math.abs(liveScrollRange - maxScrollRange) > 2) maxScrollRange = liveScrollRange;
+        lastScrollMetricsAt = now;
+      }
+
       const isBuildActive = buildPhase === 'OPENING' || buildPhase === 'SCROLL';
       if (isBuildActive) trailCtx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
 
@@ -1990,8 +2013,9 @@
           const openingProgress = layer.isOpening
             ? Math.max(0, Math.min(1, (now - openingStartedAt - layer.openingDelay) / Math.max(1, layer.openingDuration || openingLayerDurationMs)))
             : 0;
-          const revealStartLine = window.innerHeight * 0.96;
-          const revealFinishLine = window.innerHeight * 0.78;
+          // Give each layer enough scroll distance for its agents to visibly complete the task.
+          const revealStartLine = window.innerHeight * 0.98;
+          const revealFinishLine = window.innerHeight * 0.34;
           const viewportProgress = Math.max(0, Math.min(1,
             (revealStartLine - rect.top) / (revealStartLine - revealFinishLine)
           ));
@@ -2006,7 +2030,8 @@
             // No fixed per-layer speed cap: the scroll timeline drives progress.
             // Velocity only controls how quickly the rendered progress catches up smoothly.
             const layerSpeed = layer.type === 'text' ? 5 : 7; // writing 5, visual reveal 7
-            const catchUp = 1 - Math.exp(-dt * (layerSpeed + Math.min(layerSpeed * 1.4, velocity * layerSpeed)));
+            const velocityBoost = Math.min(layerSpeed * 3, velocity * layerSpeed * 2.25);
+            const catchUp = 1 - Math.exp(-dt * (layerSpeed + velocityBoost));
             p = Math.max(previousProgress, previousProgress + (targetProgress - previousProgress) * catchUp);
           }
           layer.progress = p;
@@ -2026,6 +2051,7 @@
             layer.stage = 'BOX';
           } else if (p >= 0.999) {
             if (layer.state !== 'DONE') {
+              layer.completedAt = now;
               layer.el.style.opacity = '';
               layer.el.style.filter = '';
               layer.el.style.clipPath = '';
@@ -2084,22 +2110,41 @@
         } else if (!finishAtBottom || (finalGalaxyLayer && finalGalaxyLayer.progress < 0.999)) {
           galaxyFinishStartedAt = 0;
         }
-        const galaxyHandoffActive = galaxyFinishStartedAt > 0 && now - galaxyFinishStartedAt < 1100;
+        const galaxyHandoffActive = galaxyFinishStartedAt > 0 && now - galaxyFinishStartedAt < 1600;
 
         activeLayers.sort((a, b) => a.progress - b.progress);
         activeLayers.forEach(layer => drawLayerWorkOverlay(trailCtx, layer));
 
+        // Keep agents on a layer briefly after its visual progress completes.
+        // This prevents fast scrolling from removing their target before they arrive.
+        const agentLayers = activeLayers.slice();
+        buildLayers.forEach(layer => {
+          const r = layer.screenRect;
+          const recentlyCompleted = layer.state === 'DONE' && layer.completedAt > 0 && now - layer.completedAt < 820;
+          const stillVisible = r && r.bottom > -80 && r.top < window.innerHeight + 80 && r.width > 3;
+          if (recentlyCompleted && stillVisible && !agentLayers.includes(layer)) agentLayers.push(layer);
+        });
+        agentLayers.sort((a, b) => a.progress - b.progress);
+
         const follow = 1 - Math.exp(-dt * (20 + Math.min(48, velocity * 24)));
         const responsiveAgentCap = window.innerWidth < 640 ? 6 : window.innerWidth < 1024 ? 12 : 20;
-        const galaxyLayer = activeLayers.find(layer => layer.el.id === 'vortex-card') || (galaxyHandoffActive ? finalGalaxyLayer : null);
+        const galaxyRect = finalGalaxyLayer && finalGalaxyLayer.screenRect;
+        const galaxyInFocus = !!(
+          galaxyRect &&
+          galaxyRect.bottom > -80 &&
+          galaxyRect.top < window.innerHeight + 80 &&
+          maxObservedScrollY >= Math.max(0, finalGalaxyLayer.startY - window.innerHeight * 0.9)
+        );
+        const galaxyLayer = agentLayers.find(layer => layer.el.id === 'vortex-card') ||
+          ((galaxyHandoffActive || galaxyInFocus) ? finalGalaxyLayer : null);
         const activeAgentCount = galaxyLayer
           ? Math.min(responsiveAgentCap, agents.length)
-          : Math.min(responsiveAgentCap, agents.length, activeLayers.length * 3);
+          : Math.min(responsiveAgentCap, agents.length, agentLayers.length * 3);
         agents.forEach((ag, idx) => {
           const targetLayer = galaxyLayer
             ? galaxyLayer
-            : (idx < activeAgentCount && activeLayers.length
-              ? activeLayers[idx % activeLayers.length]
+            : (idx < activeAgentCount && agentLayers.length
+              ? agentLayers[idx % agentLayers.length]
               : null);
           if (!targetLayer || !targetLayer.screenRect) {
             ag.targetLayer = null;
@@ -2111,8 +2156,8 @@
           }
 
           const r = targetLayer.screenRect;
-          const workersOnTask = Math.max(1, Math.ceil(activeAgentCount / activeLayers.length));
-          const laneIndex = Math.floor(idx / activeLayers.length);
+          const workersOnTask = Math.max(1, Math.ceil(activeAgentCount / agentLayers.length));
+          const laneIndex = Math.floor(idx / agentLayers.length);
           const laneCount = Math.max(1, Math.min(4, workersOnTask));
           const progress = Math.max(0.015, Math.min(0.985, targetLayer.progress));
           let targetX;
@@ -2176,7 +2221,7 @@
         });
 
         // Keep the finished galaxy in the agents' hands briefly before ending the build.
-        if (buildPhase === 'SCROLL' && galaxyFinishStartedAt && now - galaxyFinishStartedAt >= 1100) {
+        if (buildPhase === 'SCROLL' && galaxyFinishStartedAt && now - galaxyFinishStartedAt >= 1600) {
           finishBuildInstantly();
         }
 
@@ -2194,8 +2239,8 @@
           });
           buildPhase = 'SCROLL';
           maxObservedScrollY = Math.max(maxObservedScrollY, window.scrollY);
-          const bottomThreshold = Math.max(0, maxScrollRange - Math.max(12, window.innerHeight * 0.012));
-          if (maxObservedScrollY >= bottomThreshold) finishBuildInstantly();
+          // Do not skip the final galaxy build when the visitor reached the bottom early.
+          // The SCROLL phase must remain active so the galaxy agents can finish their handoff.
         }
 
         completedLayersCount = completedNow;
@@ -2238,6 +2283,7 @@
         buildPhase = 'OPENING';
         openingStartedAt = performance.now();
         maxObservedScrollY = 0;
+        lastScrollMetricsAt = 0;
         galaxyFinishStartedAt = 0;
         lastScrollY = 0;
         initBuildLayers();
