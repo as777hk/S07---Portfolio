@@ -984,10 +984,11 @@
       let node;
       while ((node = walker.nextNode())) {
         const parent = node.parentElement;
-        if (!parent || parent.closest('script,style,svg,textarea,input,select')) continue;
+        if (!parent || parent.closest('script,style,svg,textarea,input,select,.build-char')) continue;
         if (node.nodeValue && node.nodeValue.length) textNodes.push(node);
       }
 
+      root.querySelectorAll('.build-char').forEach(char => char.classList.remove('is-typed', 'is-caret'));
       let charIndex = 0;
       textNodes.forEach(textNode => {
         const value = textNode.nodeValue || '';
@@ -1261,6 +1262,7 @@
       buildLayers.forEach(layer => {
         layer.state = 'DONE';
         layer.progress = 1;
+        if (layer.type === 'text') updateTextTyping(layer, 1);
         layer.el.style.opacity = '';
         layer.el.style.filter = '';
         layer.el.style.clipPath = '';
