@@ -6,7 +6,7 @@ import { ArrowUpRight, Menu, X } from "lucide-react";
 import { motion, useScroll } from "motion/react";
 import CyberAtmosphere from "@/components/cyber-atmosphere";
 
-const nav = [["/#security","SECURITY"],["/#work","SELECTED WORK"],["/#field-notes","FIELD NOTES"],["/#about","ABOUT"]];
+const nav = [["/#security","SECURITY"],["/#swarm-rebuild","SWARM"],["/#work","SELECTED WORK"],["/#field-notes","FIELD NOTES"],["/#about","ABOUT"]];
 function CursorTrail() {
   const ref=useRef<HTMLDivElement>(null);
   useEffect(()=>{
