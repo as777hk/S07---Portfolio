@@ -1983,7 +1983,7 @@
 
       // Keep the bottom threshold aligned with the live document height as images/fonts settle.
       if (now - lastScrollMetricsAt >= 220) {
-        const liveScrollRange = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+        const liveScrollRange = Math.max(1, Math.max(document.documentElement.scrollHeight, document.body.scrollHeight) - window.innerHeight);
         if (Math.abs(liveScrollRange - maxScrollRange) > 2) maxScrollRange = liveScrollRange;
         lastScrollMetricsAt = now;
       }
@@ -2156,8 +2156,9 @@
           }
 
           const r = targetLayer.screenRect;
-          const workersOnTask = Math.max(1, Math.ceil(activeAgentCount / agentLayers.length));
-          const laneIndex = Math.floor(idx / agentLayers.length);
+          const agentLayerCount = Math.max(1, agentLayers.length);
+          const workersOnTask = Math.max(1, Math.ceil(activeAgentCount / agentLayerCount));
+          const laneIndex = Math.floor(idx / agentLayerCount);
           const laneCount = Math.max(1, Math.min(4, workersOnTask));
           const progress = Math.max(0.015, Math.min(0.985, targetLayer.progress));
           let targetX;
