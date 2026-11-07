@@ -153,6 +153,19 @@
       box-shadow: 0 0 20px rgba(56,189,248,.16);
     }
     .security-brand-kali-mark img { width: 100%; height: 100%; object-fit: contain; }
+    .security-brand-logo-panel img { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
+    .security-brand-owasp { border-color: rgba(228,77,38,.58); box-shadow: 0 0 18px rgba(228,77,38,.09); }
+    .security-brand-mitre { border-color: rgba(148,163,184,.48); }
+    .security-brand-offsec { border-color: rgba(45,212,191,.48); box-shadow: 0 0 18px rgba(45,212,191,.08); }
+    .security-brand-htb { border-color: rgba(159,239,0,.42); box-shadow: 0 0 18px rgba(159,239,0,.07); }
+    .security-brand-nist { border-color: rgba(96,165,250,.5); box-shadow: 0 0 18px rgba(96,165,250,.08); }
+    .security-brand-nist-mark {
+      position: relative; z-index: 1; width: 124px; height: 43px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 8px; background: #f8fafc; color: #163e66;
+      font: 900 27px/1 ui-sans-serif, system-ui, sans-serif; letter-spacing: .13em;
+      border-bottom: 4px solid #2e6b9d;
+    }
     .security-brand-name {
       position: relative;
       z-index: 1;
@@ -187,6 +200,21 @@
     .tool-logo-chip-kali { background: rgba(8,21,34,.9); border: 1px solid rgba(85,124,148,.72); color: #b9e7fb; box-shadow: 0 0 15px rgba(56,189,248,.11); }
     .tool-logo-chip-burp { background: rgba(45,18,10,.9); border: 1px solid rgba(255,102,51,.72); color: #ffb08b; box-shadow: 0 0 15px rgba(255,102,51,.12); }
     .tool-logo-chip-burp img { width: 22px; height: 22px; padding: 2px; border-radius: 5px; background: #fff; }
+    .tool-logo-chip-nmap { background: rgba(20,31,51,.9); border: 1px solid rgba(96,165,250,.68); color: #bfdbfe; }
+    .tool-logo-chip-metasploit { background: rgba(7,36,30,.9); border: 1px solid rgba(52,211,153,.62); color: #a7f3d0; }
+    .tool-logo-chip-wireshark { background: rgba(15,34,52,.9); border: 1px solid rgba(56,189,248,.58); color: #bae6fd; }
+    .tool-logo-chip-ghidra { background: rgba(43,28,12,.9); border: 1px solid rgba(251,146,60,.58); color: #fed7aa; }
+    .tool-logo-chip img { flex: 0 0 auto; filter: none; }
+    .security-brand-card { min-width: 0; }
+    @media (max-width: 640px) {
+      .security-brand-card { min-height: 104px; padding: 10px 6px; gap: 6px; }
+      .security-brand-logo-panel { width: 108px; height: 40px; }
+      .security-brand-nist-mark { width: 108px; height: 40px; }
+      .security-brand-name { font-size: 11px; letter-spacing: .1em; }
+      .security-brand-caption { font-size: 7px; letter-spacing: .1em; }
+      .tool-logo-chip { min-height: 36px; font-size: 10px; padding: 5px 8px; }
+      .tool-logo-chip img { width: 20px; height: 20px; }
+    }
 
     @media (max-width: 1023px) {
       #hero-portrait-card {
@@ -558,38 +586,41 @@
         <p data-build-layer data-wave="3" data-build-type="text" class="font-mono text-[10px] uppercase tracking-widest text-zinc-400 mb-6">
           ALIGNED WITH<br /><span class="text-white font-bold">GLOBAL SECURITY STANDARDS.</span>
         </p>
-        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-6 items-center py-6 border-y border-zinc-900">
-          <div data-build-layer data-wave="3" data-build-type="box" class="flex flex-col items-center justify-center">
-            <span class="font-display text-2xl text-red-600 tracking-wider">OWASP</span>
-            <span class="font-mono text-[8px] text-zinc-500 tracking-widest">TOP 10 AUDIT</span>
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4 items-stretch py-6 border-y border-zinc-900">
+          <div data-build-layer data-wave="3" data-build-type="box" class="security-brand-card security-brand-owasp">
+            <div class="security-brand-logo-panel"><img src="/brand-logos/owasp.svg" alt="OWASP logo" loading="lazy" decoding="async" /></div>
+            <span class="security-brand-name">OWASP</span>
+            <span class="security-brand-caption">TOP 10 AUDIT</span>
           </div>
-          <div data-build-layer data-wave="3" data-build-type="box" class="flex flex-col items-center justify-center">
-            <span class="font-display text-2xl text-red-500 tracking-wider">MITRE</span>
-            <span class="font-mono text-[8px] text-zinc-500 tracking-widest">ATT&amp;CK MATRIX</span>
+          <div data-build-layer data-wave="3" data-build-type="box" class="security-brand-card security-brand-mitre">
+            <div class="security-brand-logo-panel"><img src="https://attack.mitre.org/theme/images/MITRE_ATTACK_logo_Lockup-black.svg" alt="MITRE ATT&amp;CK logo" loading="lazy" decoding="async" /></div>
+            <span class="security-brand-name">MITRE ATT&amp;CK</span>
+            <span class="security-brand-caption">ADVERSARY MATRIX</span>
           </div>
-          <div data-build-layer data-wave="3" data-build-type="box" class="flex flex-col items-center justify-center">
-            <span class="font-display text-2xl text-zinc-100 tracking-widest">OFFSEC</span>
-            <span class="font-mono text-[8px] text-zinc-500 tracking-widest">MINDSET</span>
+          <div data-build-layer data-wave="3" data-build-type="box" class="security-brand-card security-brand-offsec">
+            <div class="security-brand-logo-panel"><img src="https://manage.offsec.com/wp-content/uploads/2023/02/image1-1.png" alt="OffSec logo" loading="lazy" decoding="async" /></div>
+            <span class="security-brand-name">OFFSEC</span>
+            <span class="security-brand-caption">PRACTICAL SECURITY</span>
           </div>
-          <div data-build-layer data-wave="3" data-build-type="box" class="flex flex-col items-center justify-center">
-            <span class="font-display text-xl text-emerald-400 tracking-wider">HACKTHEBOX</span>
+          <div data-build-layer data-wave="3" data-build-type="box" class="security-brand-card security-brand-htb">
+            <div class="security-brand-logo-panel"><img src="/brand-logos/hackthebox.svg" alt="Hack The Box logo" loading="lazy" decoding="async" /></div>
+            <span class="security-brand-name">HACK THE BOX</span>
+            <span class="security-brand-caption">PRACTICAL LABS</span>
           </div>
           <div data-build-layer data-wave="3" data-build-type="box" class="security-brand-card security-brand-burp">
-            <div class="security-brand-logo-panel">
-              <img src="https://portswigger.net/content/images/logos/burpsuite-twittercard.png" alt="Official Burp Suite logo" loading="lazy" decoding="async" />
-            </div>
+            <div class="security-brand-logo-panel"><img src="/brand-logos/burpsuite.svg" alt="Burp Suite logo" loading="lazy" decoding="async" /></div>
             <span class="security-brand-name">BURP SUITE</span>
             <span class="security-brand-caption">WEB APP SECURITY</span>
           </div>
           <div data-build-layer data-wave="3" data-build-type="box" class="security-brand-card security-brand-kali">
-            <div class="security-brand-kali-mark">
-              <img src="https://www.kali.org/images/kali-dragon-icon.svg" alt="Kali Linux dragon logo" loading="lazy" decoding="async" />
-            </div>
+            <div class="security-brand-logo-panel"><img src="/brand-logos/kalilinux.svg" alt="Kali Linux logo" loading="lazy" decoding="async" /></div>
             <span class="security-brand-name">KALI LINUX</span>
             <span class="security-brand-caption">PENETRATION TESTING</span>
           </div>
-          <div data-build-layer data-wave="3" data-build-type="box" class="flex flex-col items-center justify-center">
-            <span class="font-display text-xl text-zinc-300 tracking-wider">NIST CSF</span>
+          <div data-build-layer data-wave="3" data-build-type="box" class="security-brand-card security-brand-nist">
+            <div class="security-brand-nist-mark" aria-label="NIST logo mark">NIST</div>
+            <span class="security-brand-name">NIST CSF</span>
+            <span class="security-brand-caption">SECURITY FRAMEWORK</span>
           </div>
         </div>
       </div>
@@ -711,19 +742,25 @@
             <span data-build-layer data-wave="6" data-build-type="box" class="px-3 py-1.5 rounded bg-zinc-900 border border-zinc-800 text-xs text-zinc-200">DevSecOps</span>
           </div>
 
-          <div class="flex flex-wrap gap-2.5 pt-2">
+          <div class="flex flex-wrap gap-2.5 pt-3">
             <div data-build-layer data-wave="6" data-build-type="box" class="tool-logo-chip tool-logo-chip-kali">
-              <img src="https://www.kali.org/images/kali-dragon-icon.svg" alt="" loading="lazy" decoding="async" />
-              <span>KALI</span>
+              <img src="/brand-logos/kalilinux.svg" alt="" loading="lazy" decoding="async" /><span>KALI LINUX</span>
             </div>
             <div data-build-layer data-wave="6" data-build-type="box" class="tool-logo-chip tool-logo-chip-burp">
-              <img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/BurpSuite_logo.svg" alt="" loading="lazy" decoding="async" />
-              <span>BURP</span>
+              <img src="/brand-logos/burpsuite.svg" alt="" loading="lazy" decoding="async" /><span>BURP SUITE</span>
             </div>
-            <div data-build-layer data-wave="6" data-build-type="box" class="px-2.5 h-9 rounded-lg bg-indigo-950 border border-indigo-400/50 flex items-center justify-center font-mono font-bold text-[11px] text-indigo-200">NMAP</div>
-            <div data-build-layer data-wave="6" data-build-type="box" class="px-2.5 h-9 rounded-lg bg-emerald-950 border border-emerald-400/50 flex items-center justify-center font-mono font-bold text-[11px] text-emerald-300">MSF</div>
-            <div data-build-layer data-wave="6" data-build-type="box" class="px-2.5 h-9 rounded-lg bg-purple-950 border border-purple-400/50 flex items-center justify-center font-mono font-bold text-[11px] text-purple-200">WIRE</div>
-            <div data-build-layer data-wave="6" data-build-type="box" class="px-2.5 h-9 rounded-lg bg-red-950 border border-red-500/60 flex items-center justify-center font-mono font-bold text-[11px] text-red-300">GHIDRA</div>
+            <div data-build-layer data-wave="6" data-build-type="box" class="tool-logo-chip tool-logo-chip-nmap">
+              <img src="https://nmap.org/images/nmap-logo-64px.svg" alt="" loading="lazy" decoding="async" /><span>NMAP</span>
+            </div>
+            <div data-build-layer data-wave="6" data-build-type="box" class="tool-logo-chip tool-logo-chip-metasploit">
+              <img src="/brand-logos/metasploit.svg" alt="" loading="lazy" decoding="async" /><span>METASPLOIT</span>
+            </div>
+            <div data-build-layer data-wave="6" data-build-type="box" class="tool-logo-chip tool-logo-chip-wireshark">
+              <img src="/brand-logos/wireshark.svg" alt="" loading="lazy" decoding="async" /><span>WIRESHARK</span>
+            </div>
+            <div data-build-layer data-wave="6" data-build-type="box" class="tool-logo-chip tool-logo-chip-ghidra">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/f/f6/Ghidra_logo.svg" alt="" loading="lazy" decoding="async" /><span>GHIDRA</span>
+            </div>
           </div>
         </div>
 
@@ -1399,6 +1436,9 @@
       buildLayers.forEach(layer => {
         const rect = layer.el.getBoundingClientRect();
         layer.startY = rect.top + window.scrollY;
+        layer.layoutLeft = rect.left;
+        layer.layoutWidth = rect.width;
+        layer.layoutHeight = rect.height;
         const centerY = (layer.startY / Math.max(1, docHeight)) * maxScrollRange;
         layer.timelineSpan = Math.max(1, band);
         layer.timelineStart = Math.min(
@@ -1910,13 +1950,21 @@
         const speedRatio = Math.min(4, velocity / 1.15);
 
         buildLayers.forEach(layer => {
-          layer.screenRect = layer.el.getBoundingClientRect();
-          const rect = layer.screenRect;
+          const screenTop = layer.startY - window.scrollY;
+          const rect = {
+            left: layer.layoutLeft,
+            top: screenTop,
+            width: layer.layoutWidth,
+            height: layer.layoutHeight,
+            right: layer.layoutLeft + layer.layoutWidth,
+            bottom: screenTop + layer.layoutHeight
+          };
+          layer.screenRect = rect;
           const openingProgress = layer.isOpening
             ? Math.max(0, Math.min(1, (now - openingStartedAt - layer.openingDelay) / Math.max(1, layer.openingDuration || openingLayerDurationMs)))
             : 0;
-          const revealStartLine = window.innerHeight * 0.94;
-          const revealFinishLine = window.innerHeight * 0.62;
+          const revealStartLine = window.innerHeight * 0.96;
+          const revealFinishLine = window.innerHeight * 0.78;
           const viewportProgress = Math.max(0, Math.min(1,
             (revealStartLine - rect.top) / (revealStartLine - revealFinishLine)
           ));
@@ -1928,12 +1976,10 @@
           if (buildPhase === 'OPENING') {
             p = Math.max(previousProgress, targetProgress);
           } else {
-            // Text is limited to 12 characters/sec; media and vector layers also get a deliberate build time.
-            const textRate = 16 / Math.max(1, (layer.textChars || []).length);
-            const buildRate = layer.type === 'text' ? textRate : layer.type === 'media' ? 0.82 : 1.0;
-            const scrollBoost = 1 + Math.min(1.55, velocity * 1.05);
-            const maxStep = buildRate * scrollBoost * dt;
-            p = Math.max(previousProgress, Math.min(targetProgress, previousProgress + maxStep));
+            // No fixed per-layer speed cap: the scroll timeline drives progress.
+            // Velocity only controls how quickly the rendered progress catches up smoothly.
+            const catchUp = 1 - Math.exp(-dt * (18 + Math.min(26, velocity * 18)));
+            p = Math.max(previousProgress, previousProgress + (targetProgress - previousProgress) * catchUp);
           }
           layer.progress = p;
           progressTotal += p;
