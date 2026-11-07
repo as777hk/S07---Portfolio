@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 610" fill="none" role="img" aria-labelledby="title desc">
+<title id="title">SAM cyber anime operative</title>
+<desc id="desc">A hooded anime-inspired cyber operative in black armor with crimson circuitry. The face is completely hidden in shadow.</desc>
+<defs>
+  <linearGradient id="hood" x1="112" y1="77" x2="347" y2="303" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#262A36"/><stop offset=".42" stop-color="#090B12"/><stop offset="1" stop-color="#030408"/>
+  </linearGradient>
+  <linearGradient id="cloth" x1="115" y1="260" x2="368" y2="602" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#202431"/><stop offset=".3" stop-color="#10131C"/><stop offset="1" stop-color="#030509"/>
+  </linearGradient>
+  <linearGradient id="armor" x1="91" y1="304" x2="386" y2="540" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#303646"/><stop offset=".45" stop-color="#11151F"/><stop offset="1" stop-color="#252B39"/>
+  </linearGradient>
+  <linearGradient id="redEdge" x1="105" y1="150" x2="360" y2="450" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#FF5369"/><stop offset=".42" stop-color="#E11D48"/><stop offset="1" stop-color="#650D22"/>
+  </linearGradient>
+  <linearGradient id="visor" x1="173" y1="180" x2="315" y2="218" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#FF8B9B"/><stop offset=".38" stop-color="#F43F5E"/><stop offset="1" stop-color="#7F102B"/>
+  </linearGradient>
+  <linearGradient id="cool" x1="90" y1="160" x2="382" y2="460" gradientUnits="userSpaceOnUse">
+    <stop stop-color="#8FA8D5"/><stop offset="1" stop-color="#263750"/>
+  </linearGradient>
+  <filter id="redGlow" x="-80%" y="-80%" width="260%" height="260%">
+    <feGaussianBlur stdDeviation="7" result="b"/><feColorMatrix in="b" type="matrix" values="1 0 0 0 0.92  0 0 0 0 0.04  0 0 0 0 0.15  0 0 0 .8 0" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <filter id="softGlow" x="-60%" y="-60%" width="220%" height="220%">
+    <feGaussianBlur stdDeviation="13"/>
+  </filter>
+  <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+    <stop stop-color="#68748A"/><stop offset=".38" stop-color="#202838"/><stop offset="1" stop-color="#090D15"/>
+  </linearGradient>
+</defs>
+
+<!-- subtle red aura, contained to the character silhouette -->
+<ellipse cx="240" cy="410" rx="172" ry="178" fill="#D91E43" opacity=".13" filter="url(#softGlow)"/>
+<path d="M103 364C118 275 166 221 240 215c78 6 126 60 137 149" stroke="#F43F5E" stroke-opacity=".18" stroke-width="2"/>
+<path d="M118 378C135 299 177 254 240 249c63 5 105 50 122 129" stroke="#91A8D8" stroke-opacity=".16" stroke-width="1.5"/>
+
+<!-- rear hood silhouette -->
+<path d="M132 249c-25-31-27-83-8-123 18-38 59-65 116-69 58 4 99 31 116 69 19 40 17 92-8 123l-24 52H156l-24-52Z" fill="#05070D" stroke="#293348" stroke-width="3"/>
+<path d="M137 222c-10-48 4-95 38-124 17-15 39-24 65-27 26 3 49 12 66 27 34 29 48 76 38 124-10 46-42 78-104 87-61-9-93-41-103-87Z" fill="url(#hood)" stroke="#5B6881" stroke-opacity=".45" stroke-width="2"/>
+<path d="M150 184c15-60 48-91 90-95 43 4 75 35 90 95-17 43-49 68-90 74-41-6-73-31-90-74Z" fill="#03050A"/>
+<!-- sharp anime hair under the hood -->
+<path d="m169 171-21-31 38 17-8-39 32 29 8-44 21 36 23-35 3 43 34-27-9 39 32-15-24 41-19 23-39 18-42-15-31-24-18-36Z" fill="#111723" stroke="#4A566B" stroke-opacity=".6" stroke-width="2"/>
+<path d="m178 147 23 20 15-33 19 30 22-33 3 39 33-21-18 39-34 28-42-13-27-26Z" fill="#060910"/>
+<path d="M155 165c16-49 44-75 85-80 42 5 69 31 85 80" stroke="#8998B1" stroke-opacity=".4" stroke-width="3"/>
+
+<!-- face cavity: intentionally featureless and fully obscured -->
+<path d="M169 175c16-27 39-42 71-45 32 3 55 18 71 45l-11 75c-12 24-34 39-60 45-26-6-48-21-60-45l-11-75Z" fill="#010207"/>
+<path d="M175 185c18-12 40-18 65-18s47 6 65 18l-6 29c-21 10-40 15-59 15s-38-5-59-15l-6-29Z" fill="#090C14"/>
+<path d="M184 196c18-7 37-10 56-10s38 3 56 10" stroke="url(#visor)" stroke-width="4" stroke-linecap="round" filter="url(#redGlow)"/>
+<path d="M192 202h96" stroke="#FF9AA9" stroke-opacity=".9" stroke-width="1"/>
+<path d="M180 235c21 9 41 13 60 13s39-4 60-13l-12 29c-14 13-30 21-48 24-18-3-34-11-48-24l-12-29Z" fill="#090D16" stroke="#222B3B" stroke-width="2"/>
+<path d="m205 260 35 8 35-8" stroke="#D9264B" stroke-opacity=".65" stroke-width="2"/>
+
+<!-- high collar and shoulder mantle -->
+<path d="M178 245 125 273l-31 65 43 69 52-36 19-80-30-46Z" fill="#090D15" stroke="#3F4B61" stroke-width="3"/>
+<path d="m302 245 53 28 31 65-43 69-52-36-19-80 30-46Z" fill="#090D15" stroke="#3F4B61" stroke-width="3"/>
+<path d="m179 246-24 58 29 32 33-52-38-38Z" fill="#1B2230"/>
+<path d="m301 246 24 58-29 32-33-52 38-38Z" fill="#1B2230"/>
+<path d="M174 263 144 317l-22 17 18 53 50-29 21-73-37-22Z" fill="#101722" stroke="#697791" stroke-opacity=".45" stroke-width="2"/>
+<path d="m306 263 30 54 22 17-18 53-50-29-21-73 37-22Z" fill="#101722" stroke="#697791" stroke-opacity=".45" stroke-width="2"/>
+
+<!-- upper torso / tactical jacket -->
+<path d="M185 275c16 19 34 29 55 32 21-3 39-13 55-32l48 35 42 101-29 172-116 24-116-24-29-172 42-101 48-35Z" fill="url(#cloth)" stroke="#374256" stroke-width="3"/>
+<path d="M183 289c15 22 34 34 57 38 23-4 42-16 57-38l30 28-23 74-64 25-64-25-23-74 30-28Z" fill="#111722" stroke="#4B566B" stroke-width="2"/>
+<path d="m177 307-36 29 17 68 42-24 22-55-45-18Z" fill="url(#armor)" stroke="#5A6880" stroke-width="2"/>
+<path d="m303 307 36 29-17 68-42-24-22-55 45-18Z" fill="url(#armor)" stroke="#5A6880" stroke-width="2"/>
+
+<!-- angular chest armor panels -->
+<path d="m129 371 54-32 31 21-24 87-50 31-29-50 18-57Z" fill="url(#metal)" stroke="#697891" stroke-opacity=".58" stroke-width="2"/>
+<path d="m351 371-54-32-31 21 24 87 50 31 29-50-18-57Z" fill="url(#metal)" stroke="#697891" stroke-opacity=".58" stroke-width="2"/>
+<path d="m191 378 49 19 49-19-8 98-41 23-41-23-8-98Z" fill="#080C14" stroke="#323D50" stroke-width="2"/>
+<path d="M240 397v95" stroke="#5A667C" stroke-opacity=".6" stroke-width="2"/>
+<path d="m203 408 21 9-13 46-23-14 15-41Z" fill="#121A27"/>
+<path d="m277 408-21 9 13 46 23-14-15-41Z" fill="#121A27"/>
+
+<!-- left arm sleeve -->
+<path d="m112 369-31 37-17 84 33 48 48-29 19-76-52-64Z" fill="#0A0E17" stroke="#4C5B73" stroke-width="3"/>
+<path d="m94 414 29-20 23 34-19 59-31 21-20-34 18-60Z" fill="#1C2533" stroke="#64738A" stroke-opacity=".55" stroke-width="2"/>
+<path d="m78 477 42-25" stroke="#E11D48" stroke-width="4" filter="url(#redGlow)"/>
+<path d="m88 491 34-18 14 20-29 29-25-10 6-21Z" fill="#090D15" stroke="#687790" stroke-opacity=".6" stroke-width="2"/>
+
+<!-- right arm sleeve -->
+<path d="m368 369 31 37 17 84-33 48-48-29-19-76 52-64Z" fill="#0A0E17" stroke="#4C5B73" stroke-width="3"/>
+<path d="m386 414-29-20-23 34 19 59 31 21 20-34-18-60Z" fill="#1C2533" stroke="#64738A" stroke-opacity=".55" stroke-width="2"/>
+<path d="m402 477-42-25" stroke="#E11D48" stroke-width="4" filter="url(#redGlow)"/>
+<path d="m392 491-34-18-14 20 29 29 25-10-6-21Z" fill="#090D15" stroke="#687790" stroke-opacity=".6" stroke-width="2"/>
+
+<!-- cyber details and red signal seams -->
+<path d="m108 351 20-28 17-5m207 33-20-28-17-5" stroke="url(#redEdge)" stroke-width="3" stroke-linecap="round"/>
+<path d="m155 372-14 42m184-42 14 42" stroke="#9BAAC5" stroke-opacity=".6" stroke-width="2"/>
+<path d="m164 462 26-17m126 17-26-17" stroke="#F43F5E" stroke-width="3" filter="url(#redGlow)"/>
+<path d="m145 517 45-28 50 17 50-17 45 28" stroke="#39465B" stroke-width="2"/>
+<path d="m124 545 47-16m185 16-47-16" stroke="#D21E43" stroke-opacity=".7" stroke-width="3"/>
+<path d="M240 505v62" stroke="#F43F5E" stroke-opacity=".7" stroke-width="2"/>
+<path d="M231 527h18m-18 9h18" stroke="#77849B" stroke-width="2"/>
+
+<!-- SAM insignia -->
+<path d="m239 337 28 14-5 31-22 13-23-13-5-31 27-14Z" fill="#090D16" stroke="#E11D48" stroke-width="2.5"/>
+<path d="m254 349-19 0-8 10 20 0-5 10-17 0" stroke="#FF405E" stroke-width="5" stroke-linecap="square" stroke-linejoin="miter" filter="url(#redGlow)"/>
+<path d="m106 332 17-9m234 9-17-9" stroke="#91A8D8" stroke-width="2" stroke-opacity=".5"/>
+<circle cx="136" cy="401" r="4" fill="#F43F5E" filter="url(#redGlow)"/>
+<circle cx="344" cy="401" r="4" fill="#F43F5E" filter="url(#redGlow)"/>
+<circle cx="167" cy="489" r="3" fill="#91A8D8"/><circle cx="313" cy="489" r="3" fill="#91A8D8"/>
+
+<!-- jacket hem, hard-surface folds -->
+<path d="m116 558 63-20 61 19 61-19 63 20-10 52H126l-10-52Z" fill="#070A11" stroke="#303C50" stroke-width="2"/>
+<path d="m146 573 42-12 52 13 52-13 42 12" stroke="#697891" stroke-opacity=".5" stroke-width="2"/>
+<path d="m180 599 27-13 33 8 33-8 27 13" stroke="#E11D48" stroke-opacity=".65" stroke-width="2"/>
+<path d="M95 397 77 452m326-55 18 55" stroke="#F43F5E" stroke-opacity=".5" stroke-width="2"/>
+</svg>
