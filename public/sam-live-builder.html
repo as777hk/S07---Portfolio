@@ -34,7 +34,7 @@
       font-family: 'Inter', sans-serif;
       overflow-x: hidden;
     }
-    /* Giant crimson PORTFOLIO background text exactly like the video */
+    /* Oversized crimson PORTFOLIO backdrop */
     .hero-bg-word {
       font-family: 'Anton', sans-serif;
       font-size: clamp(5.4rem, 20.2vw, 19.2rem);
@@ -47,7 +47,7 @@
     }
     /* Layer states during live construction */
     [data-build-layer] {
-      transition: opacity 0.18s ease, filter 0.22s ease;
+      transition: opacity 0.08s linear, filter 0.08s linear, clip-path 0.06s linear;
     }
     body.build-mode [data-build-layer].layer-unbuilt {
       opacity: 0 !important;
@@ -58,7 +58,7 @@
       pointer-events: none !important;
     }
     body.build-mode [data-build-layer].layer-building {
-      opacity: 1 !important;
+      opacity: var(--build-opacity, 1) !important;
     }
     body.build-mode [data-build-layer].layer-done {
       opacity: 1 !important;
@@ -83,9 +83,9 @@
 <body class="build-mode selection:bg-red-600 selection:text-white">
 
   <!-- ===================================================================== -->
-  <!-- 1. "SCANNING PAGE..." INITIAL STAGE (00:00 - 00:01.2)                 -->
+  <!-- Live scroll builder: no autoplay intro or timed playback -->
   <!-- ===================================================================== -->
-  <div id="preloader" class="fixed inset-0 z-[90] bg-[#06070b] flex flex-col items-center justify-center transition-opacity duration-300">
+  <div id="preloader" style="display:none" class="fixed inset-0 z-[90] bg-[#06070b] flex flex-col items-center justify-center transition-opacity duration-300">
     <canvas id="preloader-canvas" width="900" height="540" class="w-full h-full pointer-events-none"></canvas>
     <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
       <span class="font-display text-4xl tracking-wider text-zinc-700/70">S</span>
@@ -148,27 +148,27 @@
 
     <!-- Status Readout -->
     <div id="bar-status-label" class="font-mono text-[11px] text-zinc-200 whitespace-nowrap">
-      Scanning page...
+      20 AGENTS · SCROLL TO BUILD
     </div>
 
     <!-- Progress Line -->
     <div class="w-20 sm:w-28 h-1 bg-zinc-800 rounded-full overflow-hidden">
-      <div id="bar-progress-fill" class="h-full bg-sky-500 w-[10%] transition-all duration-150"></div>
+      <div id="bar-progress-fill" class="h-full bg-sky-500 w-[10%] transition-none"></div>
     </div>
 
     <!-- Mode Button: "Start" -> "Touring" / "Free View" -->
-    <button id="bar-mode-btn" type="button" class="px-2.5 py-1 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-medium text-[11px] transition-colors whitespace-nowrap">
-      Start
-    </button>
+    <span id="bar-mode-btn" class="px-2.5 py-1 rounded-lg bg-sky-600 text-white font-medium text-[11px] whitespace-nowrap">
+      SCROLL TO BUILD
+    </span>
 
     <!-- Speed Button: "1x" / "2x" / "4x" -->
-    <button id="bar-speed-btn" type="button" class="px-2 py-1 rounded-lg bg-zinc-800/90 hover:bg-zinc-700 text-zinc-200 font-mono text-[11px] border border-zinc-700/70 transition-colors">
-      1x
-    </button>
+    <span id="bar-speed-btn" class="px-2 py-1 rounded-lg bg-zinc-800/90 text-zinc-200 font-mono text-[10px] border border-zinc-700/70 whitespace-nowrap">
+      HOLD
+    </span>
 
     <!-- Replay Button -->
     <button id="bar-replay-btn" type="button" class="hidden px-2.5 py-1 rounded-lg bg-zinc-800/90 hover:bg-zinc-700 text-zinc-100 font-medium text-[11px] border border-zinc-700/70 transition-colors">
-      Replay
+      Rewind
     </button>
 
     <!-- Sound Toggle -->
@@ -865,7 +865,7 @@
     renderAwards();
 
     // =========================================================================
-    // 2. WAVE-SYNCHRONIZED 20-AGENT LIVE FIGMA BUILDER (51.4s CHOREOGRAPHY)
+    // 2. SCROLL-SCRUBBED 20-AGENT LIVE PORTFOLIO BUILDER
     // =========================================================================
     const AGENT_COLORS = [
       '#38bdf8', '#f472b6', '#a78bfa', '#34d399', '#fb923c',
@@ -892,12 +892,14 @@
     const barSoundBtn = document.getElementById('bar-sound-btn');
     const barCloseBtn = document.getElementById('bar-close-btn');
 
-    let buildPhase = 'SCANNING';
-    let scanElapsed = 0;
+    let buildPhase = 'BUILDING';
     let currentWave = 1;
     const MAX_WAVE = 8;
-    let touringAutoScroll = true;
-    let speedMultiplier = 1;
+    let scrollVelocity = 0;
+    let lastScrollSoundAt = 0;
+    let lastScrollY = window.scrollY;
+    let lastScrollAt = performance.now();
+    let maxScrollRange = 1;
     let soundEnabled = false;
     let audioCtx = null;
     let buildStartTime = 0;
@@ -912,7 +914,12 @@
       preloaderCanvas.width = window.innerWidth;
       preloaderCanvas.height = window.innerHeight;
     }
-    window.addEventListener('resize', resizeOverlayCanvases);
+    window.addEventListener('resize', () => {
+      resizeOverlayCanvases();
+      cacheScrollTimeline();
+    });
+    window.addEventListener('load', cacheScrollTimeline, { once: true });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(cacheScrollTimeline);
     resizeOverlayCanvases();
 
     function playAgentTick(freq = 520, dur = 0.02) {
@@ -944,6 +951,8 @@
         el.classList.add('layer-unbuilt');
         el.style.opacity = '';
         el.style.filter = '';
+        el.style.clipPath = '';
+        el.style.removeProperty('--build-opacity');
         return {
           id: index,
           el,
@@ -953,12 +962,33 @@
           origText: el.dataset.origText || '',
           state: 'UNBUILT',
           progress: 0,
-          stage: 'BOX'
+          stage: 'BOX',
+          startY: 0,
+          timelineStart: 0,
+          timelineSpan: 1,
+          screenRect: null
         };
       });
       totalBuildLayers = buildLayers.length;
       completedLayersCount = 0;
       currentWave = 1;
+      cacheScrollTimeline();
+    }
+
+    function cacheScrollTimeline() {
+      const docHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+      maxScrollRange = Math.max(1, docHeight - window.innerHeight);
+      const band = Math.min(Math.max(window.innerHeight * 0.72, 320), maxScrollRange);
+      buildLayers.forEach(layer => {
+        const rect = layer.el.getBoundingClientRect();
+        layer.startY = rect.top + window.scrollY;
+        const centerY = (layer.startY / Math.max(1, docHeight)) * maxScrollRange;
+        layer.timelineSpan = Math.max(1, band);
+        layer.timelineStart = Math.min(
+          Math.max(0, maxScrollRange - band),
+          Math.max(-band * 0.12, centerY - band * 0.38)
+        );
+      });
     }
 
     function initAgents() {
@@ -977,58 +1007,35 @@
       });
     }
 
-    function activateWaveSkeletons(waveNum) {
-      buildLayers.forEach(l => {
-        if (l.wave === waveNum && l.state === 'UNBUILT') {
-          l.state = 'SKELETON';
-          l.stage = 'BOX';
-          l.progress = 0;
-          l.el.classList.remove('layer-unbuilt');
-          l.el.classList.add('layer-skeleton');
-        }
-      });
-    }
-
     function startLiveBuild() {
       document.body.classList.add('build-mode');
-      window.scrollTo({ top: 0, behavior: 'instant' });
       initBuildLayers();
       initAgents();
       buildPhase = 'BUILDING';
-      buildStartTime = performance.now();
       currentWave = 1;
-      activateWaveSkeletons(1);
-
-      preloader.style.opacity = '0';
-      setTimeout(() => { preloader.style.display = 'none'; }, 280);
-
+      preloader.style.display = 'none';
       barAgentDots.classList.remove('hidden');
       barAgentDots.classList.add('flex');
       barReplayBtn.classList.add('hidden');
       barSpeedBtn.classList.remove('hidden');
-      barModeBtn.textContent = touringAutoScroll ? 'Touring' : 'Free View';
-      barModeBtn.className = touringAutoScroll
-        ? 'px-2.5 py-1 rounded-lg bg-sky-600 text-white font-medium text-[11px]'
-        : 'px-2.5 py-1 rounded-lg bg-zinc-800 text-zinc-300 font-medium text-[11px]';
+      barModeBtn.textContent = 'SCROLL TO BUILD';
+      barModeBtn.className = 'px-2.5 py-1 rounded-lg bg-sky-600 text-white font-medium text-[11px] whitespace-nowrap';
+      barStatusLabel.textContent = '20 AGENTS · SCROLL TO BUILD';
+      barProgressFill.style.width = '0%';
       pipMinimap.style.opacity = '1';
     }
 
     function replayFullExperience() {
-      window.scrollTo({ top: 0, behavior: 'instant' });
-      document.body.classList.add('build-mode');
-      initBuildLayers();
-      initAgents();
-      scanElapsed = 0;
-      buildPhase = 'SCANNING';
-      preloader.style.display = 'flex';
-      preloader.style.opacity = '1';
-      barAgentDots.classList.add('hidden');
-      barReplayBtn.classList.add('hidden');
-      barSpeedBtn.classList.remove('hidden');
-      barStatusLabel.textContent = 'Scanning page...';
-      barProgressFill.style.width = '15%';
-      barModeBtn.textContent = 'Start';
-      barModeBtn.className = 'px-2.5 py-1 rounded-lg bg-sky-600 text-white font-medium text-[11px]';
+      if (buildPhase === 'COMPLETED') {
+        document.body.classList.add('build-mode');
+        buildPhase = 'BUILDING';
+        initBuildLayers();
+        initAgents();
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      preloader.style.display = 'none';
+      barReplayBtn.classList.remove('hidden');
+      barStatusLabel.textContent = 'REWINDING · SCROLL TO REBUILD';
     }
 
     function finishBuildInstantly() {
@@ -1037,11 +1044,10 @@
         layer.progress = 1;
         layer.el.style.opacity = '';
         layer.el.style.filter = '';
+        layer.el.style.clipPath = '';
+        layer.el.style.removeProperty('--build-opacity');
         layer.el.classList.remove('layer-unbuilt', 'layer-skeleton', 'layer-building');
         layer.el.classList.add('layer-done');
-        if (!layer.hasChildren && layer.origText) {
-          layer.el.textContent = layer.origText;
-        }
       });
       completedLayersCount = totalBuildLayers;
       buildPhase = 'COMPLETED';
@@ -1049,28 +1055,11 @@
       barAgentDots.classList.add('hidden');
       barSpeedBtn.classList.add('hidden');
       barReplayBtn.classList.remove('hidden');
-      barStatusLabel.textContent = 'Rebuilt by 20 agents in 51.4s';
+      barStatusLabel.textContent = 'BUILD COMPLETE · 20 AGENTS';
       barProgressFill.style.width = '100%';
-      barModeBtn.textContent = 'Free View';
-      barModeBtn.className = 'px-2.5 py-1 rounded-lg bg-sky-600 text-white font-medium text-[11px]';
+      barModeBtn.textContent = 'LIVE VIEW';
+      barModeBtn.className = 'px-2.5 py-1 rounded-lg bg-sky-600 text-white font-medium text-[11px] whitespace-nowrap';
     }
-
-    barModeBtn.addEventListener('click', () => {
-      if (buildPhase === 'SCANNING') {
-        startLiveBuild();
-      } else if (buildPhase === 'BUILDING') {
-        touringAutoScroll = !touringAutoScroll;
-        barModeBtn.textContent = touringAutoScroll ? 'Touring' : 'Free View';
-        barModeBtn.className = touringAutoScroll
-          ? 'px-2.5 py-1 rounded-lg bg-sky-600 text-white font-medium text-[11px]'
-          : 'px-2.5 py-1 rounded-lg bg-zinc-800 text-zinc-300 font-medium text-[11px]';
-      }
-    });
-
-    barSpeedBtn.addEventListener('click', () => {
-      speedMultiplier = speedMultiplier === 1 ? 2 : speedMultiplier === 2 ? 4 : 1;
-      barSpeedBtn.textContent = `${speedMultiplier}x`;
-    });
 
     barReplayBtn.addEventListener('click', replayFullExperience);
     document.getElementById('replay-intro-btn').addEventListener('click', replayFullExperience);
@@ -1087,12 +1076,20 @@
       pipMinimap.style.opacity = pipMinimap.style.opacity === '0' ? '1' : '0';
     });
 
-    window.addEventListener('wheel', () => {
-      if (buildPhase === 'BUILDING' && touringAutoScroll) {
-        touringAutoScroll = false;
-        barModeBtn.textContent = 'Free View';
-        barModeBtn.className = 'px-2.5 py-1 rounded-lg bg-zinc-800 text-zinc-300 font-medium text-[11px]';
+    window.addEventListener('scroll', () => {
+      const now = performance.now();
+      const nextY = window.scrollY;
+      const elapsed = Math.max(8, now - lastScrollAt);
+      const delta = nextY - lastScrollY;
+      if (delta !== 0) {
+        scrollVelocity = delta / elapsed;
+        if (soundEnabled && now - lastScrollSoundAt > 90 && Math.abs(delta) > 28) {
+          playAgentTick(230 + Math.min(520, Math.abs(delta) * 1.8), 0.018);
+          lastScrollSoundAt = now;
+        }
       }
+      lastScrollY = nextY;
+      lastScrollAt = now;
     }, { passive: true });
 
     // =========================================================================
@@ -1430,159 +1427,123 @@
       lastFrameTime = now;
       const t = now * 0.001;
 
-      if (buildPhase === 'SCANNING') {
-        scanElapsed += dt;
-        preloaderCtx.clearRect(0, 0, preloaderCanvas.width, preloaderCanvas.height);
-        const cx = preloaderCanvas.width / 2;
-        const cy = preloaderCanvas.height / 2;
-        const isBursting = scanElapsed > 0.65;
-
-        agents.forEach((ag, idx) => {
-          const isLeft = idx < 10;
-          if (!isBursting) {
-            const clusterX = cx + (isLeft ? -95 : 95);
-            const clusterY = cy + (isLeft ? 18 : -12);
-            const ang = t * 2.2 + idx * 0.8;
-            ag.x = clusterX + Math.cos(ang) * (14 + (idx % 4) * 7);
-            ag.y = clusterY + Math.sin(ang * 1.3) * (14 + (idx % 3) * 8);
-            ag.cursorMode = 'POINTER';
-          } else {
-            const targetX = isLeft ? preloaderCanvas.width * 0.14 + (idx % 4) * 38 : preloaderCanvas.width * 0.78 + (idx % 3) * 32;
-            const targetY = preloaderCanvas.height * (0.18 + (idx % 9) * 0.085);
-            ag.history.push({ x: ag.x, y: ag.y });
-            if (ag.history.length > 4) ag.history.shift();
-            ag.x += (targetX - ag.x) * 0.14;
-            ag.y += (targetY - ag.y) * 0.14;
-            ag.cursorMode = 'CROSSHAIR';
-          }
-          drawAgentCursorWithTrail(preloaderCtx, ag);
-        });
-
-        barProgressFill.style.width = `${Math.min(100, (scanElapsed / 1.25) * 100)}%`;
-        if (scanElapsed >= 1.25) {
-          startLiveBuild();
-        }
-      }
-
       trailCtx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
 
       if (buildPhase === 'BUILDING') {
         const activeRects = [];
+        const activeLayers = [];
+        let progressTotal = 0;
+        let completedNow = 0;
+        let waveNow = 1;
+        const scrollY = window.scrollY;
+        const velocity = Math.abs(scrollVelocity);
+        const speedRatio = Math.min(4, velocity / 1.15);
 
-        const currentWaveLayers = buildLayers.filter(l => l.wave === currentWave);
-        if (currentWaveLayers.length > 0 && currentWaveLayers.every(l => l.state === 'DONE')) {
-          if (currentWave < MAX_WAVE) {
-            currentWave++;
-            activateWaveSkeletons(currentWave);
+        buildLayers.forEach(layer => {
+          const p = Math.max(0, Math.min(1, (scrollY - layer.timelineStart) / layer.timelineSpan));
+          layer.progress = p;
+          progressTotal += p;
+          layer.screenRect = layer.el.getBoundingClientRect();
+          const rect = layer.screenRect;
+          const inViewport = rect.bottom > -220 && rect.top < window.innerHeight + 220 && rect.width > 3;
+
+          if (p <= 0.001) {
+            layer.state = 'UNBUILT';
+            layer.stage = 'BOX';
+            layer.el.style.opacity = '';
+            layer.el.style.filter = '';
+            layer.el.style.clipPath = '';
+            layer.el.style.removeProperty('--build-opacity');
+            layer.el.classList.remove('layer-skeleton', 'layer-building', 'layer-done');
+            layer.el.classList.add('layer-unbuilt');
+          } else if (p >= 0.999) {
+            layer.state = 'DONE';
+            layer.stage = 'CONTENT';
+            layer.progress = 1;
+            completedNow++;
+            layer.el.style.opacity = '';
+            layer.el.style.filter = '';
+            layer.el.style.clipPath = '';
+            layer.el.style.removeProperty('--build-opacity');
+            layer.el.classList.remove('layer-unbuilt', 'layer-skeleton', 'layer-building');
+            layer.el.classList.add('layer-done');
+          } else {
+            const boxPhase = 0.28;
+            const contentProgress = Math.max(0, Math.min(1, (p - boxPhase) / (1 - boxPhase)));
+            if (p < boxPhase) {
+              layer.state = 'SKELETON';
+              layer.stage = 'BOX';
+              layer.progress = p / boxPhase;
+              layer.el.style.opacity = '';
+              layer.el.style.filter = '';
+              layer.el.style.clipPath = '';
+              layer.el.style.removeProperty('--build-opacity');
+              layer.el.classList.remove('layer-unbuilt', 'layer-building', 'layer-done');
+              layer.el.classList.add('layer-skeleton');
+            } else {
+              layer.state = 'BUILDING';
+              layer.stage = 'CONTENT';
+              layer.progress = contentProgress;
+              const opacity = Math.min(1, contentProgress * 1.18);
+              layer.el.style.setProperty('--build-opacity', String(opacity));
+              layer.el.style.clipPath = `inset(0 ${100 - contentProgress * 100}% 0 0)`;
+              layer.el.style.filter = contentProgress < 0.85 ? `blur(${(1 - contentProgress) * 1.4}px)` : 'none';
+              layer.el.classList.remove('layer-unbuilt', 'layer-skeleton', 'layer-done');
+              layer.el.classList.add('layer-building');
+            }
           }
-        }
 
-        currentWaveLayers.forEach(l => {
-          if (l.state === 'SKELETON' || l.state === 'BUILDING') {
-            const r = drawLayerWireframe(trailCtx, l);
-            if (r) activeRects.push(r);
+          if (p > 0.02 && inViewport) waveNow = Math.max(waveNow, layer.wave);
+          if (p > 0.02 && p < 0.999 && inViewport) activeLayers.push(layer);
+          if ((layer.state === 'SKELETON' || layer.state === 'BUILDING') && inViewport) {
+            const wire = drawLayerWireframe(trailCtx, layer);
+            if (wire) activeRects.push(wire);
           }
         });
 
+        activeLayers.sort((a, b) => Math.abs(a.progress - 0.52) - Math.abs(b.progress - 0.52));
+        const follow = 1 - Math.exp(-dt * (5 + Math.min(30, velocity * 10)));
         agents.forEach((ag, idx) => {
-          if (!ag.targetLayer || ag.targetLayer.state === 'DONE' || ag.targetLayer.wave !== currentWave) {
-            const nextLayer = currentWaveLayers.find(l => l.state === 'SKELETON');
-            if (nextLayer) {
-              nextLayer.state = 'BUILDING';
-              nextLayer.stage = 'BOX';
-              nextLayer.progress = 0;
-              ag.targetLayer = nextLayer;
-              ag.cursorMode = 'CROSSHAIR';
-            } else {
-              const busyLayer = currentWaveLayers.find(l => l.state === 'BUILDING');
-              ag.targetLayer = busyLayer || null;
-            }
+          const targetLayer = activeLayers.length ? activeLayers[idx % activeLayers.length] : null;
+          let targetX;
+          let targetY;
+          if (targetLayer && targetLayer.screenRect) {
+            const r = targetLayer.screenRect;
+            const spreadX = 0.08 + ((idx * 0.371) % 0.84);
+            const spreadY = 0.12 + ((idx * 0.619) % 0.76);
+            targetX = r.left + r.width * spreadX;
+            targetY = r.top + r.height * spreadY;
+            ag.cursorMode = targetLayer.type === 'text' ? 'IBEAM' : 'CROSSHAIR';
+            ag.targetLayer = targetLayer;
+          } else {
+            const side = idx < 10 ? 0.34 : 0.66;
+            const orbit = t * (0.28 + speedRatio * 0.22) + idx * 0.77;
+            targetX = window.innerWidth * side + Math.cos(orbit) * (34 + (idx % 4) * 13);
+            targetY = window.innerHeight * 0.48 + Math.sin(orbit * 1.2) * (30 + (idx % 3) * 12);
+            ag.cursorMode = 'POINTER';
+            ag.targetLayer = null;
           }
-
-          const layer = ag.targetLayer;
-          if (layer && layer.state === 'BUILDING') {
-            const b = layer.el.getBoundingClientRect();
-            const rate = 0.24 * dt * speedMultiplier;
-            layer.progress += rate;
-
-            ag.history.push({ x: ag.x, y: ag.y });
-            if (ag.history.length > 4) ag.history.shift();
-
-            if (layer.stage === 'BOX') {
-              const p = Math.min(1, layer.progress);
-              const cornerX = b.left + (idx % 2 === 0 ? b.width * p : b.width);
-              const cornerY = b.top + b.height * p;
-              ag.x += (cornerX - ag.x) * 0.25;
-              ag.y += (cornerY - ag.y) * 0.25;
-              ag.cursorMode = p < 0.45 ? 'CROSSHAIR' : 'POINTER';
-
-              if (layer.progress >= 1) {
-                layer.stage = 'CONTENT';
-                layer.progress = 0;
-                layer.el.classList.remove('layer-skeleton', 'layer-unbuilt');
-                layer.el.classList.add('layer-building');
-                playAgentTick(440 + (ag.id * 15), 0.02);
-              }
-            } else if (layer.stage === 'CONTENT') {
-              const p = Math.min(1, layer.progress);
-              if (layer.type === 'text' && !layer.hasChildren && layer.origText) {
-                ag.cursorMode = 'IBEAM';
-                const charCount = Math.max(1, Math.floor(layer.origText.length * p));
-                layer.el.textContent = layer.origText.slice(0, charCount);
-                layer.el.style.filter = p < 0.85 ? `blur(${(1 - p) * 1.8}px)` : 'none';
-                const tx = b.left + Math.min(b.width, (charCount / Math.max(1, layer.origText.length)) * b.width);
-                const ty = b.top + b.height * 0.55;
-                ag.x += (tx - ag.x) * 0.35;
-                ag.y += (ty - ag.y) * 0.35;
-              } else {
-                ag.cursorMode = 'POINTER';
-                layer.el.style.opacity = String(Math.min(1, p * 1.15));
-                const tx = b.left + b.width * (0.2 + 0.75 * ((idx % 3) / 2));
-                const ty = b.top + b.height * (0.25 + 0.65 * p);
-                ag.x += (tx - ag.x) * 0.22;
-                ag.y += (ty - ag.y) * 0.22;
-              }
-
-              if (layer.progress >= 1) {
-                layer.state = 'DONE';
-                layer.el.style.opacity = '';
-                layer.el.style.filter = '';
-                layer.el.classList.remove('layer-building', 'layer-skeleton');
-                layer.el.classList.add('layer-done');
-                if (!layer.hasChildren && layer.origText) {
-                  layer.el.textContent = layer.origText;
-                }
-                completedLayersCount++;
-                playAgentTick(660 + (ag.id * 12), 0.022);
-              }
-            }
-          }
+          ag.history.push({ x: ag.x, y: ag.y });
+          const maxTrail = Math.min(10, 3 + Math.round(speedRatio * 1.5));
+          if (ag.history.length > maxTrail) ag.history.shift();
+          ag.x += (targetX - ag.x) * follow;
+          ag.y += (targetY - ag.y) * follow;
         });
 
         drawFigmaRulers(trailCtx, activeRects);
+        agents.forEach(ag => drawAgentCursorWithTrail(trailCtx, ag));
 
-        agents.forEach(ag => {
-          drawAgentCursorWithTrail(trailCtx, ag);
-        });
-
-        const scaledCompleted = Math.min(304, Math.round((completedLayersCount / Math.max(1, totalBuildLayers)) * 304));
-        const pct = Math.min(100, (completedLayersCount / Math.max(1, totalBuildLayers)) * 100);
-        barStatusLabel.textContent = `20 agents · ${scaledCompleted} / 304 layers`;
+        completedLayersCount = completedNow;
+        currentWave = waveNow;
+        const pct = Math.min(100, (progressTotal / Math.max(1, totalBuildLayers)) * 100);
+        barStatusLabel.textContent = `20 AGENTS · WAVE ${currentWave}/${MAX_WAVE} · ${completedLayersCount}/${totalBuildLayers}`;
         barProgressFill.style.width = `${pct}%`;
+        barSpeedBtn.textContent = velocity < 0.035 ? 'HOLD' : `SCROLL ${Math.max(0.1, speedRatio).toFixed(1)}x`;
+        if (window.scrollY > 24 || pct > 2) barReplayBtn.classList.remove('hidden');
+        else barReplayBtn.classList.add('hidden');
 
-        if (touringAutoScroll && currentWaveLayers.length > 0) {
-          const anchorEl = currentWaveLayers[0].el;
-          const rect = anchorEl.getBoundingClientRect();
-          const targetScrollY = currentWave === 1 ? 0 : window.scrollY + rect.top - window.innerHeight * 0.22;
-          const diff = targetScrollY - window.scrollY;
-          if (Math.abs(diff) > 12) {
-            window.scrollBy(0, diff * 0.06);
-          }
-        }
-
-        if (completedLayersCount >= totalBuildLayers) {
-          finishBuildInstantly();
-        }
+        scrollVelocity *= Math.exp(-dt * 4.8);
+        if (Math.abs(scrollVelocity) < 0.02) scrollVelocity = 0;
       }
 
       pipCtx.fillStyle = '#06070b';
@@ -1593,7 +1554,7 @@
       pipCtx.fillRect(78, 16, 84, 92);
       pipCtx.strokeStyle = '#60a5fa';
       pipCtx.strokeRect(78, 16, 84, 92);
-      agents.slice(0, 10).forEach(ag => {
+      agents.forEach(ag => {
         const mx = (ag.x / Math.max(1, window.innerWidth)) * pipCanvas.width;
         const my = (ag.y / Math.max(1, window.innerHeight)) * pipCanvas.height;
         pipCtx.fillStyle = ag.color;
@@ -1630,6 +1591,15 @@
 
     initBuildLayers();
     initAgents();
+    buildPhase = 'BUILDING';
+    preloader.style.display = 'none';
+    barAgentDots.classList.remove('hidden');
+    barAgentDots.classList.add('flex');
+    barModeBtn.textContent = 'SCROLL TO BUILD';
+    barSpeedBtn.textContent = 'HOLD';
+    barStatusLabel.textContent = '20 AGENTS · READY TO BUILD';
+    barProgressFill.style.width = '0%';
+    pipMinimap.style.opacity = '1';
     requestAnimationFrame(animate);
   </script>
 </body>
