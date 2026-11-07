@@ -1166,6 +1166,7 @@
     let lastScrollAt = performance.now();
     let maxScrollRange = 1;
     let maxObservedScrollY = 0;
+    let galaxyFinishStartedAt = 0;
     let soundEnabled = false;
     let audioCtx = null;
     let buildStartTime = 0;
@@ -1529,6 +1530,7 @@
       openingStartedAt = performance.now();
       currentWave = 1;
       maxObservedScrollY = 0;
+      galaxyFinishStartedAt = 0;
       lastScrollY = 0;
       scrollVelocity = 0;
       trailCanvas.style.display = 'block';
@@ -1596,8 +1598,7 @@
       maxObservedScrollY = Math.max(maxObservedScrollY, nextY);
       lastScrollY = nextY;
       lastScrollAt = now;
-      const finishThreshold = Math.max(0, maxScrollRange - Math.max(12, window.innerHeight * 0.012));
-      if (buildPhase === 'SCROLL' && maxObservedScrollY >= finishThreshold) finishBuildInstantly();
+      // The final galaxy is completed by the animation loop after its agent build handoff.
     }, { passive: true });
 
     // =========================================================================
@@ -2075,12 +2076,22 @@
           if (p > 0.008 && p < 0.999 && rect.bottom > 0 && rect.top < window.innerHeight) activeLayers.push(layer);
         });
 
+        const finishThreshold = Math.max(0, maxScrollRange - Math.max(12, window.innerHeight * 0.012));
+        const finishAtBottom = buildPhase === 'SCROLL' && maxObservedScrollY >= finishThreshold;
+        const finalGalaxyLayer = buildLayers.find(layer => layer.el.id === 'vortex-card') || null;
+        if (finishAtBottom && finalGalaxyLayer && finalGalaxyLayer.progress >= 0.999) {
+          if (!galaxyFinishStartedAt) galaxyFinishStartedAt = now;
+        } else if (!finishAtBottom || (finalGalaxyLayer && finalGalaxyLayer.progress < 0.999)) {
+          galaxyFinishStartedAt = 0;
+        }
+        const galaxyHandoffActive = galaxyFinishStartedAt > 0 && now - galaxyFinishStartedAt < 1100;
+
         activeLayers.sort((a, b) => a.progress - b.progress);
         activeLayers.forEach(layer => drawLayerWorkOverlay(trailCtx, layer));
 
         const follow = 1 - Math.exp(-dt * (20 + Math.min(48, velocity * 24)));
         const responsiveAgentCap = window.innerWidth < 640 ? 6 : window.innerWidth < 1024 ? 12 : 20;
-        const galaxyLayer = activeLayers.find(layer => layer.el.id === 'vortex-card') || null;
+        const galaxyLayer = activeLayers.find(layer => layer.el.id === 'vortex-card') || (galaxyHandoffActive ? finalGalaxyLayer : null);
         const activeAgentCount = galaxyLayer
           ? Math.min(responsiveAgentCap, agents.length)
           : Math.min(responsiveAgentCap, agents.length, activeLayers.length * 3);
@@ -2164,6 +2175,11 @@
           }
         });
 
+        // Keep the finished galaxy in the agents' hands briefly before ending the build.
+        if (buildPhase === 'SCROLL' && galaxyFinishStartedAt && now - galaxyFinishStartedAt >= 1100) {
+          finishBuildInstantly();
+        }
+
         if (buildPhase === 'OPENING' && now - openingStartedAt >= openingTotalDurationMs) {
           openingLayers.forEach(layer => {
             layer.state = 'DONE';
@@ -2222,6 +2238,7 @@
         buildPhase = 'OPENING';
         openingStartedAt = performance.now();
         maxObservedScrollY = 0;
+        galaxyFinishStartedAt = 0;
         lastScrollY = 0;
         initBuildLayers();
         initAgents();
