@@ -76,9 +76,25 @@
       opacity: 1 !important;
       filter: none !important;
     }
+    .build-word {
+      display: inline-block;
+      white-space: nowrap;
+      vertical-align: baseline;
+      max-width: 100%;
+    }
+    @media (max-width: 640px) {
+      [data-build-layer] {
+        overflow-wrap: normal;
+        word-break: normal;
+      }
+      .build-word {
+        max-width: 100%;
+      }
+    }
     .build-char {
+      display: inline;
       opacity: 0;
-      transition: opacity 0.012s linear;
+      transition: opacity 0.035s linear;
     }
     .build-char.is-typed { opacity: 1; }
     .build-char.is-caret::after {
@@ -985,24 +1001,40 @@
       while ((node = walker.nextNode())) {
         const parent = node.parentElement;
         if (!parent || parent.closest('script,style,svg,textarea,input,select,.build-char')) continue;
+        // A nested build layer owns its own typing sequence.
+        if (parent.closest('[data-build-layer]') !== root) continue;
         if (node.nodeValue && node.nodeValue.length) textNodes.push(node);
       }
 
-      root.querySelectorAll('.build-char').forEach(char => char.classList.remove('is-typed', 'is-caret'));
+      root.querySelectorAll('.build-char').forEach(char => {
+        if (char.closest('[data-build-layer]') === root) char.classList.remove('is-typed', 'is-caret');
+      });
       let charIndex = 0;
       textNodes.forEach(textNode => {
         const value = textNode.nodeValue || '';
         const fragment = document.createDocumentFragment();
-        for (let i = 0; i < value.length; i++) {
-          const char = document.createElement('span');
-          char.className = 'build-char';
-          char.dataset.buildChar = String(charIndex++);
-          char.textContent = value[i];
-          fragment.appendChild(char);
-        }
+        // Preserve spaces as ordinary text nodes; keep each word together to protect line layout.
+        value.split(/(\\s+)/).forEach(part => {
+          if (!part) return;
+          if (/^\\s+$/.test(part)) {
+            fragment.appendChild(document.createTextNode(part));
+            return;
+          }
+          const word = document.createElement('span');
+          word.className = 'build-word';
+          word.setAttribute('aria-hidden', 'true');
+          for (let i = 0; i < part.length; i++) {
+            const char = document.createElement('span');
+            char.className = 'build-char';
+            char.dataset.buildChar = String(charIndex++);
+            char.textContent = part[i];
+            word.appendChild(char);
+          }
+          fragment.appendChild(word);
+        });
         textNode.parentNode.replaceChild(fragment, textNode);
       });
-      return Array.from(root.querySelectorAll('.build-char'));
+      return Array.from(root.querySelectorAll('.build-char')).filter(char => char.closest('[data-build-layer]') === root);
     }
 
     function updateTextTyping(layer, progress) {
@@ -1183,21 +1215,24 @@
         return Math.abs(ra.top - rb.top) > 18 ? ra.top - rb.top : ra.left - rb.left;
       });
 
-      const openingBudgetMs = 9000;
-      const openingWeights = openingLayers.map(layer => {
-        if (layer.type === 'text') return Math.max(0.7, Math.min(5.5, (layer.textChars || []).length / 24));
-        if (layer.type === 'media') return 1.8;
-        return 1.25;
-      });
-      const totalOpeningWeight = Math.max(1, openingWeights.reduce((sum, weight) => sum + weight, 0));
-      let openingCursor = 0;
+      const openingSlotMs = openingLayers.length > 1
+        ? Math.min(145, 6200 / (openingLayers.length - 1))
+        : 0;
       openingLayers.forEach((layer, index) => {
         layer.isOpening = true;
-        layer.openingDelay = openingCursor;
-        layer.openingDuration = openingBudgetMs * openingWeights[index] / totalOpeningWeight;
-        openingCursor += layer.openingDuration;
+        layer.openingDelay = index * openingSlotMs;
+        if (layer.type === 'text') {
+          layer.openingDuration = Math.max(950, (layer.textChars || []).length / 20 * 1000);
+        } else if (layer.type === 'media') {
+          layer.openingDuration = 1900;
+        } else {
+          layer.openingDuration = 1350;
+        }
       });
-      openingTotalDurationMs = openingCursor;
+      openingTotalDurationMs = openingLayers.reduce(
+        (latest, layer) => Math.max(latest, layer.openingDelay + layer.openingDuration),
+        0
+      );
     }
 
     function cacheScrollTimeline() {
@@ -1577,6 +1612,124 @@
     // =========================================================================
     const vortexCanvas = document.getElementById('vortex-canvas');
     const vortexCtx = vortexCanvas.getContext('2d');
+    let vortexWidth = 380;
+    let vortexHeight = 256;
+    let vortexDpr = 1;
+
+    function resizeVortexCanvas() {
+      const rect = vortexCanvas.getBoundingClientRect();
+      if (rect.width < 8 || rect.height < 8) return;
+      vortexDpr = Math.min(2, window.devicePixelRatio || 1);
+      vortexWidth = rect.width;
+      vortexHeight = rect.height;
+      vortexCanvas.width = Math.round(vortexWidth * vortexDpr);
+      vortexCanvas.height = Math.round(vortexHeight * vortexDpr);
+      vortexCtx.setTransform(vortexDpr, 0, 0, vortexDpr, 0, 0);
+    }
+
+    function drawVortexAnimation(ctx, width, height, time) {
+      if (!width || !height) return;
+      ctx.clearRect(0, 0, width, height);
+      const cx = width * 0.62;
+      const cy = height * 0.46;
+      const radius = Math.min(width, height) * 0.31;
+      const pulse = 0.82 + Math.sin(time * 2.2) * 0.12;
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.globalCompositeOperation = 'screen';
+
+      // Three rotating elliptical circuit orbits.
+      for (let ring = 0; ring < 3; ring++) {
+        ctx.save();
+        ctx.rotate(time * (ring % 2 ? -0.2 : 0.16) + ring * 0.72);
+        ctx.strokeStyle = ring === 1 ? '#f87171' : '#38bdf8';
+        ctx.globalAlpha = 0.2 + ring * 0.055;
+        ctx.lineWidth = ring === 0 ? 1.05 : 0.7;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, radius * (1 + ring * 0.28), radius * (0.42 + ring * 0.16), 0, 0.22, Math.PI * 1.78);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Interconnected rotating agent nodes.
+      const nodes = [];
+      const count = 18;
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 * i) / count + time * (i % 2 ? -0.12 : 0.12);
+        const orbit = radius * (0.54 + (i % 3) * 0.2);
+        nodes.push({
+          x: Math.cos(angle) * orbit * 1.32,
+          y: Math.sin(angle) * orbit * 0.78,
+          angle
+        });
+      }
+
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 0.65;
+      ctx.globalAlpha = 0.2;
+      ctx.beginPath();
+      nodes.forEach((node, i) => {
+        const next = nodes[(i + 3) % count];
+        ctx.moveTo(node.x, node.y);
+        ctx.lineTo(next.x, next.y);
+      });
+      ctx.stroke();
+
+      nodes.forEach((node, i) => {
+        const active = (i + Math.floor(time * 2.4)) % 6 === 0;
+        ctx.save();
+        ctx.translate(node.x, node.y);
+        ctx.rotate(node.angle);
+        ctx.strokeStyle = active ? '#f87171' : '#67e8f9';
+        ctx.fillStyle = active ? 'rgba(248,113,113,.22)' : 'rgba(103,232,249,.15)';
+        ctx.globalAlpha = active ? 0.95 : 0.72;
+        ctx.shadowColor = active ? '#f87171' : '#38bdf8';
+        ctx.shadowBlur = active ? 9 : 4;
+        ctx.lineWidth = 0.9;
+        ctx.beginPath();
+        ctx.moveTo(0, -4.5);
+        ctx.lineTo(3.8, -1.2);
+        ctx.lineTo(2.8, 3.2);
+        ctx.lineTo(-2.8, 3.2);
+        ctx.lineTo(-3.8, -1.2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      });
+
+      // Central rotating hex-core.
+      ctx.rotate(-time * 0.42);
+      ctx.globalAlpha = 0.9;
+      ctx.strokeStyle = '#f87171';
+      ctx.shadowColor = '#f87171';
+      ctx.shadowBlur = 10;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const angle = (Math.PI / 3) * i - Math.PI / 6;
+        const x = Math.cos(angle) * 13 * pulse;
+        const y = Math.sin(angle) * 13 * pulse;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(248,113,113,.13)';
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#e0f2fe';
+      ctx.fillRect(-2, -2, 4, 4);
+      ctx.restore();
+    }
+
+    window.addEventListener('resize', resizeVortexCanvas);
+    if (window.ResizeObserver) {
+      const vortexObserver = new ResizeObserver(resizeVortexCanvas);
+      vortexObserver.observe(vortexCanvas.parentElement);
+    }
+    requestAnimationFrame(resizeVortexCanvas);
     const hudXY = document.getElementById('hud-xy');
     let lastFrameTime = performance.now();
 
@@ -1613,8 +1766,17 @@
           const targetProgress = buildPhase === 'OPENING'
             ? openingProgress
             : (layer.isOpening ? 1 : viewportProgress);
-          // Keep completed/revealed content stable when the visitor scrolls upward.
-          const p = Math.max(layer.progress || 0, targetProgress);
+          const previousProgress = layer.progress || 0;
+          let p;
+          if (buildPhase === 'OPENING') {
+            p = Math.max(previousProgress, targetProgress);
+          } else {
+            // Text is limited to 12 characters/sec; media and vector layers also get a deliberate build time.
+            const textRate = 12 / Math.max(1, (layer.textChars || []).length);
+            const buildRate = layer.type === 'text' ? textRate : layer.type === 'media' ? 0.58 : 0.72;
+            const maxStep = buildRate * dt;
+            p = Math.max(previousProgress, Math.min(targetProgress, previousProgress + maxStep));
+          }
           layer.progress = p;
           progressTotal += p;
           const inViewport = rect.bottom > -220 && rect.top < window.innerHeight + 220 && rect.width > 3;
@@ -1671,7 +1833,8 @@
         activeLayers.forEach(layer => drawLayerWorkOverlay(trailCtx, layer));
 
         const follow = 1 - Math.exp(-dt * (8 + Math.min(18, velocity * 3.2)));
-        const activeAgentCount = Math.min(agents.length, activeLayers.length * 4);
+        const responsiveAgentCap = window.innerWidth < 640 ? 6 : window.innerWidth < 1024 ? 12 : 20;
+        const activeAgentCount = Math.min(responsiveAgentCap, agents.length, activeLayers.length * 3);
         agents.forEach((ag, idx) => {
           const targetLayer = idx < activeAgentCount && activeLayers.length
             ? activeLayers[idx % activeLayers.length]
@@ -1770,20 +1933,7 @@
 
       drawVfxScene();
 
-      vortexCtx.clearRect(0, 0, vortexCanvas.width, vortexCanvas.height);
-      if (buildPhase !== 'COMPLETED') agents.forEach((ag, idx) => {
-        ag.orbitAngle += 0.022 + (idx % 4) * 0.006;
-        const rad = 32 + (idx % 5) * 18 + Math.sin(t * 2 + idx) * 8;
-        const vx = vortexCanvas.width * 0.62 + Math.cos(ag.orbitAngle) * rad;
-        const vy = vortexCanvas.height * 0.42 + Math.sin(ag.orbitAngle) * rad;
-        drawAgentCursorWithTrail(vortexCtx, {
-          x: vx,
-          y: vy,
-          color: ag.color,
-          cursorMode: 'POINTER',
-          history: []
-        });
-      });
+      drawVortexAnimation(vortexCtx, vortexWidth, vortexHeight, t);
 
       if (modalOpen) {
         modalCtx.fillStyle = '#07080d';
