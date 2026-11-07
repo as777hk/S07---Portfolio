@@ -9,6 +9,11 @@ export const metadata: Metadata = {
   },
   description: "Explore SAM's cybersecurity portfolio through a cinematic, interactive 20-agent live website build, security labs, and technical explorations.",
   applicationName: "SAM",
+  icons: {
+    icon: [{ url: "/sam-mark.svg?v=3", type: "image/svg+xml" }],
+    shortcut: [{ url: "/sam-mark.svg?v=3", type: "image/svg+xml" }],
+    apple: [{ url: "/sam-mark.svg?v=3", type: "image/svg+xml" }]
+  },
   openGraph: {
     title: "SAM | Cybersecurity & Penetration Tester — 20-Agent Live Builder",
     description: "A cybersecurity portfolio presented through an interactive 20-agent website build.",
