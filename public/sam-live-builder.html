@@ -47,7 +47,7 @@
     }
     /* Layer states during live construction */
     [data-build-layer] {
-      transition: opacity 0.08s linear, filter 0.08s linear, clip-path 0.06s linear;
+      transition: opacity 0.22s cubic-bezier(0.22, 1, 0.36, 1), filter 0.26s ease-out, clip-path 0.22s cubic-bezier(0.22, 1, 0.36, 1);
     }
     body.build-mode [data-build-layer].layer-unbuilt {
       opacity: 0 !important;
@@ -80,7 +80,7 @@
     }
   </style>
 </head>
-<body class="build-mode selection:bg-red-600 selection:text-white">
+<body class="selection:bg-red-600 selection:text-white">
 
   <!-- ===================================================================== -->
   <!-- Live scroll builder: no autoplay intro or timed playback -->
@@ -1407,7 +1407,7 @@
 
       trailCtx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
 
-      if (buildPhase === 'BUILDING') {
+      if (buildPhase === 'OPENING' || buildPhase === 'SCROLL') {
         const activeLayers = [];
         let progressTotal = 0;
         let completedNow = 0;
@@ -1454,7 +1454,7 @@
             layer.state = 'BUILDING';
             layer.stage = 'CONTENT';
             layer.progress = p;
-            const opacity = Math.min(1, 0.08 + p * 1.02);
+            const opacity = Math.min(1, 0.18 + p * 0.92);
             layer.el.style.setProperty('--build-opacity', String(opacity));
             layer.el.style.clipPath = `inset(0 ${100 - p * 100}% 0 0)`;
             layer.el.style.filter = p < 0.82 ? `blur(${(1 - p) * 1.6}px)` : 'none';
@@ -1469,7 +1469,7 @@
         });
 
         activeLayers.sort((a, b) => Math.abs(a.progress - 0.52) - Math.abs(b.progress - 0.52));
-        const follow = 1 - Math.exp(-dt * (5 + Math.min(30, velocity * 10)));
+        const follow = 1 - Math.exp(-dt * (7 + Math.min(14, velocity * 3.2)));
         agents.forEach((ag, idx) => {
           const targetLayer = activeLayers.length ? activeLayers[idx % activeLayers.length] : null;
           let targetX;
@@ -1491,7 +1491,7 @@
             ag.targetLayer = null;
           }
           ag.history.push({ x: ag.x, y: ag.y });
-          const maxTrail = Math.min(10, 3 + Math.round(speedRatio * 1.5));
+          const maxTrail = Math.min(7, 2 + Math.round(speedRatio * 1.15));
           if (ag.history.length > maxTrail) ag.history.shift();
           const dx = targetX - ag.x;
           const dy = targetY - ag.y;
@@ -1571,6 +1571,7 @@
       }
     });
 
+    document.body.classList.add('build-mode');
     initBuildLayers();
     initAgents();
     buildPhase = 'OPENING';
