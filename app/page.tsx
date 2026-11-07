@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowDown, ArrowUpRight, Fingerprint, Radar, Shield, ShieldAlert, Workflow, Binary, ScanSearch, AudioWaveform, GitBranch, Zap } from "lucide-react";
 import Reveal from "@/components/reveal";
+import SwarmRebuild from "@/components/swarm-rebuild";
 
 const projects = [
   { id: "01", tag: "SECURITY STUDY / WEB", title: "ATTACK SURFACE", text: "A visual exploration of routes, inputs, assets and trust boundaries across a web application.", type: "surface", chips: ["WEB SECURITY", "RECON", "THREAT MAPPING"] },
@@ -71,6 +72,8 @@ export default function HomePage() {
       </div>
       <div className="hero-baseline"><span>SECURITY FIRST</span><i/><span>CREATIVE BY DESIGN</span></div>
     </div></section>
+
+    <SwarmRebuild />
 
     <section className="section manifesto-section" id="security"><div className="wrap">
       <div className="section-meta"><span>02 / THE MINDSET</span><span>THINK LIKE AN ATTACKER. BUILD LIKE A DEFENDER.</span></div>
