@@ -227,7 +227,7 @@
     @media (prefers-reduced-motion: reduce) {
       #hero-portrait-card::before { animation: none; }
       .security-brand-card, .tool-logo-chip { transition: none; }
-      #vortex-card .galaxy-real-photo { animation: none; transform: none; }
+      #vortex-card .galaxy-real-photo { animation: none; transform: scale(1.95); }
     }
 
     /* The final galaxy is a real Hubble image, revealed as the last build layer. */
@@ -243,15 +243,15 @@
       clip-path: circle(0% at 62% 48%);
       filter: saturate(1.04) contrast(1.06) brightness(.78);
       pointer-events: none;
-      transform: scale(1.24) rotate(0deg);
+      transform: scale(1.95) rotate(0deg);
       transform-origin: 50% 50%;
       animation: milky-way-live-rotation 64s linear infinite;
       animation-play-state: paused;
       will-change: clip-path, opacity, transform;
     }
     @keyframes milky-way-live-rotation {
-      from { transform: scale(1.24) rotate(0deg); }
-      to { transform: scale(1.24) rotate(360deg); }
+      from { transform: scale(1.95) rotate(0deg); }
+      to { transform: scale(1.95) rotate(360deg); }
     }
     #vortex-card.layer-building .galaxy-real-photo,
     #vortex-card.layer-done .galaxy-real-photo {
