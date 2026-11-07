@@ -49,7 +49,10 @@
     }
     /* Keep the hero character in its existing slot; add a subtle drifting smoke halo. */
     #hero-portrait-card {
-      transform: translateY(72px);
+      /* On desktop, move the figure clear below the large PORTFOLIO word.
+         Reserve matching layout space so it never overlaps the next section. */
+      transform: translateY(clamp(190px, 15vw, 235px));
+      margin-bottom: clamp(118px, 10vw, 163px);
       isolation: isolate;
       overflow: visible;
     }
@@ -187,7 +190,8 @@
 
     @media (max-width: 1023px) {
       #hero-portrait-card {
-        transform: translateY(48px);
+        transform: translateY(0);
+        margin-bottom: 0;
       }
       .security-brand-card { min-height: 106px; }
       .security-brand-logo-panel { width: 120px; }
@@ -457,7 +461,7 @@
           <!-- Center Column: Photorealistic Transparent Cutout Portrait Over PORTFOLIO -->
           <div class="lg:col-span-4 flex justify-center">
             <div id="hero-portrait-card" data-build-layer data-wave="1" data-build-type="media" class="relative w-72 sm:w-[340px] h-[380px] sm:h-[430px] flex items-end justify-center">
-              <img src="/sam-cyber-hero.jpg" alt="SAM — tall hooded anime cyber-operator, face hidden in shadow with drifting smoke" class="hero-portrait-art" loading="eager" decoding="async" />
+              <img src="https://photoshop-api.adobe.io/v2/short-url/urn:aaid:ps:US:67f9f42c-4b57-4a81-af20-05481f250fc6" alt="SAM — hooded cyber operative with an isolated transparent silhouette" class="hero-portrait-art" loading="eager" decoding="async" />
             </div>
           </div>
 
