@@ -1978,7 +1978,7 @@
           } else {
             // No fixed per-layer speed cap: the scroll timeline drives progress.
             // Velocity only controls how quickly the rendered progress catches up smoothly.
-            const catchUp = 1 - Math.exp(-dt * (18 + Math.min(26, velocity * 18)));
+            const catchUp = 1 - Math.exp(-dt * (14 + Math.min(20, velocity * 14)));
             p = Math.max(previousProgress, previousProgress + (targetProgress - previousProgress) * catchUp);
           }
           layer.progress = p;
