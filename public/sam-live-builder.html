@@ -1515,6 +1515,8 @@
           });
           buildPhase = 'SCROLL';
           maxObservedScrollY = Math.max(maxObservedScrollY, window.scrollY);
+          const bottomThreshold = Math.max(0, maxScrollRange - Math.max(12, window.innerHeight * 0.012));
+          if (maxObservedScrollY >= bottomThreshold) finishBuildInstantly();
         }
 
         completedLayersCount = completedNow;
