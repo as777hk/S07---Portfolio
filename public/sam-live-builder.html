@@ -58,47 +58,44 @@
       white-space: nowrap;
       pointer-events: none;
     }
-    /* The vertical Shorts frame stays in the original center slot beneath PORTFOLIO. */
-    #hero-portrait-card {
-      transform: translateY(clamp(190px, 15vw, 235px));
-      margin-bottom: clamp(118px, 10vw, 163px);
-      isolation: isolate;
-      overflow: visible;
-    }
-    #hero-portrait-card::before {
-      content: "";
+    /* The uploaded square video fills the complete home opening section. */
+    #hero .hero-video-backdrop {
       position: absolute;
+      inset: 0;
       z-index: 0;
-      inset: 4% -12% 0;
-      pointer-events: none;
-      background:
-        radial-gradient(ellipse at 50% 35%, rgba(14,165,233,.18), transparent 62%),
-        radial-gradient(ellipse at 50% 78%, rgba(16,185,129,.10), transparent 66%);
-      opacity: .8;
-    }
-    #hero-portrait-card::after { display: none; }
-    #hero-portrait-card .hero-video-frame {
-      position: relative;
-      z-index: 2;
-      width: 100%;
-      height: 100%;
       overflow: hidden;
-      border: 1px solid rgba(56,189,248,.3);
-      border-radius: 12px;
-      background: #03080b url("https://i.ytimg.com/vi/b1iUs5oj3AU/hqdefault.jpg") center / cover no-repeat;
-      box-shadow: inset 0 0 24px rgba(0,0,0,.38), 0 0 22px rgba(8,145,178,.10);
+      background: #02070b;
+      pointer-events: none;
     }
-    #hero-portrait-card .hero-video-frame iframe {
+    #hero .hero-video-backdrop video {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
-      border: 0;
       display: block;
-      background: transparent;
+      object-fit: cover;
+      object-position: center 48%;
+      filter: brightness(.62) saturate(1.18) contrast(1.06);
     }
+    #hero .hero-video-shade {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(2,7,12,.78) 0%, rgba(2,7,12,.24) 48%, rgba(2,7,12,.76) 100%),
+        linear-gradient(180deg, rgba(2,7,12,.42) 0%, rgba(2,7,12,.08) 42%, rgba(2,7,12,.82) 100%);
+    }
+    #hero .hero-content-shell { min-height: calc(100svh - 56px); }
     @media (max-width: 1023px) {
-      #hero-portrait-card { transform: translateY(0); margin-bottom: 0; }
+      #hero .hero-video-backdrop video { object-position: center 46%; }
+      #hero .hero-video-shade {
+        background:
+          linear-gradient(180deg, rgba(2,7,12,.5), rgba(2,7,12,.22) 40%, rgba(2,7,12,.82)),
+          linear-gradient(90deg, rgba(2,7,12,.28), transparent 50%, rgba(2,7,12,.28));
+      }
+    }
+    @media (max-width: 640px) {
+      #hero .hero-video-backdrop video { object-position: center 45%; }
+      #hero .hero-content-shell { min-height: calc(100svh - 56px); }
     }
 
     .security-brand-card {
@@ -477,7 +474,14 @@
     <!-- =================================================================== -->
     <!-- WAVE 1: CYBERSECURITY HERO SECTION                                  -->
     <!-- =================================================================== -->
-    <section id="hero" class="relative min-h-[88vh] max-w-7xl mx-auto pt-5 pb-14 px-4 sm:px-6 flex flex-col justify-between border-b border-zinc-900">
+    <section id="hero" class="relative w-full min-h-[calc(100svh-56px)] isolate overflow-hidden border-b border-zinc-900">
+      <div class="hero-video-backdrop" aria-hidden="true">
+        <video id="hero-background-video" autoplay muted loop playsinline webkit-playsinline preload="auto" poster="https://at.adobe.com/bhDeReyGLXh2zrlC" disablepictureinpicture>
+          <source src="https://at.adobe.com/rmeyETRICNVuj2wM" type="video/mp4" />
+        </video>
+        <div class="hero-video-shade"></div>
+      </div>
+      <div class="hero-content-shell relative z-10 min-h-[calc(100svh-56px)] max-w-7xl mx-auto pt-5 pb-14 px-4 sm:px-6 flex flex-col justify-between">
       <!-- Top Micro Header -->
       <div class="flex items-center justify-between text-[10px] font-mono uppercase tracking-widest text-zinc-400">
         <div data-build-layer data-wave="1" data-build-type="text" class="space-y-0.5">
@@ -524,20 +528,8 @@
             </div>
           </div>
 
-          <!-- Center Column: Photorealistic Transparent Cutout Portrait Over PORTFOLIO -->
-          <div class="lg:col-span-4 flex justify-center">
-            <div id="hero-portrait-card" data-build-layer data-wave="1" data-build-type="media" class="relative w-[216px] sm:w-[242px] h-[384px] sm:h-[430px] flex items-end justify-center">
-              <div class="hero-video-frame">
-                <iframe
-                  src="https://www.youtube-nocookie.com/embed/b1iUs5oj3AU?autoplay=1&amp;mute=1&amp;loop=1&amp;playlist=b1iUs5oj3AU&amp;controls=0&amp;rel=0&amp;modestbranding=1&amp;playsinline=1&amp;iv_load_policy=3&amp;vq=medium"
-                  title="SAM — live cybersecurity visual"
-                  allow="autoplay; encrypted-media; picture-in-picture"
-                  referrerpolicy="strict-origin-when-cross-origin"
-                  loading="eager"
-                ></iframe>
-              </div>
-            </div>
-          </div>
+          <!-- The cinematic video fills this opening section behind the content. -->
+          <div class="hidden lg:block lg:col-span-4" aria-hidden="true"></div>
 
           <!-- Right Column: Cybersecurity Stats Stack -->
           <div class="lg:col-span-4 flex flex-col items-start lg:items-end space-y-3.5 pb-2">
@@ -587,6 +579,7 @@
         <div data-build-layer data-wave="1" data-build-type="text" class="font-mono text-[10px] uppercase tracking-widest text-zinc-500 hidden sm:block">
           OFFENSIVE &amp; DEFENSIVE OPS · 2022–2026
         </div>
+      </div>
       </div>
     </section>
 
