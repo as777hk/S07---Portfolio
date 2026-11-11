@@ -219,10 +219,6 @@
     }
 
     @media (max-width: 1023px) {
-      #hero-portrait-card {
-        transform: translateY(0);
-        margin-bottom: 0;
-      }
       .security-brand-card { min-height: 106px; }
       .security-brand-logo-panel { width: 120px; }
     }
@@ -230,8 +226,8 @@
       #cyber-atmosphere-canvas { opacity: .58; }
     }
     @media (prefers-reduced-motion: reduce) {
-      #hero-portrait-card::before { animation: none; }
       .security-brand-card, .tool-logo-chip { transition: none; }
+      #hero-background-video { animation: none; }
       #vortex-card .galaxy-real-photo { animation: none; transform: scale(1.95); }
     }
 
@@ -2415,7 +2411,7 @@
           // The SCROLL phase must remain active so the galaxy agents can finish their handoff.
         }
 
-        completedLayersCount = buildLayers.reduce((count, layer) => count + (layer.state === 'DONE' ? 1 : 0), 0);
+        completedLayersCount = completedNow;
         currentWave = waveNow;
         const pct = Math.min(100, (progressTotal / Math.max(1, totalBuildLayers)) * 100);
         if (now - lastHudUpdateAt >= 90 || completedNow === totalBuildLayers) {
