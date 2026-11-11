@@ -88,8 +88,8 @@
       height: 100%;
       object-fit: contain;
       object-position: center bottom;
-      mix-blend-mode: lighten;
-      filter: brightness(1.13) contrast(1.08) drop-shadow(0 22px 38px rgba(0,0,0,.96));
+      mix-blend-mode: normal;
+      filter: none;
     }
     @keyframes portrait-smoke-drift {
       0% { transform: translate3d(-4px, 5px, 0) scale(.98); opacity: .62; }
@@ -518,7 +518,7 @@
           <!-- Center Column: Photorealistic Transparent Cutout Portrait Over PORTFOLIO -->
           <div class="lg:col-span-4 flex justify-center">
             <div id="hero-portrait-card" data-build-layer data-wave="1" data-build-type="media" class="relative w-72 sm:w-[340px] h-[380px] sm:h-[430px] flex items-end justify-center">
-              <img src="https://photoshop-api.adobe.io/v2/short-url/urn:aaid:ps:US:67f9f42c-4b57-4a81-af20-05481f250fc6" alt="SAM — hooded cyber operative with an isolated transparent silhouette" class="hero-portrait-art" loading="eager" decoding="async" />
+              <img src="https://at.adobe.com/5PqhGYIWkjdW0B8f" alt="SAM — shadow hunter surrounded by blue awakened energy in a rain-soaked scene" class="hero-portrait-art" loading="eager" decoding="async" fetchpriority="high" />
             </div>
           </div>
 
@@ -1375,22 +1375,26 @@
 
       // Larger Photoshop-style transform handles and vector anchor points.
       const handle = 6;
-      const points = [
-        [rect.left, rect.top], [rect.left + rect.width / 2, rect.top], [rect.right, rect.top],
-        [rect.right, rect.top + rect.height / 2], [rect.right, rect.bottom],
-        [rect.left + rect.width / 2, rect.bottom], [rect.left, rect.bottom],
-        [rect.left, rect.top + rect.height / 2]
-      ];
+      const half = handle / 2;
+      const midX = rect.left + rect.width / 2;
+      const midY = rect.top + rect.height / 2;
       ctx.globalAlpha = 0.98;
-      points.forEach(([x, y]) => {
-        ctx.fillStyle = '#06131d';
-        ctx.fillRect(x - handle / 2, y - handle / 2, handle, handle);
-        ctx.strokeStyle = color;
-        ctx.shadowColor = color;
-        ctx.shadowBlur = 6;
-        ctx.lineWidth = 1.25;
-        ctx.strokeRect(x - handle / 2, y - handle / 2, handle, handle);
-      });
+      ctx.beginPath();
+      ctx.rect(rect.left - half, rect.top - half, handle, handle);
+      ctx.rect(midX - half, rect.top - half, handle, handle);
+      ctx.rect(rect.right - half, rect.top - half, handle, handle);
+      ctx.rect(rect.right - half, midY - half, handle, handle);
+      ctx.rect(rect.right - half, rect.bottom - half, handle, handle);
+      ctx.rect(midX - half, rect.bottom - half, handle, handle);
+      ctx.rect(rect.left - half, rect.bottom - half, handle, handle);
+      ctx.rect(rect.left - half, midY - half, handle, handle);
+      ctx.fillStyle = '#06131d';
+      ctx.fill();
+      ctx.strokeStyle = color;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 3;
+      ctx.lineWidth = 1.15;
+      ctx.stroke();
 
       // A visible progress rail and scan head show the active construction point.
       if (rect.width > 22 && rect.height > 12) {
@@ -1622,7 +1626,7 @@
     // =========================================================================
     function drawAgentCursorWithTrail(ctx, ag) {
       const color = ag.color || '#38bdf8';
-      const history = Array.isArray(ag.history) ? ag.history.slice(-4) : [];
+      const history = Array.isArray(ag.history) ? ag.history : [];
 
       // A short, restrained signal trail makes the cursor feel like a moving build tool.
       if (history.length > 1) {
@@ -1714,7 +1718,10 @@
       ctx.shadowBlur = 0;
       ctx.globalAlpha = 0.62;
       ctx.fillStyle = ag.color;
-      for (let x = r.left + 10; x < frontX - 7; x += 18) {
+      const particleSpacing = 26;
+      const particleCount = Math.min(6, Math.floor(Math.max(0, frontX - r.left - 12) / particleSpacing));
+      for (let i = 0; i < particleCount; i++) {
+        const x = frontX - 12 - i * particleSpacing;
         ctx.fillRect(x, y - 0.7, 1.4, 1.4);
       }
       ctx.restore();
@@ -1737,6 +1744,7 @@
       const pct = Math.round(vfxSplit * 100);
       vfxRange.value = String(pct);
       vfxSplitReadout.textContent = `SPLIT: ${pct}%`;
+      drawVfxScene();
     }
     vfxContainer.addEventListener('mousemove', (e) => {
       if (e.buttons === 1) updateVfxSplit(e.clientX);
@@ -1745,6 +1753,7 @@
     vfxRange.addEventListener('input', (e) => {
       vfxSplit = Number(e.target.value) / 100;
       vfxSplitReadout.textContent = `SPLIT: ${e.target.value}%`;
+      drawVfxScene();
     });
 
     function drawVfxScene() {
@@ -1950,7 +1959,6 @@
     // Avoid animating large canvases while their sections are off-screen.
     let vfxSceneVisible = false;
     let galaxyCanvasVisible = false;
-    let lastVfxDrawAt = 0;
     let lastGalaxyDrawAt = 0;
     let lastModalDrawAt = 0;
     if ('IntersectionObserver' in window) {
@@ -1959,7 +1967,10 @@
           if (entry.target === vortexCanvas || entry.target === vortexCanvas.parentElement) {
             galaxyCanvasVisible = entry.isIntersecting;
           }
-          if (entry.target === vfxContainer) vfxSceneVisible = entry.isIntersecting;
+          if (entry.target === vfxContainer) {
+            vfxSceneVisible = entry.isIntersecting;
+            if (entry.isIntersecting) drawVfxScene();
+          }
         });
       }, { rootMargin: '140px 0px' });
       canvasVisibilityObserver.observe(vortexCanvas);
@@ -1971,12 +1982,20 @@
 
     const hudXY = document.getElementById('hud-xy');
     let lastFrameTime = performance.now();
+    let lastBuildFrameAt = 0;
+    let lastHudUpdateAt = 0;
 
     window.addEventListener('mousemove', (e) => {
       if (hudXY) hudXY.textContent = `X: ${e.clientX} Y: ${e.clientY}`;
     });
 
     function animate(now) {
+      const frameBuildActive = buildPhase === 'OPENING' || buildPhase === 'SCROLL';
+      if (frameBuildActive && now - lastBuildFrameAt < (1000 / 45)) {
+        requestAnimationFrame(animate);
+        return;
+      }
+      if (frameBuildActive) lastBuildFrameAt = now;
       const dt = Math.min(0.05, (now - lastFrameTime) * 0.001);
       lastFrameTime = now;
       const t = now * 0.001;
@@ -2247,18 +2266,20 @@
         completedLayersCount = completedNow;
         currentWave = waveNow;
         const pct = Math.min(100, (progressTotal / Math.max(1, totalBuildLayers)) * 100);
-        barStatusLabel.textContent = `20 AGENTS · WAVE ${currentWave}/${MAX_WAVE} · ${completedLayersCount}/${totalBuildLayers}`;
-        barProgressFill.style.width = `${pct}%`;
-        barSpeedBtn.textContent = velocity < 0.035 ? 'HOLD' : `SCROLL ${Math.max(0.1, speedRatio).toFixed(1)}x`;
+        if (now - lastHudUpdateAt >= 90 || completedNow === totalBuildLayers) {
+          const statusText = `20 AGENTS · WAVE ${currentWave}/${MAX_WAVE} · ${completedLayersCount}/${totalBuildLayers}`;
+          const speedText = velocity < 0.035 ? 'HOLD' : `SCROLL ${Math.max(0.1, speedRatio).toFixed(1)}x`;
+          if (barStatusLabel.textContent !== statusText) barStatusLabel.textContent = statusText;
+          const progressText = `${pct}%`;
+          if (barProgressFill.style.width !== progressText) barProgressFill.style.width = progressText;
+          if (barSpeedBtn.textContent !== speedText) barSpeedBtn.textContent = speedText;
+          lastHudUpdateAt = now;
+        }
         scrollVelocity *= Math.exp(-dt * 4.8);
         if (Math.abs(scrollVelocity) < 0.02) scrollVelocity = 0;
       }
 
       if (document.visibilityState === 'visible') {
-        if (vfxSceneVisible && now - lastVfxDrawAt >= 50) {
-          drawVfxScene();
-          lastVfxDrawAt = now;
-        }
         if (galaxyCanvasVisible && now - lastGalaxyDrawAt >= 42) {
           drawVortexAnimation(vortexCtx, vortexWidth, vortexHeight, t);
           lastGalaxyDrawAt = now;
