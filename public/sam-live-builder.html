@@ -2188,9 +2188,12 @@
           const viewportProgress = Math.max(0, Math.min(1,
             (revealStartLine - rect.top) / (revealStartLine - revealFinishLine)
           ));
+          const hasPassedLayer = rect.bottom <= window.innerHeight * 0.14;
+          const reachedDocumentEnd = buildPhase === 'SCROLL' && maxObservedScrollY >= maxScrollRange - 12;
+          const forceLayerComplete = buildPhase === 'SCROLL' && (hasPassedLayer || reachedDocumentEnd);
           const targetProgress = buildPhase === 'OPENING'
             ? openingProgress
-            : (layer.isOpening ? 1 : viewportProgress);
+            : (forceLayerComplete ? 1 : (layer.isOpening ? 1 : viewportProgress));
           const previousProgress = layer.progress || 0;
           let p;
           if (buildPhase === 'OPENING') {
@@ -2198,10 +2201,11 @@
           } else {
             // No fixed per-layer speed cap: the scroll timeline drives progress.
             // Velocity only controls how quickly the rendered progress catches up smoothly.
-            const layerSpeed = layer.type === 'text' ? 9 : 12; // quicker writing and visual reveal catch-up
-            const velocityBoost = Math.min(layerSpeed * 3.4, velocity * layerSpeed * 2.65);
+            const layerSpeed = layer.type === 'text' ? 16 : 19;
+            const velocityBoost = Math.min(layerSpeed * 4, velocity * layerSpeed * 2.8);
             const catchUp = 1 - Math.exp(-dt * (layerSpeed + velocityBoost));
             p = Math.max(previousProgress, previousProgress + (targetProgress - previousProgress) * catchUp);
+            if (targetProgress >= 0.999 && targetProgress - p < 0.008) p = 1;
           }
           layer.progress = p;
           progressTotal += p;
@@ -2251,19 +2255,10 @@
               if (layer.el.style.filter !== 'none') layer.el.style.filter = 'none';
               updateTextTyping(layer, p);
             } else if (layer.type === 'media') {
-              if (layer.el.id === 'hero-portrait-card') {
-                // This is a large photographic raster: fade it in instead of animating
-                // a changing clip-path that repeatedly repaints the full image.
-                layer.el.style.clipPath = '';
-                layer.el.style.setProperty('--build-opacity', String(Math.min(1, 0.08 + p * 0.92)));
-              } else {
-                if (layer.el.style.getPropertyValue('--build-opacity') !== '1') layer.el.style.setProperty('--build-opacity', '1');
-                layer.el.style.clipPath = 'inset(0 ' + (100 - p * 100) + '% 0 0)';
-              }
-              // Keep one subtle fixed preview softness; changing blur radius every frame
-              // forces repeated layer rasterization and makes scroll builds hitch.
-              const mediaFilter = p < 0.88 ? 'blur(0.45px) saturate(0.9)' : 'none';
-              if (layer.el.style.filter !== mediaFilter) layer.el.style.filter = mediaFilter;
+              // Fade large media layers instead of animating a changing clip-path on every frame.
+              layer.el.style.clipPath = '';
+              layer.el.style.setProperty('--build-opacity', String(Math.min(1, 0.12 + p * 0.88)));
+              if (layer.el.style.filter !== 'none') layer.el.style.filter = 'none';
               if (layer.galaxyPhoto) {
                 layer.galaxyPhoto.style.opacity = String(Math.min(1, 0.18 + p * 0.82));
                 layer.galaxyPhoto.style.clipPath = 'circle(' + Math.max(1, p * 152) + '% at 62% 48%)';
@@ -2298,13 +2293,13 @@
         const agentLayers = activeLayers.slice();
         buildLayers.forEach(layer => {
           const r = layer.screenRect;
-          const recentlyCompleted = layer.state === 'DONE' && layer.completedAt > 0 && now - layer.completedAt < 820;
+          const recentlyCompleted = layer.state === 'DONE' && layer.completedAt > 0 && now - layer.completedAt < 1150;
           const stillVisible = r && r.bottom > -80 && r.top < window.innerHeight + 80 && r.width > 3;
           if (recentlyCompleted && stillVisible && !agentLayers.includes(layer)) agentLayers.push(layer);
         });
         agentLayers.sort((a, b) => a.progress - b.progress);
 
-        const follow = 1 - Math.exp(-dt * (30 + Math.min(18, velocity * 2.2)));
+        const follow = 1 - Math.exp(-dt * (42 + Math.min(32, velocity * 2.8)));
         const responsiveAgentCap = window.innerWidth < 640 ? 6 : window.innerWidth < 1024 ? 12 : 20;
         const galaxyRect = finalGalaxyLayer && finalGalaxyLayer.screenRect;
         const galaxyInFocus = !!(
@@ -2370,23 +2365,10 @@
             targetX = r.left + r.width * progress;
             targetY = r.top + r.height * (0.22 + (laneIndex / laneCount) * 0.58);
           } else {
-            const pathProgress = (progress + laneIndex / laneCount * 0.16) % 1;
-            const perimeter = 2 * (r.width + r.height);
-            let distance = pathProgress * perimeter;
-            if (distance <= r.width) {
-              targetX = r.left + distance;
-              targetY = r.top;
-            } else if ((distance -= r.width) <= r.height) {
-              targetX = r.right;
-              targetY = r.top + distance;
-            } else if ((distance -= r.height) <= r.width) {
-              targetX = r.right - distance;
-              targetY = r.bottom;
-            } else {
-              distance -= r.width;
-              targetX = r.left;
-              targetY = r.bottom - Math.min(r.height, distance);
-            }
+            // Agents sweep across the interior of each target box, not only its border.
+            const lane = (laneIndex + 1) / (laneCount + 1);
+            targetX = r.left + r.width * (0.08 + progress * 0.84);
+            targetY = r.top + r.height * lane;
           }
 
           ag.targetLayer = targetLayer;
@@ -2433,7 +2415,7 @@
           // The SCROLL phase must remain active so the galaxy agents can finish their handoff.
         }
 
-        completedLayersCount = completedNow;
+        completedLayersCount = buildLayers.reduce((count, layer) => count + (layer.state === 'DONE' ? 1 : 0), 0);
         currentWave = waveNow;
         const pct = Math.min(100, (progressTotal / Math.max(1, totalBuildLayers)) * 100);
         if (now - lastHudUpdateAt >= 90 || completedNow === totalBuildLayers) {
@@ -2487,6 +2469,21 @@
         initAgents();
       }
     });
+
+
+    const heroBackgroundVideo = document.getElementById('hero-background-video');
+    if (heroBackgroundVideo) {
+      heroBackgroundVideo.muted = true;
+      heroBackgroundVideo.defaultMuted = true;
+      const startHeroVideo = () => {
+        const playAttempt = heroBackgroundVideo.play();
+        if (playAttempt && typeof playAttempt.catch === 'function') playAttempt.catch(() => {});
+      };
+      startHeroVideo();
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && heroBackgroundVideo.paused) startHeroVideo();
+      });
+    }
 
     document.body.classList.add('build-mode');
     initBuildLayers();
