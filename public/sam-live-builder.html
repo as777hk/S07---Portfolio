@@ -41,7 +41,7 @@
     #cyber-atmosphere-canvas {
       position: fixed;
       inset: 0;
-      z-index: 15;
+      z-index: 5;
       width: 100vw;
       height: 100vh;
       pointer-events: none;
@@ -111,8 +111,9 @@
       left: 50%;
       width: max(100vw, 177.78vh);
       height: max(100vh, 56.25vw);
-      transform: translate3d(-50%, -50%, 0);
-      border: 0;
+      transform: translate3d(-50%, -50%, 0) scale(var(--hero-video-cover-scale, 1));
+      border: 0 !important;
+      outline: 0 !important;
       display: block;
       pointer-events: none;
     }
@@ -507,7 +508,7 @@
     <!-- =================================================================== -->
     <!-- WAVE 1: CYBERSECURITY HERO SECTION                                  -->
     <!-- =================================================================== -->
-    <section id="hero" class="relative w-full min-h-[calc(100svh-56px)] isolate overflow-hidden border-b border-zinc-900">
+    <section id="hero" class="relative w-full min-h-[calc(100svh-56px)] isolate overflow-hidden">
       <div class="hero-video-backdrop" aria-hidden="true">
         <iframe
           id="hero-background-video"
@@ -532,9 +533,9 @@
         </div>
       </div>
 
-      <!-- Center Stack: Giant Red PORTFOLIO + Transparent Cutout Portrait + 3 Columns -->
+      <!-- Hero title stage: headline and content columns are separate rows. -->
       <div class="hero-title-stage my-auto py-2">
-        <!-- Giant Crimson PORTFOLIO Background Text -->
+        <!-- Crimson PORTFOLIO wordmark above the content grid. -->
         <div id="hero-parallax-word" data-build-layer data-wave="1" data-build-type="box" class="hero-bg-word select-none text-center lg:text-left">
           PORTFOLIO
         </div>
@@ -2041,6 +2042,16 @@
 
     // Lightweight simulated hacker-atmosphere: terminal streams, packet traces and system panes.
     // It is purely visual and makes no network requests.
+    const heroBackgroundPlayer = document.getElementById('hero-background-video');
+    function updateHeroVideoCover() {
+      if (!heroBackgroundPlayer) return;
+      const viewportAspect = window.innerWidth / Math.max(1, window.innerHeight);
+      const coverScale = Math.max(1, viewportAspect);
+      heroBackgroundPlayer.style.setProperty('--hero-video-cover-scale', coverScale.toFixed(4));
+    }
+    window.addEventListener('resize', updateHeroVideoCover, { passive: true });
+    updateHeroVideoCover();
+
     const cyberAtmosphereCanvas = document.getElementById('cyber-atmosphere-canvas');
     const cyberAtmosphereCtx = cyberAtmosphereCanvas.getContext('2d', { alpha: true });
     let cyberAtmosphereWidth = window.innerWidth;
