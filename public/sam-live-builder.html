@@ -7,6 +7,8 @@
   <link rel="icon" type="image/svg+xml" href="/sam-mark.svg?v=3" />
   <link rel="apple-touch-icon" href="/sam-mark.svg?v=3" />
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://www.youtube.com" />
+  <link rel="preconnect" href="https://i.ytimg.com" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -2053,7 +2055,7 @@
       cyberAtmosphereCanvas.width = Math.ceil(cyberAtmosphereWidth * scale);
       cyberAtmosphereCanvas.height = Math.ceil(cyberAtmosphereHeight * scale);
       cyberAtmosphereCtx.setTransform(scale, 0, 0, scale, 0, 0);
-      const columns = Math.max(12, Math.min(48, Math.floor(cyberAtmosphereWidth / (cyberAtmosphereWidth < 640 ? 40 : 32))));
+      const columns = Math.max(12, Math.min(42, Math.floor(cyberAtmosphereWidth / (cyberAtmosphereWidth < 640 ? 42 : 36))));
       cyberDrops = Array.from({ length: columns }, (_, i) => ({
         x: (i + .5) * (cyberAtmosphereWidth / columns),
         y: -((i * 83) % Math.max(160, cyberAtmosphereHeight)),
@@ -2182,7 +2184,7 @@
     });
 
     function animate(now) {
-      const dt = Math.min(0.05, (now - lastFrameTime) * 0.001);
+      const dt = Math.min(0.1, (now - lastFrameTime) * 0.001);
       lastFrameTime = now;
       const t = now * 0.001;
 
