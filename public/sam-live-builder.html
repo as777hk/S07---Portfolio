@@ -2103,7 +2103,9 @@
             } else if (layer.type === 'media') {
               if (layer.el.style.getPropertyValue('--build-opacity') !== '1') layer.el.style.setProperty('--build-opacity', '1');
               layer.el.style.clipPath = 'inset(0 ' + (100 - p * 100) + '% 0 0)';
-              const mediaFilter = p < 0.88 ? 'blur(' + ((1 - p) * 0.9) + 'px) saturate(0.9)' : 'none';
+              // Keep one subtle fixed preview softness; changing blur radius every frame
+              // forces repeated layer rasterization and makes scroll builds hitch.
+              const mediaFilter = p < 0.88 ? 'blur(0.45px) saturate(0.9)' : 'none';
               if (layer.el.style.filter !== mediaFilter) layer.el.style.filter = mediaFilter;
               if (layer.galaxyPhoto) {
                 layer.galaxyPhoto.style.opacity = String(Math.min(1, 0.18 + p * 0.82));
