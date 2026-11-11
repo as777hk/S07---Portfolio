@@ -39,24 +39,60 @@
     #cyber-atmosphere-canvas {
       position: fixed;
       inset: 0;
-      z-index: 1;
+      z-index: 15;
       width: 100vw;
       height: 100vh;
       pointer-events: none;
-      opacity: .88;
+      opacity: .62;
       mix-blend-mode: screen;
     }
     main { z-index: 10; }
     /* Oversized crimson PORTFOLIO backdrop */
+    #hero .hero-content-shell > .hero-title-stage {
+      position: relative;
+      min-height: clamp(430px, 62vh, 650px);
+      display: flex;
+      align-items: center;
+      isolation: isolate;
+    }
     .hero-bg-word {
+      position: absolute;
+      z-index: 0;
+      top: 50%;
+      left: 50%;
+      width: 100%;
+      transform: translate3d(-50%, -50%, 0);
       font-family: 'Anton', sans-serif;
-      font-size: clamp(5.4rem, 20.2vw, 19.2rem);
-      line-height: 0.82;
+      font-size: clamp(3rem, 13.6vw, 15.5rem);
+      line-height: 0.94;
       letter-spacing: -0.015em;
-      color: #dc2626;
+      color: rgba(220,38,38,.34);
       text-transform: uppercase;
       white-space: nowrap;
+      text-align: center;
       pointer-events: none;
+    }
+    #hero .hero-foreground-grid {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      margin-top: 0 !important;
+      align-items: center;
+    }
+    #hero .hero-content-shell { text-shadow: 0 2px 12px rgba(0,0,0,.88); }
+    @media (max-width: 1023px) {
+      #hero .hero-content-shell > .hero-title-stage {
+        min-height: 0;
+        display: block;
+        padding-top: clamp(42px, 8vh, 76px);
+      }
+      .hero-bg-word {
+        top: 0;
+        transform: translate3d(-50%, -18%, 0);
+        font-size: clamp(2.8rem, 12.8vw, 7.4rem);
+        opacity: .72;
+      }
+      #hero .hero-foreground-grid { align-items: start; }
     }
     /* The uploaded square video fills the complete home opening section. */
     #hero .hero-video-backdrop {
@@ -67,26 +103,26 @@
       background: #02070b;
       pointer-events: none;
     }
-    #hero .hero-video-backdrop video {
+    #hero .hero-video-backdrop iframe {
       position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
+      top: 50%;
+      left: 50%;
+      width: max(100vw, 177.78vh);
+      height: max(100vh, 56.25vw);
+      transform: translate3d(-50%, -50%, 0);
+      border: 0;
       display: block;
-      object-fit: cover;
-      object-position: center 48%;
-      filter: brightness(.62) saturate(1.18) contrast(1.06);
+      pointer-events: none;
     }
     #hero .hero-video-shade {
       position: absolute;
       inset: 0;
       background:
-        linear-gradient(90deg, rgba(2,7,12,.78) 0%, rgba(2,7,12,.24) 48%, rgba(2,7,12,.76) 100%),
-        linear-gradient(180deg, rgba(2,7,12,.42) 0%, rgba(2,7,12,.08) 42%, rgba(2,7,12,.82) 100%);
+        linear-gradient(90deg, rgba(2,7,12,.58) 0%, rgba(2,7,12,.12) 48%, rgba(2,7,12,.58) 100%),
+        linear-gradient(180deg, rgba(2,7,12,.30) 0%, rgba(2,7,12,.04) 42%, rgba(2,7,12,.68) 100%);
     }
     #hero .hero-content-shell { min-height: calc(100svh - 56px); }
     @media (max-width: 1023px) {
-      #hero .hero-video-backdrop video { object-position: center 46%; }
       #hero .hero-video-shade {
         background:
           linear-gradient(180deg, rgba(2,7,12,.5), rgba(2,7,12,.22) 40%, rgba(2,7,12,.82)),
@@ -94,7 +130,6 @@
       }
     }
     @media (max-width: 640px) {
-      #hero .hero-video-backdrop video { object-position: center 45%; }
       #hero .hero-content-shell { min-height: calc(100svh - 56px); }
     }
 
@@ -223,7 +258,7 @@
       .security-brand-logo-panel { width: 120px; }
     }
     @media (max-width: 640px) {
-      #cyber-atmosphere-canvas { opacity: .58; }
+      #cyber-atmosphere-canvas { opacity: .48; }
     }
     @media (prefers-reduced-motion: reduce) {
       .security-brand-card, .tool-logo-chip { transition: none; }
@@ -472,9 +507,14 @@
     <!-- =================================================================== -->
     <section id="hero" class="relative w-full min-h-[calc(100svh-56px)] isolate overflow-hidden border-b border-zinc-900">
       <div class="hero-video-backdrop" aria-hidden="true">
-        <video id="hero-background-video" autoplay muted loop playsinline webkit-playsinline preload="auto" poster="https://at.adobe.com/bhDeReyGLXh2zrlC" disablepictureinpicture>
-          <source src="https://at.adobe.com/rmeyETRICNVuj2wM" type="video/mp4" />
-        </video>
+        <iframe
+          id="hero-background-video"
+          src="https://www.youtube.com/embed/b1iUs5oj3AU?autoplay=1&amp;mute=1&amp;loop=1&amp;playlist=b1iUs5oj3AU&amp;controls=0&amp;modestbranding=1&amp;rel=0&amp;playsinline=1&amp;iv_load_policy=3"
+          title="SAM — cinematic cybersecurity opening"
+          allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+          referrerpolicy="strict-origin-when-cross-origin"
+          loading="eager"
+        ></iframe>
         <div class="hero-video-shade"></div>
       </div>
       <div class="hero-content-shell relative z-10 min-h-[calc(100svh-56px)] max-w-7xl mx-auto pt-5 pb-14 px-4 sm:px-6 flex flex-col justify-between">
@@ -491,14 +531,14 @@
       </div>
 
       <!-- Center Stack: Giant Red PORTFOLIO + Transparent Cutout Portrait + 3 Columns -->
-      <div class="relative my-auto py-2">
+      <div class="hero-title-stage my-auto py-2">
         <!-- Giant Crimson PORTFOLIO Background Text -->
         <div id="hero-parallax-word" data-build-layer data-wave="1" data-build-type="box" class="hero-bg-word select-none text-center lg:text-left">
           PORTFOLIO
         </div>
 
         <!-- Foreground 3-Column Grid Overlapping PORTFOLIO -->
-        <div class="relative z-20 grid grid-cols-1 lg:grid-cols-12 gap-6 items-end lg:-mt-44">
+        <div class="hero-foreground-grid relative z-20 grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
           
           <!-- Left Column -->
           <div class="lg:col-span-4 space-y-3 pb-2">
@@ -1502,8 +1542,8 @@
         layer.isOpening = true;
         layer.openingDelay = index * openingSlotMs;
         if (layer.type === 'text') {
-          const openingSpeed = Math.max(1, Number(layer.el.dataset.openingSpeed) || 20);
-          layer.openingDuration = Math.max(950, (layer.textChars || []).length / openingSpeed * 1000);
+          const openingSpeed = Math.max(1, Number(layer.el.dataset.openingSpeed) || 28);
+          layer.openingDuration = Math.max(760, (layer.textChars || []).length / openingSpeed * 1000);
         } else if (layer.type === 'media') {
           layer.openingDuration = 1900;
         } else {
@@ -2013,7 +2053,7 @@
       cyberAtmosphereCanvas.width = Math.ceil(cyberAtmosphereWidth * scale);
       cyberAtmosphereCanvas.height = Math.ceil(cyberAtmosphereHeight * scale);
       cyberAtmosphereCtx.setTransform(scale, 0, 0, scale, 0, 0);
-      const columns = Math.max(14, Math.min(68, Math.floor(cyberAtmosphereWidth / (cyberAtmosphereWidth < 640 ? 34 : 24))));
+      const columns = Math.max(12, Math.min(48, Math.floor(cyberAtmosphereWidth / (cyberAtmosphereWidth < 640 ? 40 : 32))));
       cyberDrops = Array.from({ length: columns }, (_, i) => ({
         x: (i + .5) * (cyberAtmosphereWidth / columns),
         y: -((i * 83) % Math.max(160, cyberAtmosphereHeight)),
@@ -2059,7 +2099,7 @@
       cyberDrops.forEach((drop, index) => {
         const headY = ((drop.y + time * drop.speed) % (height + 180)) - 90;
         const centerDistance = Math.abs(drop.x - width * .5) / Math.max(1, width * .5);
-        const columnStrength = .22 + centerDistance * .32;
+        const columnStrength = centerDistance < .30 ? .045 : .25 + centerDistance * .22;
         for (let row = 0; row < drop.length; row++) {
           const y = headY - row * 14;
           if (y < -14 || y > height + 14) continue;
@@ -2295,7 +2335,7 @@
         });
         agentLayers.sort((a, b) => a.progress - b.progress);
 
-        const follow = 1 - Math.exp(-dt * (42 + Math.min(32, velocity * 2.8)));
+        const follow = 1 - Math.exp(-dt * (18 + Math.min(12, velocity * 1.5)));
         const responsiveAgentCap = window.innerWidth < 640 ? 6 : window.innerWidth < 1024 ? 12 : 20;
         const galaxyRect = finalGalaxyLayer && finalGalaxyLayer.screenRect;
         const galaxyInFocus = !!(
@@ -2306,9 +2346,9 @@
         );
         const galaxyLayer = agentLayers.find(layer => layer.el.id === 'vortex-card') ||
           ((galaxyHandoffActive || galaxyInFocus) ? finalGalaxyLayer : null);
-        const activeAgentCount = galaxyLayer
+        const activeAgentCount = agentLayers.length
           ? Math.min(responsiveAgentCap, agents.length)
-          : Math.min(responsiveAgentCap, agents.length, agentLayers.length * 3);
+          : 0;
         const eligibleAgentLayers = new Set(agentLayers);
         const agentTargets = agents.map((ag, idx) => {
           if (idx >= activeAgentCount) return null;
@@ -2339,7 +2379,7 @@
           const laneIndex = targetOffsets.get(targetLayer) || 0;
           targetOffsets.set(targetLayer, laneIndex + 1);
           const workersOnTask = targetCounts.get(targetLayer) || 1;
-          const laneCount = Math.max(1, Math.min(4, workersOnTask));
+          const laneCount = Math.max(1, workersOnTask);
           const progress = Math.max(0.015, Math.min(0.985, targetLayer.progress));
           let targetX;
           let targetY;
@@ -2428,7 +2468,7 @@
       }
 
       if (document.visibilityState === 'visible') {
-        const cyberFrameInterval = window.innerWidth < 640 ? 85 : 55;
+        const cyberFrameInterval = window.innerWidth < 640 ? 100 : 80;
         if (now - lastCyberAtmosphereDrawAt >= cyberFrameInterval) {
           drawCyberAtmosphere(t);
           lastCyberAtmosphereDrawAt = now;
@@ -2467,19 +2507,6 @@
     });
 
 
-    const heroBackgroundVideo = document.getElementById('hero-background-video');
-    if (heroBackgroundVideo) {
-      heroBackgroundVideo.muted = true;
-      heroBackgroundVideo.defaultMuted = true;
-      const startHeroVideo = () => {
-        const playAttempt = heroBackgroundVideo.play();
-        if (playAttempt && typeof playAttempt.catch === 'function') playAttempt.catch(() => {});
-      };
-      startHeroVideo();
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible' && heroBackgroundVideo.paused) startHeroVideo();
-      });
-    }
 
     document.body.classList.add('build-mode');
     initBuildLayers();
