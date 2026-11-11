@@ -88,8 +88,10 @@
       height: 100%;
       object-fit: contain;
       object-position: center bottom;
-      mix-blend-mode: normal;
-      filter: none;
+      mix-blend-mode: lighten;
+      filter: saturate(1.08) contrast(1.06);
+      -webkit-mask-image: radial-gradient(ellipse 88% 86% at 50% 47%, #000 55%, rgba(0,0,0,.96) 66%, rgba(0,0,0,.68) 80%, transparent 100%);
+      mask-image: radial-gradient(ellipse 88% 86% at 50% 47%, #000 55%, rgba(0,0,0,.96) 66%, rgba(0,0,0,.68) 80%, transparent 100%);
     }
     @keyframes portrait-smoke-drift {
       0% { transform: translate3d(-4px, 5px, 0) scale(.98); opacity: .62; }
@@ -1188,6 +1190,7 @@
     let completedLayersCount = 0;
     let buildLayers = [];
     let agents = [];
+    let agentAssignmentCursor = 0;
 
     function resizeOverlayCanvases() {
       trailCanvas.width = window.innerWidth;
@@ -1524,6 +1527,7 @@
     }
 
     function initAgents() {
+      agentAssignmentCursor = 0;
       agents = AGENT_COLORS.map((color, idx) => {
         const isLeft = idx < 10;
         return {
@@ -1650,7 +1654,7 @@
       ctx.rotate(Number.isFinite(ag.angle) ? ag.angle : 0);
       ctx.globalCompositeOperation = 'screen';
       ctx.shadowColor = color;
-      ctx.shadowBlur = 3;
+      ctx.shadowBlur = 2;
       ctx.lineJoin = 'round';
 
       // Compact precision cursor: an unmistakable pointer silhouette (about 8×11 px).
@@ -1696,7 +1700,7 @@
       ctx.globalCompositeOperation = 'screen';
       ctx.strokeStyle = ag.color;
       ctx.shadowColor = ag.color;
-      ctx.shadowBlur = 7;
+      ctx.shadowBlur = 3.5;
       ctx.lineCap = 'round';
       ctx.lineWidth = 1.4;
       ctx.globalAlpha = 0.48;
@@ -1982,7 +1986,6 @@
 
     const hudXY = document.getElementById('hud-xy');
     let lastFrameTime = performance.now();
-    let lastBuildFrameAt = 0;
     let lastHudUpdateAt = 0;
 
     window.addEventListener('mousemove', (e) => {
@@ -1990,12 +1993,6 @@
     });
 
     function animate(now) {
-      const frameBuildActive = buildPhase === 'OPENING' || buildPhase === 'SCROLL';
-      if (frameBuildActive && now - lastBuildFrameAt < (1000 / 45)) {
-        requestAnimationFrame(animate);
-        return;
-      }
-      if (frameBuildActive) lastBuildFrameAt = now;
       const dt = Math.min(0.05, (now - lastFrameTime) * 0.001);
       lastFrameTime = now;
       const t = now * 0.001;
@@ -2147,7 +2144,7 @@
         });
         agentLayers.sort((a, b) => a.progress - b.progress);
 
-        const follow = 1 - Math.exp(-dt * (20 + Math.min(48, velocity * 24)));
+        const follow = 1 - Math.exp(-dt * (17 + Math.min(9, velocity * 1.4)));
         const responsiveAgentCap = window.innerWidth < 640 ? 6 : window.innerWidth < 1024 ? 12 : 20;
         const galaxyRect = finalGalaxyLayer && finalGalaxyLayer.screenRect;
         const galaxyInFocus = !!(
@@ -2161,12 +2158,22 @@
         const activeAgentCount = galaxyLayer
           ? Math.min(responsiveAgentCap, agents.length)
           : Math.min(responsiveAgentCap, agents.length, agentLayers.length * 3);
+        const eligibleAgentLayers = new Set(agentLayers);
+        const agentTargets = agents.map((ag) => {
+          if (galaxyLayer) return galaxyLayer;
+          if (ag.targetLayer && eligibleAgentLayers.has(ag.targetLayer)) return ag.targetLayer;
+          if (!agentLayers.length) return null;
+          const nextLayer = agentLayers[agentAssignmentCursor % agentLayers.length];
+          agentAssignmentCursor++;
+          return nextLayer;
+        });
+        const targetCounts = new Map();
+        agentTargets.forEach(layer => {
+          if (layer) targetCounts.set(layer, (targetCounts.get(layer) || 0) + 1);
+        });
+        const targetOffsets = new Map();
         agents.forEach((ag, idx) => {
-          const targetLayer = galaxyLayer
-            ? galaxyLayer
-            : (idx < activeAgentCount && agentLayers.length
-              ? agentLayers[idx % agentLayers.length]
-              : null);
+          const targetLayer = agentTargets[idx];
           if (!targetLayer || !targetLayer.screenRect) {
             ag.targetLayer = null;
             ag.taskRect = null;
@@ -2175,11 +2182,11 @@
             ag.y = -100;
             return;
           }
-
+          if (ag.targetLayer !== targetLayer) ag.history = [];
           const r = targetLayer.screenRect;
-          const agentLayerCount = Math.max(1, agentLayers.length);
-          const workersOnTask = Math.max(1, Math.ceil(activeAgentCount / agentLayerCount));
-          const laneIndex = Math.floor(idx / agentLayerCount);
+          const laneIndex = targetOffsets.get(targetLayer) || 0;
+          targetOffsets.set(targetLayer, laneIndex + 1);
+          const workersOnTask = targetCounts.get(targetLayer) || 1;
           const laneCount = Math.max(1, Math.min(4, workersOnTask));
           const progress = Math.max(0.015, Math.min(0.985, targetLayer.progress));
           let targetX;
