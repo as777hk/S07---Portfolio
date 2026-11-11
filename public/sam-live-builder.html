@@ -2159,7 +2159,8 @@
           ? Math.min(responsiveAgentCap, agents.length)
           : Math.min(responsiveAgentCap, agents.length, agentLayers.length * 3);
         const eligibleAgentLayers = new Set(agentLayers);
-        const agentTargets = agents.map((ag) => {
+        const agentTargets = agents.map((ag, idx) => {
+          if (idx >= activeAgentCount) return null;
           if (galaxyLayer) return galaxyLayer;
           if (ag.targetLayer && eligibleAgentLayers.has(ag.targetLayer)) return ag.targetLayer;
           if (!agentLayers.length) return null;
