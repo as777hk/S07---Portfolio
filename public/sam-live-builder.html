@@ -53,7 +53,6 @@
          Reserve matching layout space so it never overlaps the next section. */
       transform: translateY(clamp(190px, 15vw, 235px));
       margin-bottom: clamp(118px, 10vw, 163px);
-      isolation: isolate;
       overflow: visible;
     }
     #hero-portrait-card::before {
@@ -2098,8 +2097,15 @@
               if (layer.el.style.filter !== 'none') layer.el.style.filter = 'none';
               updateTextTyping(layer, p);
             } else if (layer.type === 'media') {
-              if (layer.el.style.getPropertyValue('--build-opacity') !== '1') layer.el.style.setProperty('--build-opacity', '1');
-              layer.el.style.clipPath = 'inset(0 ' + (100 - p * 100) + '% 0 0)';
+              if (layer.el.id === 'hero-portrait-card') {
+                // This is a large photographic raster: fade it in instead of animating
+                // a changing clip-path that repeatedly repaints the full image.
+                layer.el.style.clipPath = '';
+                layer.el.style.setProperty('--build-opacity', String(Math.min(1, 0.08 + p * 0.92)));
+              } else {
+                if (layer.el.style.getPropertyValue('--build-opacity') !== '1') layer.el.style.setProperty('--build-opacity', '1');
+                layer.el.style.clipPath = 'inset(0 ' + (100 - p * 100) + '% 0 0)';
+              }
               // Keep one subtle fixed preview softness; changing blur radius every frame
               // forces repeated layer rasterization and makes scroll builds hitch.
               const mediaFilter = p < 0.88 ? 'blur(0.45px) saturate(0.9)' : 'none';
