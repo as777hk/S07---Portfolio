@@ -28,8 +28,11 @@ jobs:
           sudo apt-get install -y ffmpeg
           mkdir -p public/media
           curl --fail --location --show-error --retry 2 --connect-timeout 30 --max-time 240 \
-            "https://at.adobe.com/73GKuQHUaofsXd99" \
+            --dump-header /tmp/sam-download-headers.txt \
+            "https://platform-cs-jpn3.adobe.io/content/storage/id/urn:aaid:sc:AP:eb399ee6-7a51-4879-83b7-72038071c4d6" \
             --output /tmp/sam-hero-source.mp4
+          echo "Downloaded bytes: $(stat -c%s /tmp/sam-hero-source.mp4)"
+          tail -n 25 /tmp/sam-download-headers.txt
           test "$(stat -c%s /tmp/sam-hero-source.mp4)" -gt 1000000
           duration="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 /tmp/sam-hero-source.mp4)"
           codec="$(ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 /tmp/sam-hero-source.mp4)"
