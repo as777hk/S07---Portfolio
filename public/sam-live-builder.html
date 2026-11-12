@@ -7,7 +7,7 @@
   <link rel="icon" type="image/svg+xml" href="/sam-mark.svg?v=3" />
   <link rel="apple-touch-icon" href="/sam-mark.svg?v=3" />
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <link rel="preconnect" href="https://platform-cs-jpn3.adobe.io" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -677,7 +677,7 @@
           controlslist="nodownload noplaybackrate noremoteplayback"
           aria-hidden="true"
         >
-          <source src="https://platform-cs-jpn3.adobe.io/content/storage/id/urn:aaid:sc:AP:eb399ee6-7a51-4879-83b7-72038071c4d6" type="video/mp4" />
+          <source src="/media/sam-hero-source.mp4" type="video/mp4" />
         </video>
         <div class="hero-video-shade"></div>
       </div>
@@ -2245,35 +2245,32 @@
       heroBackgroundVideo.playsInline = true;
 
       const playHeroBackground = () => {
-        if (heroBackgroundVideo.readyState < 2) return;
+        if (heroBackgroundVideo.readyState < 2 || heroBackgroundVideo.seeking) return;
         if (heroBackgroundVideo.currentTime < HERO_START_SECONDS - 0.12) {
           if (heroSeekingToStart) return;
           heroSeekingToStart = true;
           try { heroBackgroundVideo.currentTime = HERO_START_SECONDS; }
-          catch (_) { heroSeekingToStart = false; return; }
+          catch (_) { heroSeekingToStart = false; }
+          return;
         }
         const attempt = heroBackgroundVideo.play();
-        if (attempt && typeof attempt.then === 'function') {
-          attempt.then(() => { heroSeekingToStart = false; }).catch(() => { heroSeekingToStart = false; });
+        if (attempt && typeof attempt.catch === 'function') {
+          attempt.catch(error => console.warn('Hero video autoplay was blocked:', error));
         }
       };
 
       heroBackgroundVideo.addEventListener('loadedmetadata', playHeroBackground);
       heroBackgroundVideo.addEventListener('seeked', () => {
         heroSeekingToStart = false;
-        if (heroBackgroundVideo.paused) {
-          const attempt = heroBackgroundVideo.play();
-          if (attempt && typeof attempt.catch === 'function') attempt.catch(() => {});
-        }
+        playHeroBackground();
       });
       heroBackgroundVideo.addEventListener('canplay', () => {
         if (heroBackgroundVideo.paused) playHeroBackground();
       });
       heroBackgroundVideo.addEventListener('ended', () => {
-        heroSeekingToStart = false;
-        try { heroBackgroundVideo.currentTime = HERO_START_SECONDS; } catch (_) {}
-        const attempt = heroBackgroundVideo.play();
-        if (attempt && typeof attempt.catch === 'function') attempt.catch(() => {});
+        heroSeekingToStart = true;
+        try { heroBackgroundVideo.currentTime = HERO_START_SECONDS; }
+        catch (_) { heroSeekingToStart = false; }
       });
       heroBackgroundVideo.addEventListener('error', () => {
         console.error('Hero video failed to load:', heroBackgroundVideo.error);
