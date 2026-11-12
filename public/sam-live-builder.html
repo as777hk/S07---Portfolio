@@ -667,7 +667,7 @@
             <div data-build-layer data-wave="1" data-build-type="text" class="font-display text-xl sm:text-2xl uppercase tracking-wide text-red-500 leading-tight">
               CYBERSECURITY &amp;<br />RED TEAM SPECIALIST
             </div>
-            <p data-build-layer data-wave="1" data-build-type="text" data-opening-speed="46" class="text-xs text-zinc-300 leading-relaxed max-w-xs">
+            <p data-build-layer data-wave="1" data-build-type="text" data-opening-speed="20" class="text-xs text-zinc-300 leading-relaxed max-w-xs">
               Breaking systems to make them unbreakable. I uncover critical vulnerabilities, simulate adversary attacks, and engineer zero-trust defenses from the first packet to the kernel.
             </p>
             <div class="pt-1">
@@ -1660,7 +1660,7 @@
         layer.isOpening = true;
         layer.openingDelay = index * openingSlotMs;
         if (layer.type === 'text') {
-          const openingSpeed = Math.max(1, Number(layer.el.dataset.openingSpeed) || 28);
+          const openingSpeed = Math.max(1, Number(layer.el.dataset.openingSpeed) || 20);
           layer.openingDuration = Math.max(760, (layer.textChars || []).length / openingSpeed * 1000);
         } else if (layer.type === 'media') {
           layer.openingDuration = 1900;
@@ -2199,28 +2199,69 @@
       }));
     }
 
-    function drawCyberPanel(ctx, x, y, width, title, rows, time) {
-      const height = 42 + rows.length * 18;
-      ctx.fillStyle = 'rgba(2,12,12,.52)';
-      ctx.fillRect(x, y, width, height);
-      ctx.strokeStyle = 'rgba(45,212,191,.92)';
+    function drawCyberPanel(ctx, x, y, width, title, rows, time, compact = false, panelIndex = 0) {
+      const rowHeight = compact ? 14 : 18;
+      const headerHeight = compact ? 25 : 32;
+      const fontSize = compact ? 7.2 : 10;
+      const panelHeight = headerHeight + rows.length * rowHeight + 9;
+      ctx.save();
+      ctx.fillStyle = compact ? 'rgba(2,12,12,.62)' : 'rgba(2,12,12,.54)';
+      ctx.fillRect(x, y, width, panelHeight);
+      ctx.strokeStyle = 'rgba(45,212,191,.94)';
       ctx.lineWidth = 1;
-      ctx.strokeRect(x + .5, y + .5, width - 1, height - 1);
-      ctx.fillStyle = '#99f6e4';
-      ctx.font = '11px "JetBrains Mono", monospace';
+      ctx.strokeRect(x + .5, y + .5, width - 1, panelHeight - 1);
+
+      // Terminal header and active connection indicators.
       ctx.textBaseline = 'top';
-      ctx.fillText(title, x + 12, y + 10);
-      ctx.strokeStyle = 'rgba(45,212,191,.68)';
-      ctx.beginPath();
-      ctx.moveTo(x + 10, y + 29);
-      ctx.lineTo(x + width - 10, y + 29);
-      ctx.stroke();
-      rows.forEach((row, index) => {
-        const n = ((Math.floor(time * 2) + index * 47) % 255).toString(16).padStart(2, '0').toUpperCase();
-        ctx.fillStyle = index % 3 === 0 ? '#a5f3fc' : '#86efac';
-        ctx.font = '10px "JetBrains Mono", monospace';
-        ctx.fillText(row.replace('{n}', n), x + 12, y + 37 + index * 18);
+      ctx.font = compact ? '7.2px "JetBrains Mono", monospace' : '10px "JetBrains Mono", monospace';
+      ctx.fillStyle = '#99f6e4';
+      ctx.fillText(title, x + (compact ? 7 : 11), y + (compact ? 7 : 9));
+      const dotX = x + width - (compact ? 30 : 38);
+      [0, 1, 2].forEach((dot, i) => {
+        ctx.fillStyle = dot === 1 ? '#67e8f9' : '#4ade80';
+        ctx.globalAlpha = .65 + .35 * Math.sin(time * 2.4 + panelIndex + i);
+        ctx.fillRect(dotX + i * (compact ? 7 : 9), y + (compact ? 8 : 12), compact ? 3 : 4, compact ? 3 : 4);
       });
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = 'rgba(45,212,191,.64)';
+      ctx.beginPath();
+      ctx.moveTo(x + 7, y + headerHeight - 2);
+      ctx.lineTo(x + width - 7, y + headerHeight - 2);
+      ctx.stroke();
+
+      // Each pane continuously types through its live-looking command/output stream.
+      const lineDuration = 1.12;
+      const cycleDuration = Math.max(lineDuration, rows.length * lineDuration);
+      const typePhase = (time + panelIndex * .83) % cycleDuration;
+      const activeLine = Math.floor(typePhase / lineDuration);
+      const charProgress = (typePhase % lineDuration) / lineDuration;
+      const maxChars = Math.max(8, Math.floor((width - (compact ? 18 : 28)) / (fontSize * .62)));
+      rows.forEach((row, index) => {
+        const n = ((Math.floor(time * 2.2) + index * 47 + panelIndex * 29) % 255).toString(16).padStart(2, '0').toUpperCase();
+        let value = row.replace('{n}', n);
+        if (value.length > maxChars) value = value.slice(0, Math.max(4, maxChars - 1)) + '…';
+        let output = value;
+        if (index === activeLine) {
+          output = value.slice(0, Math.max(1, Math.floor(value.length * charProgress)));
+          if (Math.floor(time * 3.2) % 2 === 0) output += '▌';
+        } else if (index > activeLine) {
+          output = '› awaiting input';
+        }
+        ctx.globalAlpha = index > activeLine ? .32 : 1;
+        ctx.fillStyle = index % 3 === 0 ? '#a5f3fc' : '#86efac';
+        ctx.font = (compact ? '7.2px' : '9.5px') + ' "JetBrains Mono", monospace';
+        ctx.fillText(output, x + (compact ? 7 : 11), y + headerHeight + 4 + index * rowHeight);
+      });
+      ctx.globalAlpha = 1;
+
+      // Thin activity meter that keeps moving even while the page is scrolling.
+      const meterWidth = Math.max(12, (width - 16) * ((Math.sin(time * 1.9 + panelIndex) + 1) * .5));
+      ctx.fillStyle = 'rgba(45,212,191,.20)';
+      ctx.fillRect(x + 8, y + panelHeight - 3, width - 16, 1.5);
+      ctx.fillStyle = '#5eead4';
+      ctx.fillRect(x + 8, y + panelHeight - 3, meterWidth, 1.5);
+      ctx.restore();
+      return panelHeight;
     }
 
     function drawCyberAtmosphere(time) {
@@ -2247,39 +2288,56 @@
         }
       });
 
-      if (width > 760 && height > 540) {
-        drawCyberPanel(ctx, 18, 92, 286, '01 // ROOT TERMINAL', [
+      // These four terminal panes are pinned to the viewport corners, so they stay visible on every section while scrolling.
+      if (width > 300 && height > 300) {
+        const compact = width < 980 || height < 620;
+        const narrow = width < 520;
+        const margin = narrow ? 8 : 12;
+        const panelWidth = narrow ? Math.max(132, (width - margin * 3) / 2) : (compact ? Math.min(286, (width - margin * 3) / 2) : 286);
+        const paneRows = narrow ? 3 : (compact ? 4 : 6);
+        const rootRows = [
           'root@sam-node:~# whoami',
           'identity: red-team-ops',
           'ssh tunnel: ESTABLISHED',
           'auth token: {n}A7-OK',
           'kernel audit: RUNNING',
           'packet stream: LIVE'
-        ], time);
-        drawCyberPanel(ctx, width - 304, 92, 286, '02 // NETWORK TRACE', [
+        ].slice(0, paneRows);
+        const networkRows = [
           'interface: eth0 / UP',
           'TLS 1.3: NEGOTIATED',
           'DNS resolver: {n} ms',
           'route map: 06 NODES',
           'IDS monitor: ACTIVE',
           'traffic: ENCRYPTED'
-        ], time);
-        drawCyberPanel(ctx, 18, height - 194, 286, '03 // SYSTEM MONITOR', [
+        ].slice(0, paneRows);
+        const systemRows = [
           'CPU: ' + (34 + Math.floor((Math.sin(time * .7) + 1) * 18)) + '% // NORMAL',
           'MEM: ' + (42 + Math.floor((Math.sin(time * .4 + 1) + 1) * 12)) + '%',
           'processes: 128 / STABLE',
           'firewall: RULESET OK',
           'threats: 00 DETECTED',
           'uptime: 24:18:09'
-        ], time);
-        drawCyberPanel(ctx, width - 304, height - 194, 286, '04 // PACKET INSPECTOR', [
+        ].slice(0, paneRows);
+        const packetRows = [
           'TCP SYN: ACCEPTED',
           'payload: ' + (100 + Math.floor((Math.sin(time) + 1) * 80)) + ' KB/s',
           'origin nodes: 0' + (3 + Math.floor((Math.sin(time * .5) + 1) * 4)),
           'signature: MATCHED',
           'session: {n} / OPEN',
           'capture: STREAMING'
-        ], time);
+        ].slice(0, paneRows);
+
+        const topY = 72;
+        const leftX = margin;
+        const rightX = width - panelWidth - margin;
+        const paneCompact = compact || narrow;
+        const rootHeight = drawCyberPanel(ctx, leftX, topY, panelWidth, '01 // ROOT TERMINAL', rootRows, time, paneCompact, 0);
+        const networkHeight = drawCyberPanel(ctx, rightX, topY, panelWidth, '02 // NETWORK TRACE', networkRows, time, paneCompact, 1);
+        const systemY = Math.max(topY + rootHeight + 10, height - (paneCompact ? 96 : 178));
+        const packetY = Math.max(topY + networkHeight + 10, height - (paneCompact ? 96 : 178));
+        drawCyberPanel(ctx, leftX, systemY, panelWidth, '03 // SYSTEM MONITOR', systemRows, time, paneCompact, 2);
+        drawCyberPanel(ctx, rightX, packetY, panelWidth, '04 // PACKET INSPECTOR', packetRows, time, paneCompact, 3);
       }
 
       if (width > 600) {
@@ -2375,7 +2433,7 @@
           } else {
             // No fixed per-layer speed cap: the scroll timeline drives progress.
             // Velocity only controls how quickly the rendered progress catches up smoothly.
-            const layerSpeed = layer.type === 'text' ? 17 : 14;
+            const layerSpeed = layer.type === 'text' ? 20 : 18;
             const velocityBoost = Math.min(layerSpeed * 0.45, velocity * layerSpeed * 0.35);
             const catchUp = 1 - Math.exp(-dt * (layerSpeed + velocityBoost));
             p = Math.max(previousProgress, previousProgress + (targetProgress - previousProgress) * catchUp);
