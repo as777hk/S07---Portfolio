@@ -139,6 +139,38 @@
       #hero .hero-content-shell { min-height: calc(100svh - 56px); }
     }
 
+    .home-social-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 7px;
+      padding-top: 7px;
+    }
+    .social-quick-btn {
+      display: inline-flex;
+      width: 32px;
+      height: 32px;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(148,163,184,.28);
+      border-radius: 8px;
+      background: rgba(3,8,14,.62);
+      color: rgba(226,232,240,.9);
+      font: 600 11px 'JetBrains Mono', monospace;
+      transition: border-color .18s ease, background .18s ease, color .18s ease, transform .18s ease;
+      cursor: pointer;
+    }
+    .social-quick-btn:hover {
+      color: #fff;
+      border-color: rgba(45,212,191,.7);
+      background: rgba(13,148,136,.16);
+      transform: translateY(-2px);
+    }
+    .social-quick-btn:focus-visible {
+      outline: 2px solid rgba(45,212,191,.8);
+      outline-offset: 2px;
+    }
+
     .security-brand-card {
       position: relative;
       min-height: 112px;
@@ -434,6 +466,10 @@
     #hero .hero-foreground-grid > div:nth-child(2) { grid-column: 2; }
     #hero .hero-foreground-grid > div:last-child { grid-column: 3; }
     #hero .hero-content-shell { text-shadow: 0 2px 10px rgba(0,0,0,.68); }
+    #hero .hero-bg-word {
+      color: rgba(220,38,38,.40) !important;
+      text-shadow: 0 0 28px rgba(220,38,38,.16);
+    }
     @media (max-width: 1023px) {
       #hero .hero-content-shell {
         min-height: calc(100svh - 56px);
@@ -680,6 +716,17 @@
               <span class="w-2 h-2 rounded-full bg-red-600"></span>
               <span>BANGLADESH · GLOBAL SECOPS</span>
             </div>
+            <div class="home-social-row" aria-label="Social and contact links">
+              <a href="https://github.com/as777hk" target="_blank" rel="noopener noreferrer" data-build-layer data-wave="1" data-build-type="box" class="social-quick-btn" aria-label="GitHub" title="GitHub"><span>GH</span></a>
+              <button type="button" data-social-placeholder="LinkedIn" data-build-layer data-wave="1" data-build-type="box" class="social-quick-btn" aria-label="LinkedIn" title="LinkedIn"><span>in</span></button>
+              <button type="button" data-social-placeholder="X" data-build-layer data-wave="1" data-build-type="box" class="social-quick-btn" aria-label="X" title="X"><span>𝕏</span></button>
+              <button type="button" data-social-placeholder="Instagram" data-build-layer data-wave="1" data-build-type="box" class="social-quick-btn" aria-label="Instagram" title="Instagram"><span>◎</span></button>
+              <button type="button" data-social-placeholder="YouTube" data-build-layer data-wave="1" data-build-type="box" class="social-quick-btn" aria-label="YouTube" title="YouTube"><span>▶</span></button>
+              <a href="mailto:mdsamiunislam.ash777@gmail.com" data-build-layer data-wave="1" data-build-type="box" class="social-quick-btn" aria-label="Email" title="Email"><span>✉</span></a>
+              <a href="https://wa.me/8801892930393" target="_blank" rel="noopener noreferrer" data-build-layer data-wave="1" data-build-type="box" class="social-quick-btn" aria-label="WhatsApp" title="WhatsApp"><span>WA</span></a>
+              <a href="tel:+8801892930393" data-build-layer data-wave="1" data-build-type="box" class="social-quick-btn" aria-label="Call" title="Call"><span>☎</span></a>
+            </div>
+            <p id="social-feedback" class="text-[9px] font-mono text-zinc-500 min-h-[12px]" aria-live="polite">SOCIAL CHANNELS // READY</p>
           </div>
 
           <!-- The cinematic video fills this opening section behind the content. -->
@@ -1098,18 +1145,18 @@
         </div>
 
         <div class="lg:col-span-4 space-y-3 text-xs">
-          <a href="#contact" data-contact="sam.scaleup.as777@gmail.com" data-build-layer data-wave="8" data-build-type="text" class="contact-item flex items-center justify-between p-3 rounded-xl bg-zinc-950/80 border border-zinc-900 hover:border-red-500/60 transition-all">
+          <a href="mailto:mdsamiunislam.ash777@gmail.com" data-build-layer data-wave="8" data-build-type="text" class="flex items-center justify-between p-3 rounded-xl bg-zinc-950/80 border border-zinc-900 hover:border-red-500/60 transition-all">
             <span class="flex items-center gap-3">
               <span class="w-8 h-8 rounded-full bg-red-600/15 border border-red-500/40 text-red-500 flex items-center justify-center">✉</span>
               <span>
                 <span class="block text-[10px] font-mono text-zinc-500">EMAIL (PGP AVAILABLE)</span>
-                <span class="text-zinc-200">sam.scaleup.as777@gmail.com</span>
+                <span class="text-zinc-200">mdsamiunislam.ash777@gmail.com</span>
               </span>
             </span>
             <span class="text-zinc-500">↗</span>
           </a>
 
-          <a href="#contact" data-contact="github.com/as777hk" data-build-layer data-wave="8" data-build-type="text" class="contact-item flex items-center justify-between p-3 rounded-xl bg-zinc-950/80 border border-zinc-900 hover:border-red-500/60 transition-all">
+          <a href="https://github.com/as777hk" target="_blank" rel="noopener noreferrer" data-build-layer data-wave="8" data-build-type="text" class="flex items-center justify-between p-3 rounded-xl bg-zinc-950/80 border border-zinc-900 hover:border-red-500/60 transition-all">
             <span class="flex items-center gap-3">
               <span class="w-8 h-8 rounded-full bg-red-600/15 border border-red-500/40 text-red-500 flex items-center justify-center">⌘</span>
               <span>
@@ -1120,12 +1167,23 @@
             <span class="text-zinc-500">↗</span>
           </a>
 
-          <a href="#contact" data-contact="@samiun.sec" data-build-layer data-wave="8" data-build-type="text" class="contact-item flex items-center justify-between p-3 rounded-xl bg-zinc-950/80 border border-zinc-900 hover:border-red-500/60 transition-all">
+          <a href="https://wa.me/8801892930393" target="_blank" rel="noopener noreferrer" data-build-layer data-wave="8" data-build-type="text" class="flex items-center justify-between p-3 rounded-xl bg-zinc-950/80 border border-zinc-900 hover:border-red-500/60 transition-all">
             <span class="flex items-center gap-3">
-              <span class="w-8 h-8 rounded-full bg-red-600/15 border border-red-500/40 text-red-500 flex items-center justify-center">🛡️</span>
+              <span class="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-400/40 text-emerald-300 flex items-center justify-center">WA</span>
               <span>
-                <span class="block text-[10px] font-mono text-zinc-500">SECURITY RESEARCH HANDLE</span>
-                <span class="text-zinc-200">@samiun.sec</span>
+                <span class="block text-[10px] font-mono text-zinc-500">WHATSAPP</span>
+                <span class="text-zinc-200">01892930393</span>
+              </span>
+            </span>
+            <span class="text-zinc-500">↗</span>
+          </a>
+
+          <a href="tel:+8801892930393" data-build-layer data-wave="8" data-build-type="text" class="flex items-center justify-between p-3 rounded-xl bg-zinc-950/80 border border-zinc-900 hover:border-red-500/60 transition-all">
+            <span class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-full bg-red-600/15 border border-red-500/40 text-red-400 flex items-center justify-center">☎</span>
+              <span>
+                <span class="block text-[10px] font-mono text-zinc-500">PHONE</span>
+                <span class="text-zinc-200">01892930393</span>
               </span>
             </span>
             <span class="text-zinc-500">↗</span>
@@ -2036,11 +2094,18 @@
       copyToast.style.opacity = '1';
       setTimeout(() => { copyToast.style.opacity = '0'; }, 2000);
     }
-    document.getElementById('copy-email-btn').addEventListener('click', () => copyTextWithToast('sam.scaleup.as777@gmail.com'));
+    document.getElementById('copy-email-btn').addEventListener('click', () => copyTextWithToast('mdsamiunislam.ash777@gmail.com'));
+    const socialFeedback = document.getElementById('social-feedback');
+    document.querySelectorAll('[data-social-placeholder]').forEach(button => {
+      button.addEventListener('click', () => {
+        const platform = button.dataset.socialPlaceholder || 'Social';
+        if (socialFeedback) socialFeedback.textContent = platform.toUpperCase() + ' // PROFILE LINK WILL BE ADDED';
+      });
+    });
     document.querySelectorAll('.contact-item').forEach(item => {
       item.addEventListener('click', (e) => {
         e.preventDefault();
-        copyTextWithToast(item.dataset.contact || 'sam.scaleup.as777@gmail.com');
+        copyTextWithToast(item.dataset.contact || 'mdsamiunislam.ash777@gmail.com');
       });
     });
 
@@ -2205,16 +2270,16 @@
       const fontSize = compact ? 7.2 : 10;
       const panelHeight = headerHeight + rows.length * rowHeight + 9;
       ctx.save();
-      ctx.fillStyle = compact ? 'rgba(2,12,12,.62)' : 'rgba(2,12,12,.54)';
+      ctx.fillStyle = compact ? 'rgba(2,12,12,.44)' : 'rgba(2,12,12,.38)';
       ctx.fillRect(x, y, width, panelHeight);
-      ctx.strokeStyle = 'rgba(45,212,191,.94)';
+      ctx.strokeStyle = 'rgba(45,212,191,.72)';
       ctx.lineWidth = 1;
       ctx.strokeRect(x + .5, y + .5, width - 1, panelHeight - 1);
 
       // Terminal header and active connection indicators.
       ctx.textBaseline = 'top';
       ctx.font = compact ? '7.2px "JetBrains Mono", monospace' : '10px "JetBrains Mono", monospace';
-      ctx.fillStyle = '#99f6e4';
+      ctx.fillStyle = 'rgba(153,246,228,.86)';
       ctx.fillText(title, x + (compact ? 7 : 11), y + (compact ? 7 : 9));
       const dotX = x + width - (compact ? 30 : 38);
       [0, 1, 2].forEach((dot, i) => {
@@ -2223,7 +2288,7 @@
         ctx.fillRect(dotX + i * (compact ? 7 : 9), y + (compact ? 8 : 12), compact ? 3 : 4, compact ? 3 : 4);
       });
       ctx.globalAlpha = 1;
-      ctx.strokeStyle = 'rgba(45,212,191,.64)';
+      ctx.strokeStyle = 'rgba(45,212,191,.48)';
       ctx.beginPath();
       ctx.moveTo(x + 7, y + headerHeight - 2);
       ctx.lineTo(x + width - 7, y + headerHeight - 2);
@@ -2247,7 +2312,7 @@
         } else if (index > activeLine) {
           output = '› awaiting input';
         }
-        ctx.globalAlpha = index > activeLine ? .32 : 1;
+        ctx.globalAlpha = index > activeLine ? .24 : .86;
         ctx.fillStyle = index % 3 === 0 ? '#a5f3fc' : '#86efac';
         ctx.font = (compact ? '7.2px' : '9.5px') + ' "JetBrains Mono", monospace';
         ctx.fillText(output, x + (compact ? 7 : 11), y + headerHeight + 4 + index * rowHeight);
