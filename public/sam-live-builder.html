@@ -109,9 +109,10 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      width: max(100vw, 177.78vh);
-      height: max(100vh, 56.25vw);
-      transform: translate3d(-50%, -50%, 0) scale(var(--hero-video-cover-scale, 1));
+      width: max(100vw, 56.25vh);
+      height: max(100vh, 177.78vw);
+      transform: translate3d(-50%, -50%, 0);
+      aspect-ratio: 9 / 16;
       border: 0 !important;
       outline: 0 !important;
       display: block;
@@ -120,6 +121,7 @@
     #hero .hero-video-shade {
       position: absolute;
       inset: 0;
+      pointer-events: none;
       background:
         linear-gradient(90deg, rgba(2,7,12,.58) 0%, rgba(2,7,12,.12) 48%, rgba(2,7,12,.58) 100%),
         linear-gradient(180deg, rgba(2,7,12,.30) 0%, rgba(2,7,12,.04) 42%, rgba(2,7,12,.68) 100%);
@@ -376,12 +378,13 @@
     }
     #hero .hero-video-backdrop { inset: 0; overflow: hidden; border: 0; }
     #hero .hero-video-backdrop iframe {
-      width: max(100vw, 177.78vh);
-      height: max(100vh, 56.25vw);
+      width: max(100vw, 56.25vh);
+      height: max(100vh, 177.78vw);
+      aspect-ratio: 9 / 16;
       border: 0 !important;
       outline: 0 !important;
       box-shadow: none !important;
-      transform: translate3d(-50%, -50%, 0) scale(var(--hero-video-cover-scale, 1));
+      transform: translate3d(-50%, -50%, 0);
     }
     #hero .hero-content-shell > .hero-title-stage {
       position: relative;
@@ -610,9 +613,9 @@
       <div class="hero-video-backdrop" aria-hidden="true">
         <iframe
           id="hero-background-video"
-          src="https://www.youtube.com/embed/b1iUs5oj3AU?autoplay=1&amp;mute=1&amp;loop=1&amp;playlist=b1iUs5oj3AU&amp;controls=0&amp;modestbranding=1&amp;rel=0&amp;playsinline=1&amp;iv_load_policy=3"
+          src="https://www.youtube-nocookie.com/embed/b1iUs5oj3AU?autoplay=1&amp;mute=1&amp;loop=1&amp;playlist=b1iUs5oj3AU&amp;controls=0&amp;disablekb=1&amp;fs=0&amp;modestbranding=1&amp;rel=0&amp;playsinline=1&amp;iv_load_policy=3&amp;cc_load_policy=0"
           title="SAM — cinematic cybersecurity opening"
-          allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+          allow="autoplay"
           referrerpolicy="strict-origin-when-cross-origin"
           loading="eager"
         ></iframe>
@@ -2140,16 +2143,6 @@
 
     // Lightweight simulated hacker-atmosphere: terminal streams, packet traces and system panes.
     // It is purely visual and makes no network requests.
-    const heroBackgroundPlayer = document.getElementById('hero-background-video');
-    function updateHeroVideoCover() {
-      if (!heroBackgroundPlayer) return;
-      const viewportAspect = window.innerWidth / Math.max(1, window.innerHeight);
-      const coverScale = Math.max(1, viewportAspect);
-      heroBackgroundPlayer.style.setProperty('--hero-video-cover-scale', coverScale.toFixed(4));
-    }
-    window.addEventListener('resize', updateHeroVideoCover, { passive: true });
-    updateHeroVideoCover();
-
     const cyberAtmosphereCanvas = document.getElementById('cyber-atmosphere-canvas');
     const cyberAtmosphereCtx = cyberAtmosphereCanvas.getContext('2d', { alpha: true });
     let cyberAtmosphereWidth = window.innerWidth;
@@ -2335,12 +2328,13 @@
           const viewportProgress = Math.max(0, Math.min(1,
             (revealStartLine - rect.top) / (revealStartLine - revealFinishLine)
           ));
+          const layerHasEnteredViewport = rect.bottom > 0 && rect.top < window.innerHeight;
           const hasPassedLayer = rect.bottom <= window.innerHeight * 0.14;
           const reachedDocumentEnd = buildPhase === 'SCROLL' && maxObservedScrollY >= maxScrollRange - 12;
-          const forceLayerComplete = buildPhase === 'SCROLL' && (hasPassedLayer || reachedDocumentEnd);
+          const shouldBuildNow = layerHasEnteredViewport || hasPassedLayer || reachedDocumentEnd;
           const targetProgress = buildPhase === 'OPENING'
             ? openingProgress
-            : (forceLayerComplete ? 1 : (layer.isOpening ? 1 : viewportProgress));
+            : (layer.isOpening || shouldBuildNow ? 1 : 0);
           const previousProgress = layer.progress || 0;
           let p;
           if (buildPhase === 'OPENING') {
@@ -2348,8 +2342,8 @@
           } else {
             // No fixed per-layer speed cap: the scroll timeline drives progress.
             // Velocity only controls how quickly the rendered progress catches up smoothly.
-            const layerSpeed = layer.type === 'text' ? 16 : 19;
-            const velocityBoost = Math.min(layerSpeed * 4, velocity * layerSpeed * 2.8);
+            const layerSpeed = layer.type === 'text' ? 22 : 26;
+            const velocityBoost = Math.min(layerSpeed * 2.2, velocity * layerSpeed * 1.8);
             const catchUp = 1 - Math.exp(-dt * (layerSpeed + velocityBoost));
             p = Math.max(previousProgress, previousProgress + (targetProgress - previousProgress) * catchUp);
             if (targetProgress >= 0.999 && targetProgress - p < 0.008) p = 1;
@@ -2440,13 +2434,13 @@
         const agentLayers = activeLayers.slice();
         buildLayers.forEach(layer => {
           const r = layer.screenRect;
-          const recentlyCompleted = layer.state === 'DONE' && layer.completedAt > 0 && now - layer.completedAt < 1150;
+          const recentlyCompleted = layer.state === 'DONE' && layer.completedAt > 0 && now - layer.completedAt < 280;
           const stillVisible = r && r.bottom > -80 && r.top < window.innerHeight + 80 && r.width > 3;
           if (recentlyCompleted && stillVisible && !agentLayers.includes(layer)) agentLayers.push(layer);
         });
         agentLayers.sort((a, b) => a.progress - b.progress);
 
-        const follow = 1 - Math.exp(-dt * (18 + Math.min(12, velocity * 1.5)));
+        const follow = 1 - Math.exp(-dt * (22 + Math.min(10, velocity * 1.2)));
         const responsiveAgentCap = window.innerWidth < 640 ? 6 : window.innerWidth < 1024 ? 12 : 20;
         const galaxyRect = finalGalaxyLayer && finalGalaxyLayer.screenRect;
         const galaxyInFocus = !!(
