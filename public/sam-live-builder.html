@@ -35,20 +35,25 @@
     body {
       background-color: #06070b;
       color: #f4f4f5;
+      isolation: isolate;
       font-family: 'Inter', sans-serif;
       overflow-x: hidden;
     }
     #cyber-atmosphere-canvas {
       position: fixed;
       inset: 0;
-      z-index: 5;
+      z-index: 0;
       width: 100vw;
       height: 100vh;
       pointer-events: none;
-      opacity: .86;
+      opacity: .68;
       mix-blend-mode: screen;
     }
-    main { z-index: 10; }
+    main {
+      position: relative;
+      z-index: 2;
+      background: transparent;
+    }
     /* Oversized crimson PORTFOLIO backdrop */
     #hero .hero-content-shell > .hero-title-stage {
       position: relative;
@@ -105,19 +110,19 @@
       background: #02070b;
       pointer-events: none;
     }
-    #hero .hero-video-backdrop iframe {
+    #hero .hero-video-backdrop video {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      width: max(100vw, 56.25vh);
-      height: max(100vh, 177.78vw);
-      transform: translate3d(-50%, -50%, 0);
-      aspect-ratio: 9 / 16;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
       border: 0 !important;
       outline: 0 !important;
       box-shadow: none !important;
       display: block;
       pointer-events: none;
+      filter: brightness(.62) saturate(1.15) contrast(1.06);
     }
     #hero .hero-video-shade {
       position: absolute;
@@ -410,19 +415,19 @@
       main #hero { width: calc(100% + 28px); margin-left: -28px; }
     }
     #hero .hero-video-backdrop { inset: 0; overflow: hidden; border: 0; }
-    #hero .hero-video-backdrop iframe {
+    #hero .hero-video-backdrop video {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      width: max(100vw, 56.25vh);
-      height: max(100vh, 177.78vw);
-      transform: translate3d(-50%, -50%, 0);
-      aspect-ratio: 9 / 16;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
       border: 0 !important;
       outline: 0 !important;
       box-shadow: none !important;
       display: block;
       pointer-events: none;
+      filter: brightness(.62) saturate(1.15) contrast(1.06);
     }
     #hero .hero-content-shell > .hero-title-stage {
       position: relative;
@@ -653,14 +658,21 @@
     <!-- =================================================================== -->
     <section id="hero" class="relative w-full min-h-[calc(100svh-56px)] isolate overflow-hidden">
       <div class="hero-video-backdrop" aria-hidden="true">
-        <iframe
+        <video
           id="hero-background-video"
-          src="https://www.youtube-nocookie.com/embed/b1iUs5oj3AU?autoplay=1&amp;mute=1&amp;loop=1&amp;playlist=b1iUs5oj3AU&amp;start=3&amp;end=26&amp;controls=0&amp;disablekb=1&amp;fs=0&amp;modestbranding=1&amp;rel=0&amp;playsinline=1&amp;iv_load_policy=3&amp;cc_load_policy=0"
-          title="SAM — cinematic cybersecurity opening"
-          allow="autoplay"
-          referrerpolicy="strict-origin-when-cross-origin"
-          loading="eager"
-        ></iframe>
+          autoplay
+          muted
+          playsinline
+          webkit-playsinline
+          preload="auto"
+          poster="https://at.adobe.com/bhDeReyGLXh2zrlC"
+          disablepictureinpicture
+          disableremoteplayback
+          controlslist="nodownload noplaybackrate noremoteplayback"
+          aria-hidden="true"
+        >
+          <source src="https://at.adobe.com/2W3YVPMXOLWBhBm9" type="video/mp4" />
+        </video>
         <div class="hero-video-shade"></div>
       </div>
       <div class="hero-content-shell relative z-10 min-h-[calc(100svh-56px)] max-w-7xl mx-auto pt-5 pb-14 px-4 sm:px-6 flex flex-col justify-between">
@@ -2214,6 +2226,39 @@
 
     // Lightweight simulated hacker-atmosphere: terminal streams, packet traces and system panes.
     // It is purely visual and makes no network requests.
+    const heroBackgroundVideo = document.getElementById('hero-background-video');
+    if (heroBackgroundVideo) {
+      heroBackgroundVideo.muted = true;
+      heroBackgroundVideo.defaultMuted = true;
+      heroBackgroundVideo.controls = false;
+      heroBackgroundVideo.loop = false;
+      heroBackgroundVideo.disablePictureInPicture = true;
+      heroBackgroundVideo.disableRemotePlayback = true;
+      heroBackgroundVideo.playsInline = true;
+
+      const playHeroBackground = () => {
+        if (heroBackgroundVideo.readyState < 1) return;
+        if (heroBackgroundVideo.currentTime < 0.95) {
+          try { heroBackgroundVideo.currentTime = 1; } catch (_) {}
+        }
+        const attempt = heroBackgroundVideo.play();
+        if (attempt && typeof attempt.catch === 'function') attempt.catch(() => {});
+      };
+
+      heroBackgroundVideo.addEventListener('loadedmetadata', playHeroBackground, { once: true });
+      heroBackgroundVideo.addEventListener('canplay', () => {
+        if (heroBackgroundVideo.paused) playHeroBackground();
+      });
+      heroBackgroundVideo.addEventListener('ended', () => {
+        heroBackgroundVideo.currentTime = 1;
+        playHeroBackground();
+      });
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && heroBackgroundVideo.paused) playHeroBackground();
+      });
+      if (heroBackgroundVideo.readyState >= 1) playHeroBackground();
+    }
+
     const cyberAtmosphereCanvas = document.getElementById('cyber-atmosphere-canvas');
     const cyberAtmosphereCtx = cyberAtmosphereCanvas.getContext('2d', { alpha: true });
     let cyberAtmosphereWidth = window.innerWidth;
@@ -2462,9 +2507,9 @@
           const hasPassedLayer = rect.bottom <= window.innerHeight * 0.14;
           const reachedDocumentEnd = buildPhase === 'SCROLL' && maxObservedScrollY >= maxScrollRange - 12;
           const shouldBuildNow = layerHasEnteredViewport || hasPassedLayer || reachedDocumentEnd;
-          const targetProgress = buildPhase === 'OPENING'
+          const targetProgress = buildPhase === 'OPENING' && layer.isOpening
             ? openingProgress
-            : (layer.isOpening || shouldBuildNow ? 1 : 0);
+            : (shouldBuildNow ? 1 : 0);
           const previousProgress = layer.progress || 0;
           let p;
           if (buildPhase === 'OPENING') {
