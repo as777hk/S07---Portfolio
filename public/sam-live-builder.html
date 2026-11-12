@@ -665,13 +665,13 @@
           playsinline
           webkit-playsinline
           preload="auto"
-          poster="https://at.adobe.com/bhDeReyGLXh2zrlC"
+          poster="https://at.adobe.com/VomkV7Uz6Xowj1Qm"
           disablepictureinpicture
           disableremoteplayback
           controlslist="nodownload noplaybackrate noremoteplayback"
           aria-hidden="true"
         >
-          <source src="https://at.adobe.com/2W3YVPMXOLWBhBm9" type="video/mp4" />
+          <source src="https://at.adobe.com/mh3Q96XbkJrczOR3" type="video/mp4" />
         </video>
         <div class="hero-video-shade"></div>
       </div>
@@ -2238,8 +2238,8 @@
 
       const playHeroBackground = () => {
         if (heroBackgroundVideo.readyState < 1) return;
-        if (heroBackgroundVideo.currentTime < 0.95) {
-          try { heroBackgroundVideo.currentTime = 1; } catch (_) {}
+        if (heroBackgroundVideo.currentTime < 4) {
+          try { heroBackgroundVideo.currentTime = 4; } catch (_) {}
         }
         const attempt = heroBackgroundVideo.play();
         if (attempt && typeof attempt.catch === 'function') attempt.catch(() => {});
