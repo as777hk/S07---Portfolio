@@ -45,7 +45,7 @@
       width: 100vw;
       height: 100vh;
       pointer-events: none;
-      opacity: .62;
+      opacity: .86;
       mix-blend-mode: screen;
     }
     main { z-index: 10; }
@@ -105,18 +105,19 @@
       background: #02070b;
       pointer-events: none;
     }
-    #hero .hero-video-backdrop iframe {
+    #hero .hero-video-backdrop video {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      width: max(100vw, 56.25vh);
-      height: max(100vh, 177.78vw);
-      transform: translate3d(-50%, -50%, 0);
-      aspect-ratio: 9 / 16;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      transform: none;
       border: 0 !important;
       outline: 0 !important;
       display: block;
       pointer-events: none;
+      filter: brightness(.62) saturate(1.15) contrast(1.06);
     }
     #hero .hero-video-shade {
       position: absolute;
@@ -263,7 +264,7 @@
       .security-brand-logo-panel { width: 120px; }
     }
     @media (max-width: 640px) {
-      #cyber-atmosphere-canvas { opacity: .48; }
+      #cyber-atmosphere-canvas { opacity: .68; }
     }
     @media (prefers-reduced-motion: reduce) {
       .security-brand-card, .tool-logo-chip { transition: none; }
@@ -377,14 +378,19 @@
       main #hero { width: calc(100% + 28px); margin-left: -28px; }
     }
     #hero .hero-video-backdrop { inset: 0; overflow: hidden; border: 0; }
-    #hero .hero-video-backdrop iframe {
-      width: max(100vw, 56.25vh);
-      height: max(100vh, 177.78vw);
-      aspect-ratio: 9 / 16;
+    #hero .hero-video-backdrop video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      transform: none;
       border: 0 !important;
       outline: 0 !important;
-      box-shadow: none !important;
-      transform: translate3d(-50%, -50%, 0);
+      display: block;
+      pointer-events: none;
+      filter: brightness(.62) saturate(1.15) contrast(1.06);
     }
     #hero .hero-content-shell > .hero-title-stage {
       position: relative;
@@ -611,14 +617,22 @@
     <!-- =================================================================== -->
     <section id="hero" class="relative w-full min-h-[calc(100svh-56px)] isolate overflow-hidden">
       <div class="hero-video-backdrop" aria-hidden="true">
-        <iframe
+        <video
           id="hero-background-video"
-          src="https://www.youtube-nocookie.com/embed/b1iUs5oj3AU?autoplay=1&amp;mute=1&amp;loop=1&amp;playlist=b1iUs5oj3AU&amp;controls=0&amp;disablekb=1&amp;fs=0&amp;modestbranding=1&amp;rel=0&amp;playsinline=1&amp;iv_load_policy=3&amp;cc_load_policy=0"
-          title="SAM — cinematic cybersecurity opening"
-          allow="autoplay"
-          referrerpolicy="strict-origin-when-cross-origin"
-          loading="eager"
-        ></iframe>
+          autoplay
+          muted
+          loop
+          playsinline
+          webkit-playsinline
+          preload="auto"
+          poster="https://at.adobe.com/bhDeReyGLXh2zrlC"
+          disablepictureinpicture
+          disableremoteplayback
+          controlslist="nodownload noplaybackrate noremoteplayback"
+        >
+          <source src="https://at.adobe.com/GXewpS6Ze4LmudIE" type="video/mp4" />
+          <source src="https://at.adobe.com/siYymIo58VWGyGqH" type="video/mp4" />
+        </video>
         <div class="hero-video-shade"></div>
       </div>
       <div class="hero-content-shell relative z-10 min-h-[calc(100svh-56px)] max-w-7xl mx-auto pt-5 pb-14 px-4 sm:px-6 flex flex-col justify-between">
@@ -2143,6 +2157,24 @@
 
     // Lightweight simulated hacker-atmosphere: terminal streams, packet traces and system panes.
     // It is purely visual and makes no network requests.
+    const heroBackgroundVideo = document.getElementById('hero-background-video');
+    if (heroBackgroundVideo) {
+      heroBackgroundVideo.muted = true;
+      heroBackgroundVideo.defaultMuted = true;
+      heroBackgroundVideo.controls = false;
+      heroBackgroundVideo.disablePictureInPicture = true;
+      heroBackgroundVideo.playsInline = true;
+      const playHeroBackground = () => {
+        const attempt = heroBackgroundVideo.play();
+        if (attempt && typeof attempt.catch === 'function') attempt.catch(() => {});
+      };
+      heroBackgroundVideo.addEventListener('canplay', playHeroBackground, { once: true });
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && heroBackgroundVideo.paused) playHeroBackground();
+      });
+      playHeroBackground();
+    }
+
     const cyberAtmosphereCanvas = document.getElementById('cyber-atmosphere-canvas');
     const cyberAtmosphereCtx = cyberAtmosphereCanvas.getContext('2d', { alpha: true });
     let cyberAtmosphereWidth = window.innerWidth;
@@ -2157,36 +2189,37 @@
       cyberAtmosphereCanvas.width = Math.ceil(cyberAtmosphereWidth * scale);
       cyberAtmosphereCanvas.height = Math.ceil(cyberAtmosphereHeight * scale);
       cyberAtmosphereCtx.setTransform(scale, 0, 0, scale, 0, 0);
-      const columns = Math.max(12, Math.min(42, Math.floor(cyberAtmosphereWidth / (cyberAtmosphereWidth < 640 ? 42 : 36))));
+      const columns = Math.max(16, Math.min(58, Math.floor(cyberAtmosphereWidth / (cyberAtmosphereWidth < 640 ? 34 : 30))));
       cyberDrops = Array.from({ length: columns }, (_, i) => ({
         x: (i + .5) * (cyberAtmosphereWidth / columns),
         y: -((i * 83) % Math.max(160, cyberAtmosphereHeight)),
-        speed: 34 + ((i * 19) % 47),
-        length: 7 + (i % 9),
+        speed: 42 + ((i * 19) % 54),
+        length: 9 + (i % 8),
         seed: i * 19 + 7
       }));
     }
 
     function drawCyberPanel(ctx, x, y, width, title, rows, time) {
-      const height = 34 + rows.length * 15;
-      ctx.fillStyle = 'rgba(2,12,12,.82)';
+      const height = 42 + rows.length * 18;
+      ctx.fillStyle = 'rgba(2,12,12,.52)';
       ctx.fillRect(x, y, width, height);
-      ctx.strokeStyle = 'rgba(45,212,191,.72)';
+      ctx.strokeStyle = 'rgba(45,212,191,.92)';
       ctx.lineWidth = 1;
       ctx.strokeRect(x + .5, y + .5, width - 1, height - 1);
-      ctx.fillStyle = 'rgba(94,234,212,.98)';
-      ctx.font = '9px "JetBrains Mono", monospace';
+      ctx.fillStyle = '#99f6e4';
+      ctx.font = '11px "JetBrains Mono", monospace';
       ctx.textBaseline = 'top';
-      ctx.fillText(title, x + 9, y + 8);
-      ctx.strokeStyle = 'rgba(45,212,191,.48)';
+      ctx.fillText(title, x + 12, y + 10);
+      ctx.strokeStyle = 'rgba(45,212,191,.68)';
       ctx.beginPath();
-      ctx.moveTo(x + 8, y + 23);
-      ctx.lineTo(x + width - 8, y + 23);
+      ctx.moveTo(x + 10, y + 29);
+      ctx.lineTo(x + width - 10, y + 29);
       ctx.stroke();
       rows.forEach((row, index) => {
         const n = ((Math.floor(time * 2) + index * 47) % 255).toString(16).padStart(2, '0').toUpperCase();
-        ctx.fillStyle = index % 3 === 0 ? 'rgba(165,243,252,.92)' : 'rgba(134,239,172,.86)';
-        ctx.fillText(row.replace('{n}', n), x + 9, y + 29 + index * 15);
+        ctx.fillStyle = index % 3 === 0 ? '#a5f3fc' : '#86efac';
+        ctx.font = '10px "JetBrains Mono", monospace';
+        ctx.fillText(row.replace('{n}', n), x + 12, y + 37 + index * 18);
       });
     }
 
@@ -2215,7 +2248,7 @@
       });
 
       if (width > 760 && height > 540) {
-        drawCyberPanel(ctx, 18, 92, 238, '01 // ROOT TERMINAL', [
+        drawCyberPanel(ctx, 18, 92, 286, '01 // ROOT TERMINAL', [
           'root@sam-node:~# whoami',
           'identity: red-team-ops',
           'ssh tunnel: ESTABLISHED',
@@ -2223,7 +2256,7 @@
           'kernel audit: RUNNING',
           'packet stream: LIVE'
         ], time);
-        drawCyberPanel(ctx, width - 256, 92, 238, '02 // NETWORK TRACE', [
+        drawCyberPanel(ctx, width - 304, 92, 286, '02 // NETWORK TRACE', [
           'interface: eth0 / UP',
           'TLS 1.3: NEGOTIATED',
           'DNS resolver: {n} ms',
@@ -2231,7 +2264,7 @@
           'IDS monitor: ACTIVE',
           'traffic: ENCRYPTED'
         ], time);
-        drawCyberPanel(ctx, 18, height - 166, 238, '03 // SYSTEM MONITOR', [
+        drawCyberPanel(ctx, 18, height - 194, 286, '03 // SYSTEM MONITOR', [
           'CPU: ' + (34 + Math.floor((Math.sin(time * .7) + 1) * 18)) + '% // NORMAL',
           'MEM: ' + (42 + Math.floor((Math.sin(time * .4 + 1) + 1) * 12)) + '%',
           'processes: 128 / STABLE',
@@ -2239,7 +2272,7 @@
           'threats: 00 DETECTED',
           'uptime: 24:18:09'
         ], time);
-        drawCyberPanel(ctx, width - 256, height - 166, 238, '04 // PACKET INSPECTOR', [
+        drawCyberPanel(ctx, width - 304, height - 194, 286, '04 // PACKET INSPECTOR', [
           'TCP SYN: ACCEPTED',
           'payload: ' + (100 + Math.floor((Math.sin(time) + 1) * 80)) + ' KB/s',
           'origin nodes: 0' + (3 + Math.floor((Math.sin(time * .5) + 1) * 4)),
@@ -2267,8 +2300,8 @@
         });
       }
 
-      const scanY = (time * 24) % Math.max(1, height);
-      ctx.strokeStyle = 'rgba(34,197,94,.055)';
+      const scanY = (time * 38) % Math.max(1, height);
+      ctx.strokeStyle = 'rgba(34,197,94,.16)';
       ctx.beginPath();
       ctx.moveTo(0, scanY);
       ctx.lineTo(width, scanY);
@@ -2342,8 +2375,8 @@
           } else {
             // No fixed per-layer speed cap: the scroll timeline drives progress.
             // Velocity only controls how quickly the rendered progress catches up smoothly.
-            const layerSpeed = layer.type === 'text' ? 22 : 26;
-            const velocityBoost = Math.min(layerSpeed * 2.2, velocity * layerSpeed * 1.8);
+            const layerSpeed = layer.type === 'text' ? 17 : 14;
+            const velocityBoost = Math.min(layerSpeed * 0.45, velocity * layerSpeed * 0.35);
             const catchUp = 1 - Math.exp(-dt * (layerSpeed + velocityBoost));
             p = Math.max(previousProgress, previousProgress + (targetProgress - previousProgress) * catchUp);
             if (targetProgress >= 0.999 && targetProgress - p < 0.008) p = 1;
@@ -2440,7 +2473,7 @@
         });
         agentLayers.sort((a, b) => a.progress - b.progress);
 
-        const follow = 1 - Math.exp(-dt * (22 + Math.min(10, velocity * 1.2)));
+        const follow = 1 - Math.exp(-dt * (18 + Math.min(8, velocity * 0.9)));
         const responsiveAgentCap = window.innerWidth < 640 ? 6 : window.innerWidth < 1024 ? 12 : 20;
         const galaxyRect = finalGalaxyLayer && finalGalaxyLayer.screenRect;
         const galaxyInFocus = !!(
@@ -2573,7 +2606,7 @@
       }
 
       if (document.visibilityState === 'visible') {
-        const cyberFrameInterval = window.innerWidth < 640 ? 100 : 80;
+        const cyberFrameInterval = window.innerWidth < 640 ? 90 : 70;
         if (now - lastCyberAtmosphereDrawAt >= cyberFrameInterval) {
           drawCyberAtmosphere(t);
           lastCyberAtmosphereDrawAt = now;
