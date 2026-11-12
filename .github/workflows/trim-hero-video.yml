@@ -1,0 +1,65 @@
+name: Prepare trimmed hero video
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/trim-hero-video.yml
+      - public/sam-live-builder.html
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  trim-hero-video:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout portfolio
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Prepare media directory
+        run: mkdir -p public/media
+
+      - name: Trim first three seconds and encode browser-friendly MP4
+        env:
+          SOURCE_URL: https://at.adobe.com/GXewpS6Ze4LmudIE
+        run: |
+          if [ -s public/media/sam-hero-trimmed.mp4 ]; then
+            echo "Trimmed hero video already exists; no action needed."
+            exit 0
+          fi
+
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          curl --fail --location --retry 4 --retry-all-errors --connect-timeout 30 "$SOURCE_URL" --output /tmp/hero-source.mp4
+          ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 /tmp/hero-source.mp4
+
+          ffmpeg -hide_banner -y -ss 3 -i /tmp/hero-source.mp4 \
+            -an \
+            -vf "fps=24,scale=480:480:flags=lanczos,format=yuv420p" \
+            -c:v libx264 -preset veryfast -crf 33 -maxrate 500k -bufsize 1000k \
+            -movflags +faststart -t 22.890 \
+            public/media/sam-hero-trimmed.mp4
+
+          ffprobe -v error -show_entries format=duration:stream=codec_name,width,height,r_frame_rate -of json public/media/sam-hero-trimmed.mp4
+
+      - name: Commit trimmed video
+        run: |
+          if [ ! -s public/media/sam-hero-trimmed.mp4 ]; then
+            echo "Trimmed video not found."
+            exit 1
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/media/sam-hero-trimmed.mp4
+          if git diff --cached --quiet; then
+            echo "No trimmed video changes to commit."
+          else
+            git commit -m "Add first-three-seconds-trimmed hero video"
+            git push
+          fi
