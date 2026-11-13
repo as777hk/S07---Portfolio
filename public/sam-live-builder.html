@@ -2538,7 +2538,7 @@
           } else {
             // No fixed per-layer speed cap: the scroll timeline drives progress.
             // Velocity only controls how quickly the rendered progress catches up smoothly.
-            const layerSpeed = layer.type === 'text' ? 20 : 18;
+            const layerSpeed = layer.type === 'text' ? 14 : 12;
             const velocityBoost = Math.min(layerSpeed * 0.45, velocity * layerSpeed * 0.35);
             const catchUp = 1 - Math.exp(-dt * (layerSpeed + velocityBoost));
             p = Math.max(previousProgress, previousProgress + (targetProgress - previousProgress) * catchUp);
@@ -2636,7 +2636,7 @@
         });
         agentLayers.sort((a, b) => a.progress - b.progress);
 
-        const follow = 1 - Math.exp(-dt * (18 + Math.min(8, velocity * 0.9)));
+        const follow = 1 - Math.exp(-dt * (14 + Math.min(6, velocity * 0.7)));
         const responsiveAgentCap = window.innerWidth < 640 ? 6 : window.innerWidth < 1024 ? 12 : 20;
         const galaxyRect = finalGalaxyLayer && finalGalaxyLayer.screenRect;
         const galaxyInFocus = !!(
