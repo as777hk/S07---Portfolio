@@ -2,6 +2,8 @@
 
 A personal website for Samiun Islam, centred on cybersecurity and extending into creative engineering, interactive web, 3D, VFX and motion exploration.
 
+**Live portfolio:** https://sam07.vercel.app
+
 ## Design direction
 Cybernetic Minimalism: a restrained graphite palette, signal-cyan accents, editorial typography, considered whitespace and purposeful motion. The visible brand is **SAMIUN** — no invented studio or sub-brand.
 
