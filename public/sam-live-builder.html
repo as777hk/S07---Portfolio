@@ -529,6 +529,113 @@
       #hero .hero-foreground-grid { gap: 22px; }
       #hero .hero-foreground-grid > div:last-child { padding-top: 4px; }
     }
+  
+    /* MOBILE NAVIGATION + RESPONSIVE HERO CORRECTIONS */
+    @media (max-width: 767px) {
+      html, body {
+        width: 100%;
+        overflow-x: hidden;
+      }
+      header > div {
+        height: auto !important;
+        min-height: 56px;
+        padding: 10px 14px !important;
+        flex-wrap: wrap;
+        column-gap: 14px;
+        row-gap: 8px;
+      }
+      header .mobile-site-nav {
+        display: flex !important;
+        order: 3;
+        width: 100%;
+        min-width: 0;
+        gap: 18px;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        padding: 7px 0 3px;
+        border-top: 1px solid rgba(148,163,184,.14);
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+      }
+      header .mobile-site-nav::-webkit-scrollbar { display: none; }
+      header .mobile-site-nav a {
+        flex: 0 0 auto;
+        white-space: nowrap;
+        font-size: 10px;
+        line-height: 1.5;
+      }
+      main {
+        min-width: 0;
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+      }
+      main #hero {
+        width: calc(100% + 24px);
+        margin-left: -12px;
+        margin-right: 0;
+      }
+      #hero .hero-content-shell {
+        min-height: auto;
+        gap: 18px;
+        padding: 16px 16px 34px;
+      }
+      #hero .hero-content-shell > .hero-title-stage {
+        min-height: 0;
+        gap: 14px;
+        padding-block: 10px 20px;
+      }
+      #hero .hero-bg-word {
+        max-width: 100%;
+        font-size: clamp(2.2rem, 10.8vw, 3.5rem);
+        line-height: .96;
+        white-space: nowrap;
+      }
+      #hero .hero-foreground-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 20px;
+      }
+      #hero .hero-foreground-grid > div {
+        grid-column: 1 !important;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        margin: 0 !important;
+      }
+      #hero .hero-foreground-grid > div:nth-child(2) {
+        display: none !important;
+      }
+      #hero .hero-foreground-grid > div:last-child {
+        align-items: flex-start !important;
+        padding-top: 0 !important;
+      }
+      #hero .hero-foreground-grid h1 {
+        font-size: clamp(3.2rem, 16vw, 4.6rem);
+        line-height: .92;
+      }
+      .home-social-row {
+        flex-wrap: wrap;
+        gap: 7px;
+      }
+      section:not(#hero) { scroll-margin-top: 104px; }
+      img, video, canvas, svg { max-width: 100%; }
+      .grid, .flex { min-width: 0; }
+      .grid > *, .flex > * { min-width: 0; }
+    }
+
+    @media (min-width: 768px) and (max-width: 1023px) {
+      header .mobile-site-nav { gap: 14px; }
+      header .mobile-site-nav a { font-size: 10px; }
+      #hero .hero-foreground-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+      }
+      #hero .hero-foreground-grid > div {
+        grid-column: 1 !important;
+      }
+      #hero .hero-foreground-grid > div:nth-child(2) {
+        display: none !important;
+      }
+    }
+
   </style>
 </head>
 <body class="selection:bg-red-600 selection:text-white">
@@ -643,7 +750,7 @@
         SAM<span class="text-red-600">.</span>
       </a>
 
-      <nav class="hidden md:flex items-center gap-7 text-xs font-medium text-zinc-400">
+      <nav class="mobile-site-nav hidden md:flex items-center gap-7 text-xs font-medium text-zinc-400" aria-label="Primary navigation">
         <a href="#karya" data-build-layer data-wave="1" data-build-type="text" class="hover:text-white transition-colors">Operations</a>
         <a href="#awards" data-build-layer data-wave="1" data-build-type="text" class="hover:text-white transition-colors">Recognition</a>
         <a href="#raw-to-real" data-build-layer data-wave="1" data-build-type="text" class="hover:text-white transition-colors">Zero-Trust</a>
@@ -685,9 +792,11 @@
           disablepictureinpicture
           disableremoteplayback
           controlslist="nodownload noplaybackrate noremoteplayback"
+          poster="https://images.pexels.com/videos/6330773/pexels-photo-6330773.jpeg?auto=compress&amp;dpr=1&amp;h=750&amp;w=1260"
           aria-hidden="true"
         >
-          <source src="https://at.adobe.com/gHyQ2iSB1DC5rDvC" type="video/mp4" />
+          <!-- Pexels background footage (video 6330773, Matias Mango; free under the Pexels license). -->
+          <source src="https://videos.pexels.com/video-files/6330773/6330773-hd_1920_1080_30fps.mp4" type="video/mp4" />
         </video>
         <div class="hero-video-shade"></div>
       </div>
@@ -2244,12 +2353,12 @@
     // It is purely visual and makes no network requests.
     const heroBackgroundVideo = document.getElementById('hero-background-video');
     if (heroBackgroundVideo) {
-      const HERO_START_SECONDS = 4;
+      const HERO_START_SECONDS = 0.12;
       let heroSeekingToStart = false;
       heroBackgroundVideo.muted = true;
       heroBackgroundVideo.defaultMuted = true;
       heroBackgroundVideo.controls = false;
-      heroBackgroundVideo.loop = false;
+      heroBackgroundVideo.loop = true;
       heroBackgroundVideo.disablePictureInPicture = true;
       heroBackgroundVideo.disableRemotePlayback = true;
       heroBackgroundVideo.playsInline = true;
@@ -2276,11 +2385,6 @@
       });
       heroBackgroundVideo.addEventListener('canplay', () => {
         if (heroBackgroundVideo.paused) playHeroBackground();
-      });
-      heroBackgroundVideo.addEventListener('ended', () => {
-        heroSeekingToStart = true;
-        try { heroBackgroundVideo.currentTime = HERO_START_SECONDS; }
-        catch (_) { heroSeekingToStart = false; }
       });
       heroBackgroundVideo.addEventListener('error', () => {
         console.error('Hero video failed to load:', heroBackgroundVideo.error);
