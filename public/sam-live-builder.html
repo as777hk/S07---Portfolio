@@ -636,6 +636,109 @@
       }
     }
 
+  
+    /* ARTHUR AIRES-INSPIRED SECTION NAV — adapted to SAM's cybernetic visual system */
+    .mobile-site-nav {
+      align-items: center;
+    }
+    .mobile-site-nav a {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      flex: 0 0 auto;
+      padding: 10px 0 11px;
+      color: rgba(203,213,225,.72);
+      font: 600 9px/1.2 'JetBrains Mono', monospace;
+      letter-spacing: .075em;
+      white-space: nowrap;
+      transition: color .22s ease, transform .22s ease;
+    }
+    .mobile-site-nav a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 3px;
+      height: 1px;
+      width: 0;
+      background: linear-gradient(90deg, #dc2626, #fb7185);
+      box-shadow: 0 0 10px rgba(220,38,38,.45);
+      transition: width .25s ease;
+    }
+    .mobile-site-nav a:hover,
+    .mobile-site-nav a:focus-visible,
+    .mobile-site-nav a.is-active {
+      color: #fff;
+      transform: translateY(-1px);
+    }
+    .mobile-site-nav a:hover::after,
+    .mobile-site-nav a:focus-visible::after,
+    .mobile-site-nav a.is-active::after {
+      width: 100%;
+    }
+    .mobile-site-nav a:focus-visible {
+      outline: 1px solid rgba(248,113,113,.65);
+      outline-offset: 5px;
+    }
+    .section-anchor-alias {
+      position: relative;
+      display: block;
+      height: 0;
+      scroll-margin-top: 112px;
+    }
+    #achievements, #skills, #experience, #contact, #karya, #raw-to-real {
+      scroll-margin-top: 88px;
+    }
+    @media (max-width: 1023px) {
+      header > div {
+        height: auto !important;
+        min-height: 56px;
+        flex-wrap: wrap;
+        row-gap: 6px;
+        padding: 9px 18px !important;
+      }
+      header .mobile-site-nav {
+        display: flex !important;
+        order: 3;
+        width: 100%;
+        min-width: 0;
+        gap: clamp(16px, 3.1vw, 28px);
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        padding: 6px 1px 4px;
+        border-top: 1px solid rgba(148,163,184,.13);
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+      }
+      header .mobile-site-nav::-webkit-scrollbar { display: none; }
+      header .mobile-site-nav a {
+        font-size: 9px;
+        padding: 8px 0 10px;
+      }
+    }
+    @media (max-width: 640px) {
+      header > div {
+        padding: 8px 13px !important;
+      }
+      header .mobile-site-nav {
+        gap: 20px;
+        margin-right: -3px;
+      }
+      header .mobile-site-nav a {
+        font-size: 8px;
+        letter-spacing: .045em;
+      }
+      #achievements, #skills, #experience, #contact, #karya, #raw-to-real {
+        scroll-margin-top: 108px;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .mobile-site-nav a,
+      .mobile-site-nav a::after {
+        transition: none;
+      }
+    }
+
   </style>
 </head>
 <body class="selection:bg-red-600 selection:text-white">
@@ -750,13 +853,13 @@
         SAM<span class="text-red-600">.</span>
       </a>
 
-      <nav class="mobile-site-nav hidden md:flex items-center gap-7 text-xs font-medium text-zinc-400" aria-label="Primary navigation">
-        <a href="#karya" data-build-layer data-wave="1" data-build-type="text" class="hover:text-white transition-colors">Operations</a>
-        <a href="#awards" data-build-layer data-wave="1" data-build-type="text" class="hover:text-white transition-colors">Recognition</a>
-        <a href="#raw-to-real" data-build-layer data-wave="1" data-build-type="text" class="hover:text-white transition-colors">Zero-Trust</a>
-        <a href="#skills" data-build-layer data-wave="1" data-build-type="text" class="hover:text-white transition-colors">Arsenal</a>
-        <a href="#journey" data-build-layer data-wave="1" data-build-type="text" class="hover:text-white transition-colors">Journey</a>
-        <a href="#contact" data-build-layer data-wave="1" data-build-type="text" class="hover:text-white transition-colors">Contact</a>
+      <nav class="mobile-site-nav hidden md:flex items-center gap-7" aria-label="Primary navigation">
+        <a href="#karya" data-build-layer data-wave="1" data-build-type="text">// OPERATIONS</a>
+        <a href="#achievements" data-build-layer data-wave="1" data-build-type="text">// ACHIEVEMENTS</a>
+        <a href="#raw-to-real" data-build-layer data-wave="1" data-build-type="text">// ZERO-TRUST</a>
+        <a href="#skills" data-build-layer data-wave="1" data-build-type="text">// SKILLS</a>
+        <a href="#experience" data-build-layer data-wave="1" data-build-type="text">// EXPERIENCE</a>
+        <a href="#contact" data-build-layer data-wave="1" data-build-type="text">// CONTACT</a>
       </nav>
 
       <div class="flex items-center gap-2.5">
@@ -999,10 +1102,11 @@
     <!-- =================================================================== -->
     <!-- WAVE 4: RECOGNITION & HALL OF FAME — "THE AUDITS. THE RECOGNITION." -->
     <!-- =================================================================== -->
-    <section id="awards" class="py-20 max-w-7xl mx-auto px-4 sm:px-6 border-b border-zinc-900">
+    <section id="achievements" class="py-20 max-w-7xl mx-auto px-4 sm:px-6 border-b border-zinc-900">
+      <span id="awards" class="section-anchor-alias" aria-hidden="true"></span>
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         <div class="lg:col-span-5 space-y-5">
-          <p data-build-layer data-wave="4" data-build-type="text" class="font-mono text-[10px] uppercase tracking-widest text-zinc-400">CERTIFICATIONS, CTFs &amp; BOUNTIES</p>
+          <p data-build-layer data-wave="4" data-build-type="text" class="font-mono text-[10px] uppercase tracking-[.18em] text-zinc-400"><span class="text-red-500">// ACHIEVEMENTS</span><span class="text-zinc-600"> / CERTIFICATIONS, CTFs &amp; BOUNTIES</span></p>
           <h2 data-build-layer data-wave="4" data-build-type="text" class="font-display text-5xl sm:text-6xl uppercase leading-none text-white">
             THE AUDITS.<br />
             <span class="text-red-600">THE RECOGNITION.</span>
@@ -1087,7 +1191,7 @@
     <section id="skills" class="py-20 max-w-7xl mx-auto px-4 sm:px-6 border-b border-zinc-900">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-12">
         <div class="lg:col-span-7">
-          <p data-build-layer data-wave="6" data-build-type="text" class="font-mono text-[10px] uppercase tracking-widest text-zinc-400 mb-1">03 / BEHIND THE FIREWALL</p>
+          <p data-build-layer data-wave="6" data-build-type="text" class="font-mono text-[10px] uppercase tracking-[.18em] text-zinc-400 mb-1"><span class="text-red-500">// SKILLS</span><span class="text-zinc-600"> / 03 — BEHIND THE FIREWALL</span></p>
           <h2 data-build-layer data-wave="6" data-build-type="text" class="font-display text-4xl sm:text-6xl uppercase leading-none text-white">
             MORE THAN TOOLS.<br />
             IT'S ADVERSARY <span class="text-red-600">MINDSET.</span>
@@ -1173,10 +1277,11 @@
     <!-- =================================================================== -->
     <!-- WAVE 7: 04 / THE JOURNEY — "ALWAYS PROBING. ALWAYS SECURING."       -->
     <!-- =================================================================== -->
-    <section id="journey" class="py-20 max-w-7xl mx-auto px-4 sm:px-6 border-b border-zinc-900">
+    <section id="experience" class="py-20 max-w-7xl mx-auto px-4 sm:px-6 border-b border-zinc-900">
+      <span id="journey" class="section-anchor-alias" aria-hidden="true"></span>
       <div class="flex items-end justify-between mb-12">
         <div>
-          <p data-build-layer data-wave="7" data-build-type="text" class="font-mono text-[10px] uppercase tracking-widest text-zinc-400 mb-1">04 / THE JOURNEY</p>
+          <p data-build-layer data-wave="7" data-build-type="text" class="font-mono text-[10px] uppercase tracking-[.18em] text-zinc-400 mb-1"><span class="text-red-500">// EXPERIENCE</span><span class="text-zinc-600"> / 04 — THE JOURNEY</span></p>
           <h2 data-build-layer data-wave="7" data-build-type="text" class="font-display text-4xl sm:text-6xl uppercase text-white">
             ALWAYS PROBING. ALWAYS SECURING<span class="text-red-600">.</span>
           </h2>
