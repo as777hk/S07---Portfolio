@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#14101b" />
+  <meta name="description" content="Security notes, practical research and field observations on application security, offensive testing and resilient systems by SAM." />
+  <title>SAM — Security Journal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      color-scheme:dark;
+      --bg:#14101b;
+      --panel:#1b1723;
+      --panel-2:#211b2a;
+      --line:rgba(221,213,232,.12);
+      --line-strong:rgba(221,213,232,.2);
+      --text:#f5f2f8;
+      --muted:#aaa2b4;
+      --dim:#766f80;
+      --red:#e3313b;
+      --red-soft:#ff6871;
+      --lime:#d3f36b;
+      --max:1180px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;scroll-padding-top:88px}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif;line-height:1.55;overflow-x:hidden}
+    a{color:inherit;text-decoration:none}
+    button,input{font:inherit}
+    button{color:inherit}
+    .shell{width:min(var(--max),calc(100% - 48px));margin-inline:auto}
+    .mono{font-family:"JetBrains Mono",monospace}
+    .site-header{position:sticky;top:0;z-index:50;background:rgba(20,16,27,.9);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
+    .header-main{height:76px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+    .brand{display:flex;align-items:center;gap:12px;min-width:190px}
+    .brand-mark{width:38px;height:38px;display:grid;place-items:center;border-radius:50%;border:1px solid rgba(227,49,59,.45);background:radial-gradient(circle,rgba(227,49,59,.24),rgba(227,49,59,.06) 70%);color:#fff;font-weight:800;letter-spacing:-.08em}
+    .brand-copy{display:flex;flex-direction:column;line-height:1.1}
+    .brand-copy strong{font-size:15px;letter-spacing:.12em}
+    .brand-copy small{margin-top:5px;color:var(--muted);font:500 9px/1 "JetBrains Mono",monospace;letter-spacing:.13em}
+    .primary-nav{display:flex;align-items:center;justify-content:center;gap:clamp(15px,2.2vw,30px);min-width:0}
+    .primary-nav a{color:#c9c2d0;font-size:12px;font-weight:600;white-space:nowrap;transition:color .2s ease}
+    .primary-nav a:hover,.primary-nav a[aria-current="page"]{color:#fff}
+    .header-actions{display:flex;align-items:center;gap:12px}
+    .search-shell{position:relative;width:178px}
+    .search-shell input{width:100%;height:38px;padding:0 12px 0 36px;border:1px solid var(--line-strong);border-radius:999px;background:#1b1723;color:var(--text);font-size:11px;outline:none;transition:border-color .2s ease,width .2s ease}
+    .search-shell input:focus{border-color:rgba(227,49,59,.75);width:205px}
+    .search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none}
+    .contact-button{height:38px;display:inline-flex;align-items:center;justify-content:center;padding:0 17px;border-radius:999px;background:var(--lime);color:#17151b;font-size:11px;font-weight:800;letter-spacing:.04em;white-space:nowrap;transition:transform .2s ease,filter .2s ease}
+    .contact-button:hover{transform:translateY(-2px);filter:brightness(1.06)}
+    .mobile-nav{display:none}
+    .page-intro{padding:37px 0 26px;border-bottom:1px solid var(--line)}
+    .eyebrow{display:flex;align-items:center;gap:9px;color:var(--red-soft);font:600 10px/1 "JetBrains Mono",monospace;letter-spacing:.15em;text-transform:uppercase}
+    .eyebrow:before{content:"";width:22px;height:1px;background:var(--red)}
+    .page-title{margin:10px 0 0;font-size:clamp(25px,4vw,41px);font-weight:800;letter-spacing:-.055em;line-height:1.1}
+    .page-subtitle{max-width:670px;margin:10px 0 0;color:var(--muted);font-size:13px;line-height:1.7}
+    .featured-story{position:relative;min-height:410px;margin:30px 0 56px;overflow:hidden;border:1px solid var(--line-strong);border-radius:13px;background:#070910;isolation:isolate}
+    .featured-story:before{content:"";position:absolute;inset:0;z-index:-2;background-image:url("https://assets.science.nasa.gov/dynamicimage/assets/science/esd/climate/2023/12/ImageWall5_1920x1200-89.jpg?crop=faces%2Cfocalpoint&fit=clip&h=1200&w=1920");background-position:center 42%;background-size:cover;transform:scale(1.01)}
+    .featured-story:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(10,8,15,.94) 0%,rgba(10,8,15,.75) 43%,rgba(10,8,15,.1) 100%),linear-gradient(0deg,rgba(10,8,15,.56),transparent 55%)}
+    .featured-content{display:flex;flex-direction:column;justify-content:flex-end;min-height:410px;max-width:680px;padding:clamp(25px,5vw,58px)}
+    .featured-label{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;padding:7px 10px;border:1px solid rgba(255,255,255,.22);border-radius:999px;background:rgba(13,11,20,.5);color:#f5f2f8;font:600 9px/1 "JetBrains Mono",monospace;letter-spacing:.13em;text-transform:uppercase}
+    .featured-label i{width:6px;height:6px;border-radius:50%;background:var(--lime);box-shadow:0 0 12px var(--lime)}
+    .featured-content h1{max-width:660px;margin:22px 0 10px;font-size:clamp(31px,5.5vw,60px);font-weight:800;letter-spacing:-.065em;line-height:.99}
+    .featured-content p{max-width:535px;margin:0;color:rgba(248,245,250,.8);font-size:14px;line-height:1.75}
+    .featured-meta{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-top:22px;color:#ddd5e3;font:500 9px/1.4 "JetBrains Mono",monospace;letter-spacing:.08em;text-transform:uppercase}
+    .meta-dot{width:3px;height:3px;border-radius:50%;background:var(--red-soft)}
+    .read-feature{align-self:flex-start;display:inline-flex;align-items:center;gap:10px;margin-top:22px;padding:11px 16px;border-radius:999px;background:var(--lime);color:#19171d;font-size:11px;font-weight:800;transition:gap .2s ease,transform .2s ease}
+    .read-feature:hover{gap:15px;transform:translateY(-2px)}
+    .content-layout{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:52px;align-items:start;padding-bottom:76px}
+    .feed-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding-bottom:15px;border-bottom:1px solid var(--line)}
+    .feed-heading h2{margin:0;font-size:22px;font-weight:800;letter-spacing:-.045em}
+    .feed-heading p{margin:5px 0 0;color:var(--muted);font-size:11px}
+    .feed-count{color:var(--dim);font:500 9px/1.4 "JetBrains Mono",monospace;letter-spacing:.1em;white-space:nowrap}
+    .topic-filters{display:flex;flex-wrap:wrap;gap:8px;padding:17px 0 10px}
+    .filter-button{border:1px solid var(--line);border-radius:999px;background:transparent;padding:7px 11px;color:var(--muted);font:500 9px/1.2 "JetBrains Mono",monospace;letter-spacing:.04em;cursor:pointer;transition:all .2s ease}
+    .filter-button:hover,.filter-button.is-active{border-color:rgba(227,49,59,.65);background:rgba(227,49,59,.1);color:#fff}
+    .article-list{display:flex;flex-direction:column}
+    .article-card{display:grid;grid-template-columns:190px minmax(0,1fr);gap:22px;padding:22px 0;border-bottom:1px solid var(--line)}
+    .article-card[hidden]{display:none}
+    .article-open{display:contents;text-align:left;background:none;border:0;cursor:pointer}
+    .post-visual{position:relative;display:flex;align-items:center;justify-content:center;min-height:138px;overflow:hidden;border:1px solid rgba(255,255,255,.1);border-radius:9px;background:#201b2b}
+    .post-visual:before,.post-visual:after{content:"";position:absolute;inset:0;pointer-events:none}
+    .post-visual:before{background:radial-gradient(circle at 50% 50%,rgba(227,49,59,.22),transparent 54%),linear-gradient(135deg,rgba(70,40,92,.7),rgba(10,13,23,.95))}
+    .post-visual:after{opacity:.38;background-image:linear-gradient(rgba(255,255,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);background-size:22px 22px;mask-image:linear-gradient(135deg,#000,transparent 80%)}
+    .visual-orbit{position:relative;z-index:1;width:76px;height:76px;border:1px solid rgba(255,255,255,.25);border-radius:50%;box-shadow:0 0 32px rgba(227,49,59,.15),inset 0 0 24px rgba(255,255,255,.08)}
+    .visual-orbit:before{content:"";position:absolute;inset:12px;border:1px solid rgba(255,255,255,.32);border-radius:50%;transform:rotate(-35deg) scaleX(1.7)}
+    .visual-orbit:after{content:"";position:absolute;left:50%;top:-5px;width:8px;height:8px;border-radius:50%;background:var(--red-soft);box-shadow:0 0 18px var(--red)}
+    .visual-code{position:relative;z-index:1;color:#f6d5d7;font:600 12px/1.8 "JetBrains Mono",monospace;text-shadow:0 0 16px rgba(227,49,59,.35)}
+    .visual-code span{color:var(--lime)}
+    .visual-lock{position:relative;z-index:1;width:55px;height:48px;border:2px solid rgba(255,255,255,.72);border-radius:9px;margin-top:20px;box-shadow:0 0 30px rgba(227,49,59,.23)}
+    .visual-lock:before{content:"";position:absolute;left:12px;right:12px;top:-28px;height:32px;border:2px solid rgba(255,255,255,.72);border-bottom:0;border-radius:22px 22px 0 0}
+    .visual-lock:after{content:"";position:absolute;left:50%;top:13px;width:7px;height:7px;border-radius:50%;background:var(--red-soft);transform:translateX(-50%);box-shadow:0 9px 0 -2px var(--red-soft)}
+    .visual-signal{position:relative;z-index:1;width:104px;height:52px;border-top:1px solid rgba(255,255,255,.4);border-bottom:1px solid rgba(255,255,255,.18);background:repeating-linear-gradient(90deg,transparent 0 9px,rgba(227,49,59,.5) 10px 11px,transparent 12px 18px)}
+    .visual-signal:before{content:"";position:absolute;left:0;right:0;top:25px;height:2px;background:linear-gradient(90deg,transparent,var(--red-soft),#f4effa,transparent);box-shadow:0 0 15px var(--red)}
+    .visual-nodes{position:relative;z-index:1;width:120px;height:70px;background:radial-gradient(circle at 10% 50%,var(--red-soft) 0 3px,transparent 4px),radial-gradient(circle at 50% 15%,#f6e9f7 0 3px,transparent 4px),radial-gradient(circle at 90% 50%,var(--lime) 0 3px,transparent 4px),radial-gradient(circle at 50% 85%,var(--red) 0 3px,transparent 4px)}
+    .visual-nodes:before,.visual-nodes:after{content:"";position:absolute;left:14%;top:50%;width:73%;height:1px;background:rgba(255,255,255,.5);transform:rotate(-18deg)}
+    .visual-nodes:after{transform:rotate(18deg)}
+    .visual-earth{position:relative;z-index:1;width:90px;height:90px;border-radius:50%;background:radial-gradient(circle at 34% 31%,#a5cee8 0 2%,#27618e 22%,#0c284a 57%,#040812 76%);box-shadow:inset -15px -8px 22px #02040d,0 0 24px rgba(78,153,220,.3)}
+    .visual-earth:before{content:"";position:absolute;inset:5px;border-radius:50%;background:radial-gradient(ellipse at 37% 42%,rgba(130,183,119,.8) 0 10%,transparent 11%),radial-gradient(ellipse at 68% 60%,rgba(113,165,107,.6) 0 8%,transparent 9%);filter:blur(3px)}
+    .visual-01{background:#151c2b}.visual-02{background:#1f1422}.visual-03{background:#161d23}.visual-04{background:#201923}.visual-05{background:#111b25}
+    .article-copy{min-width:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
+    .article-meta{display:flex;align-items:center;flex-wrap:wrap;gap:8px;color:var(--dim);font:500 9px/1.4 "JetBrains Mono",monospace;letter-spacing:.07em;text-transform:uppercase}
+    .article-category{color:var(--red-soft)}
+    .article-copy h3{margin:8px 0 7px;color:#f5f2f8;font-size:19px;font-weight:800;letter-spacing:-.04em;line-height:1.2;transition:color .2s ease}
+    .article-open:hover .article-copy h3{color:#ff7980}
+    .article-copy p{max-width:640px;margin:0;color:var(--muted);font-size:12px;line-height:1.7}
+    .article-read{display:inline-flex;align-items:center;gap:8px;margin-top:13px;color:#f0eaf5;font:600 9px/1.4 "JetBrains Mono",monospace;letter-spacing:.08em;text-transform:uppercase}
+    .article-read b{color:var(--red-soft);font-size:14px;transition:transform .2s ease}
+    .article-open:hover .article-read b{transform:translateX(4px)}
+    .empty-state{display:none;padding:32px 0;color:var(--muted);font-size:13px}
+    .sidebar{position:sticky;top:100px}
+    .sidebar-card{padding:20px;border:1px solid var(--line);border-radius:10px;background:rgba(27,23,35,.7)}
+    .sidebar-card+.sidebar-card{margin-top:16px}
+    .sidebar-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 16px}
+    .sidebar-heading h3{margin:0;font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+    .sidebar-heading span{color:var(--dim);font:500 8px/1.4 "JetBrains Mono",monospace;letter-spacing:.1em}
+    .author-row{display:flex;align-items:center;gap:12px}
+    .author-avatar{width:48px;height:48px;display:grid;place-items:center;flex:0 0 48px;border-radius:50%;border:1px solid rgba(227,49,59,.48);background:radial-gradient(circle,rgba(227,49,59,.24),#201723 72%);font-weight:800;letter-spacing:-.08em}
+    .author-meta strong{display:block;font-size:13px}
+    .author-meta small{display:block;margin-top:4px;color:var(--muted);font:500 8px/1.4 "JetBrains Mono",monospace;letter-spacing:.08em}
+    .author-bio{margin:14px 0 0;color:var(--muted);font-size:11px;line-height:1.7}
+    .author-links{display:flex;gap:8px;margin-top:15px}
+    .author-links a{display:inline-flex;align-items:center;justify-content:center;padding:7px 10px;border:1px solid var(--line);border-radius:999px;color:#e7e1ed;font:500 8px/1.2 "JetBrains Mono",monospace;transition:border-color .2s ease,color .2s ease}
+    .author-links a:hover{border-color:var(--red);color:#fff}
+    .popular-list{display:flex;flex-direction:column}
+    .popular-item{display:grid;grid-template-columns:29px minmax(0,1fr);gap:10px;padding:12px 0;border-top:1px solid var(--line);background:none;border-left:0;border-right:0;border-bottom:0;text-align:left;cursor:pointer}
+    .popular-item:first-child{padding-top:0;border-top:0}
+    .popular-number{color:var(--red-soft);font:600 11px/1.5 "JetBrains Mono",monospace}
+    .popular-item strong{display:block;color:#f1edf5;font-size:11px;line-height:1.45;transition:color .2s ease}
+    .popular-item:hover strong{color:var(--red-soft)}
+    .popular-item small{display:block;margin-top:5px;color:var(--dim);font:500 8px/1.4 "JetBrains Mono",monospace;letter-spacing:.06em;text-transform:uppercase}
+    .topic-list{display:flex;flex-wrap:wrap;gap:7px}
+    .topic-tag{padding:6px 9px;border:1px solid var(--line);border-radius:999px;color:#c8c0cf;font:500 8px/1.3 "JetBrains Mono",monospace;letter-spacing:.04em}
+    .contact-panel{position:relative;overflow:hidden;padding:20px;border:1px solid rgba(227,49,59,.3);border-radius:10px;background:linear-gradient(135deg,rgba(102,22,35,.28),rgba(27,23,35,.9))}
+    .contact-panel:after{content:"";position:absolute;width:130px;height:130px;right:-65px;top:-65px;border:1px solid rgba(227,49,59,.25);border-radius:50%;box-shadow:0 0 0 15px rgba(227,49,59,.04),0 0 0 31px rgba(227,49,59,.03)}
+    .contact-panel h3{position:relative;z-index:1;margin:0;font-size:17px;font-weight:800;letter-spacing:-.04em}
+    .contact-panel p{position:relative;z-index:1;margin:8px 0 15px;color:var(--muted);font-size:10px;line-height:1.65}
+    .contact-panel a{position:relative;z-index:1;display:inline-flex;align-items:center;gap:8px;color:var(--lime);font:600 9px/1.4 "JetBrains Mono",monospace;letter-spacing:.08em}
+    .site-footer{border-top:1px solid var(--line);padding:24px 0 36px;color:var(--dim);font:500 9px/1.6 "JetBrains Mono",monospace;letter-spacing:.04em}
+    .footer-inner{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+    .footer-inner strong{color:#f2edf5;letter-spacing:.12em}
+    dialog{width:min(760px,calc(100% - 28px));max-height:86vh;padding:0;overflow:auto;border:1px solid rgba(221,213,232,.2);border-radius:15px;background:#181420;color:var(--text);box-shadow:0 30px 120px rgba(0,0,0,.65)}
+    dialog::backdrop{background:rgba(6,4,11,.82);backdrop-filter:blur(8px)}
+    .dialog-head{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:15px 20px;border-bottom:1px solid var(--line);background:rgba(24,20,32,.94);backdrop-filter:blur(14px)}
+    .dialog-head span{color:var(--red-soft);font:600 9px/1.4 "JetBrains Mono",monospace;letter-spacing:.12em;text-transform:uppercase}
+    .dialog-close{width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--line);border-radius:50%;background:transparent;color:#fff;cursor:pointer}
+    .dialog-body{padding:clamp(22px,5vw,42px)}
+    .dialog-body h2{margin:10px 0 14px;font-size:clamp(27px,5vw,43px);line-height:1.05;letter-spacing:-.06em}
+    .dialog-deck{color:#c5bdcb;font-size:14px;line-height:1.75}
+    .dialog-meta{display:flex;align-items:center;flex-wrap:wrap;gap:10px;color:var(--dim);font:500 9px/1.4 "JetBrains Mono",monospace;letter-spacing:.08em;text-transform:uppercase}
+    .dialog-copy{margin-top:26px;color:#c9c2d0;font-size:13px;line-height:1.85}
+    .dialog-copy h3{margin:24px 0 8px;color:#fff;font-size:16px;letter-spacing:-.02em}
+    .dialog-copy p{margin:0 0 14px}
+    .dialog-note{margin-top:28px;padding:14px;border-left:2px solid var(--red);background:rgba(227,49,59,.07);color:#d9d1df;font-size:11px;line-height:1.7}
+    @media(max-width:1000px){
+      .brand{min-width:auto}
+      .primary-nav{gap:15px}
+      .search-shell{width:145px}
+      .search-shell input:focus{width:165px}
+      .content-layout{grid-template-columns:minmax(0,1fr) 275px;gap:30px}
+    }
+    @media(max-width:780px){
+      .shell{width:min(var(--max),calc(100% - 32px))}
+      .header-main{height:auto;min-height:68px;flex-wrap:wrap;gap:12px;padding:12px 0}
+      .primary-nav{order:3;width:100%;justify-content:flex-start;overflow-x:auto;padding:9px 0 2px;border-top:1px solid var(--line);scrollbar-width:none}
+      .primary-nav::-webkit-scrollbar{display:none}
+      .header-actions{margin-left:auto}
+      .search-shell{width:min(34vw,170px)}
+      .search-shell input:focus{width:min(42vw,190px)}
+      .content-layout{grid-template-columns:1fr;gap:28px}
+      .sidebar{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+      .sidebar-card+.sidebar-card{margin-top:0}
+      .contact-panel{grid-column:1/-1}
+      .featured-story{min-height:360px;margin-top:22px;margin-bottom:40px}
+      .featured-content{min-height:360px}
+    }
+    @media(max-width:560px){
+      .shell{width:calc(100% - 28px)}
+      .brand-mark{width:34px;height:34px}
+      .brand-copy strong{font-size:13px}
+      .header-actions{gap:7px}
+      .search-shell{width:38px}
+      .search-shell input{height:36px;padding:0 10px 0 34px}
+      .search-shell input::placeholder{color:transparent}
+      .search-shell input:focus{position:absolute;right:0;top:0;width:min(70vw,235px);background:#1b1723;z-index:3}
+      .contact-button{height:36px;padding:0 12px;font-size:9px}
+      .page-intro{padding:28px 0 20px}
+      .page-title{font-size:30px}
+      .featured-story{min-height:385px}
+      .featured-content{min-height:385px;padding:22px}
+      .featured-story:after{background:linear-gradient(90deg,rgba(10,8,15,.92),rgba(10,8,15,.5)),linear-gradient(0deg,rgba(10,8,15,.7),transparent 60%)}
+      .featured-content h1{font-size:36px}
+      .featured-content p{font-size:12px}
+      .article-card{grid-template-columns:104px minmax(0,1fr);gap:13px;padding:17px 0}
+      .post-visual{min-height:112px}
+      .visual-orbit{width:56px;height:56px}
+      .visual-code{font-size:9px}
+      .visual-earth{width:66px;height:66px}
+      .article-copy h3{font-size:15px;margin:6px 0}
+      .article-copy p{font-size:10px;line-height:1.55}
+      .article-meta{font-size:8px}
+      .article-read{font-size:8px;margin-top:8px}
+      .feed-heading h2{font-size:19px}
+      .sidebar{grid-template-columns:1fr}
+      .contact-panel{grid-column:auto}
+    }
+    @media(prefers-reduced-motion:reduce){
+      *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="shell header-main">
+      <a class="brand" href="/sam-live-builder.html" aria-label="SAM portfolio home">
+        <span class="brand-mark">S.</span>
+        <span class="brand-copy"><strong>SAM</strong><small>SECURITY JOURNAL</small></span>
+      </a>
+      <nav class="primary-nav" aria-label="Blog navigation">
+        <a href="/sam-live-builder.html">Portfolio</a>
+        <a href="#latest" aria-current="page">Latest Notes</a>
+        <a href="#topics">Topics</a>
+        <a href="#about">About</a>
+      </nav>
+      <div class="header-actions">
+        <label class="search-shell">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <input id="site-search" type="search" placeholder="Search notes..." autocomplete="off" aria-label="Search blog articles" />
+        </label>
+        <a class="contact-button" href="mailto:mdsamiunislam.ash777@gmail.com">LET'S TALK ↗</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="page-intro">
+      <div class="eyebrow">FIELD NOTES / OFFENSIVE &amp; DEFENSIVE SECURITY</div>
+      <h2 class="page-title">Research. Reasoning. Real-world security.</h2>
+      <p class="page-subtitle">A journal for practical cybersecurity thinking — from attack-surface discovery and application testing to authentication hardening and the work that turns findings into stronger systems.</p>
+    </section>
+
+    <section class="featured-story" aria-labelledby="featured-title">
+      <div class="featured-content">
+        <span class="featured-label"><i></i> FEATURED FIELD NOTE</span>
+        <h1 id="featured-title">The internet is a living attack surface.</h1>
+        <p>Security starts before the first payload. Understand what is exposed, how systems trust one another, and where a small assumption can become a serious weakness.</p>
+        <div class="featured-meta"><span>SAM / SEC_OPS</span><span class="meta-dot"></span><span>WEB &amp; APPLICATION SECURITY</span><span class="meta-dot"></span><span>FIELD NOTE 01</span></div>
+        <button class="read-feature" type="button" data-open-post="surface">Read featured note <span aria-hidden="true">→</span></button>
+      </div>
+    </section>
+
+    <div class="content-layout" id="latest">
+      <section class="feed" aria-labelledby="feed-title">
+        <div class="feed-heading">
+          <div><h2 id="feed-title">Latest field notes</h2><p>Ideas, methods and lessons from the security side of the internet.</p></div>
+          <span class="feed-count" id="feed-count">05 NOTES</span>
+        </div>
+        <div class="topic-filters" id="topics" aria-label="Filter articles by topic">
+          <button class="filter-button is-active" type="button" data-filter="all">ALL NOTES</button>
+          <button class="filter-button" type="button" data-filter="web">WEB SECURITY</button>
+          <button class="filter-button" type="button" data-filter="application">APP SECURITY</button>
+          <button class="filter-button" type="button" data-filter="offensive">OFFENSIVE</button>
+          <button class="filter-button" type="button" data-filter="defensive">DEFENSIVE</button>
+        </div>
+
+        <div class="article-list" id="article-list">
+          <article class="article-card" data-category="web" data-search="attack surface login page assets subdomains api exposed services web security">
+            <button class="article-open" type="button" data-open-post="surface" aria-label="Read The attack surface is bigger than the login page">
+              <div class="post-visual visual-01"><div class="visual-orbit"></div></div>
+              <div class="article-copy">
+                <div class="article-meta"><span class="article-category">WEB SECURITY</span><span>·</span><span>FIELD NOTE 01</span><span>·</span><span>6 MIN READ</span></div>
+                <h3>The attack surface is bigger than the login page</h3>
+                <p>Subdomains, APIs, forgotten environments and third-party trust paths can matter just as much as the interface users see.</p>
+                <span class="article-read">READ THE NOTE <b>→</b></span>
+              </div>
+            </button>
+          </article>
+
+          <article class="article-card" data-category="application" data-search="oauth two factor authentication 2fa identity provider callback scopes token session security">
+            <button class="article-open" type="button" data-open-post="oauth" aria-label="Read OAuth is not a checkbox">
+              <div class="post-visual visual-02"><div class="visual-lock"></div></div>
+              <div class="article-copy">
+                <div class="article-meta"><span class="article-category">APPLICATION SECURITY</span><span>·</span><span>FIELD NOTE 02</span><span>·</span><span>5 MIN READ</span></div>
+                <h3>OAuth isn't a checkbox: where trust can break</h3>
+                <p>Redirect handling, token validation, scopes and session lifecycle decisions all shape the real strength of an authentication flow.</p>
+                <span class="article-read">READ THE NOTE <b>→</b></span>
+              </div>
+            </button>
+          </article>
+
+          <article class="article-card" data-category="offensive" data-search="recon reconnaissance attack surface mapping dns endpoints asset discovery penetration testing red team">
+            <button class="article-open" type="button" data-open-post="recon" aria-label="Read Recon before exploitation">
+              <div class="post-visual visual-03"><div class="visual-nodes"></div></div>
+              <div class="article-copy">
+                <div class="article-meta"><span class="article-category">OFFENSIVE SECURITY</span><span>·</span><span>FIELD NOTE 03</span><span>·</span><span>7 MIN READ</span></div>
+                <h3>Recon before exploitation: build a map, not a list</h3>
+                <p>A disciplined discovery workflow turns scattered assets and observations into test coverage that can be explained and repeated.</p>
+                <span class="article-read">READ THE NOTE <b>→</b></span>
+              </div>
+            </button>
+          </article>
+
+          <article class="article-card" data-category="application" data-search="idor insecure direct object reference authorization access control account data isolation">
+            <button class="article-open" type="button" data-open-post="idor" aria-label="Read IDOR a small authorization gap">
+              <div class="post-visual visual-04"><div class="visual-code">403 <span>→</span> 200<br/>AUTH_SCOPE</div></div>
+              <div class="article-copy">
+                <div class="article-meta"><span class="article-category">ACCESS CONTROL</span><span>·</span><span>FIELD NOTE 04</span><span>·</span><span>5 MIN READ</span></div>
+                <h3>IDOR: a small authorization gap with a large impact</h3>
+                <p>Why object-level authorization matters, how to validate access boundaries safely, and what makes a report actionable.</p>
+                <span class="article-read">READ THE NOTE <b>→</b></span>
+              </div>
+            </button>
+          </article>
+
+          <article class="article-card" data-category="defensive" data-search="penetration test vulnerability report remediation retesting validate fixes risk reduction defensive security">
+            <button class="article-open" type="button" data-open-post="remediation" aria-label="Read From finding to fix">
+              <div class="post-visual visual-05"><div class="visual-signal"></div></div>
+              <div class="article-copy">
+                <div class="article-meta"><span class="article-category">DEFENSIVE SECURITY</span><span>·</span><span>FIELD NOTE 05</span><span>·</span><span>6 MIN READ</span></div>
+                <h3>From finding to fix: closing the penetration-test loop</h3>
+                <p>A vulnerability report is a starting point. Prioritization, ownership, remediation and retesting are what reduce risk.</p>
+                <span class="article-read">READ THE NOTE <b>→</b></span>
+              </div>
+            </button>
+          </article>
+        </div>
+        <div class="empty-state" id="empty-state">No notes match that search. Try a different keyword or topic.</div>
+      </section>
+
+      <aside class="sidebar" id="about">
+        <section class="sidebar-card">
+          <div class="sidebar-heading"><h3>About the author</h3><span>SEC_OPS</span></div>
+          <div class="author-row">
+            <div class="author-avatar">S.</div>
+            <div class="author-meta"><strong>SAM</strong><small>CYBERSECURITY RESEARCHER</small></div>
+          </div>
+          <p class="author-bio">Independent security researcher focused on application security, penetration testing, red-team thinking and resilient authentication. These notes explain the reasoning behind the work.</p>
+          <div class="author-links">
+            <a href="https://github.com/as777hk" target="_blank" rel="noreferrer">GITHUB ↗</a>
+            <a href="/sam-live-builder.html">PORTFOLIO ↗</a>
+          </div>
+        </section>
+
+        <section class="sidebar-card">
+          <div class="sidebar-heading"><h3>Editor's picks</h3><span>START HERE</span></div>
+          <div class="popular-list">
+            <button class="popular-item" type="button" data-open-post="surface"><span class="popular-number">01</span><span><strong>The attack surface is bigger than the login page</strong><small>WEB SECURITY</small></span></button>
+            <button class="popular-item" type="button" data-open-post="oauth"><span class="popular-number">02</span><span><strong>OAuth isn't a checkbox</strong><small>APPLICATION SECURITY</small></span></button>
+            <button class="popular-item" type="button" data-open-post="recon"><span class="popular-number">03</span><span><strong>Recon before exploitation</strong><small>OFFENSIVE SECURITY</small></span></button>
+          </div>
+        </section>
+
+        <section class="sidebar-card">
+          <div class="sidebar-heading"><h3>Explore topics</h3><span>INDEX</span></div>
+          <div class="topic-list">
+            <a class="topic-tag" href="#topics" data-topic-link="web">WEB SECURITY</a>
+            <a class="topic-tag" href="#topics" data-topic-link="application">AUTH &amp; IDENTITY</a>
+            <a class="topic-tag" href="#topics" data-topic-link="offensive">RECON &amp; RED TEAM</a>
+            <a class="topic-tag" href="#topics" data-topic-link="defensive">REMEDIATION</a>
+          </div>
+        </section>
+
+        <section class="contact-panel">
+          <h3>Have a security question?</h3>
+          <p>Want to discuss an assessment, a finding, or a topic for a future field note?</p>
+          <a href="mailto:mdsamiunislam.ash777@gmail.com">GET IN TOUCH ↗</a>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-inner">
+      <div><strong>SAM.</strong> — SECURITY JOURNAL · PRACTICAL THINKING, STRONGER SYSTEMS</div>
+      <div><a href="/sam-live-builder.html">BACK TO PORTFOLIO ↗</a></div>
+    </div>
+  </footer>
+
+  <dialog id="post-dialog" aria-labelledby="dialog-title">
+    <div class="dialog-head"><span id="dialog-category">FIELD NOTE</span><button class="dialog-close" type="button" id="dialog-close" aria-label="Close article">✕</button></div>
+    <div class="dialog-body">
+      <div class="dialog-meta" id="dialog-meta"></div>
+      <h2 id="dialog-title"></h2>
+      <p class="dialog-deck" id="dialog-deck"></p>
+      <div class="dialog-copy" id="dialog-copy"></div>
+      <div class="dialog-note">These notes are educational and intended for authorized security work, responsible disclosure and defensive improvement. Always obtain explicit permission before testing systems you do not own.</div>
+    </div>
+  </dialog>
+
+  <script>
+    const posts = {
+      surface: {
+        category: "WEB SECURITY",
+        label: "FIELD NOTE 01",
+        readTime: "6 MIN READ",
+        title: "The attack surface is bigger than the login page",
+        deck: "Security starts with understanding what is exposed and how the pieces of a system connect — not only with testing the screen users log into.",
+        sections: [
+          ["Start with the system, not the page", "A modern application rarely lives in one place. The public website may depend on APIs, subdomains, authentication services, cloud storage, administrative tools, staging environments and external integrations. Each connection creates assumptions about identity, permissions and data flow."],
+          ["Map the boundaries", "A useful assessment begins by defining scope, identifying assets that are explicitly authorized for testing, and understanding which components exchange sensitive data. Record what each service does, who can reach it, and what trust it places in another component."],
+          ["Turn discovery into test coverage", "The goal is not to collect the largest possible list of hosts. It is to build a reliable map that helps prioritize exposed functionality, sensitive data paths and high-impact trust boundaries. Keep observations reproducible and validate findings without accessing data that is outside the agreed scope."],
+          ["The practical takeaway", "When teams review only the login page, they can miss the systems that make the application work. A broader, evidence-led view makes testing more complete and remediation more focused."]
+        ]
+      },
+      oauth: {
+        category: "APPLICATION SECURITY",
+        label: "FIELD NOTE 02",
+        readTime: "5 MIN READ",
+        title: "OAuth isn't a checkbox: where trust can break",
+        deck: "A secure sign-in flow depends on the details around identity, callbacks, tokens and sessions — not simply on enabling an identity provider.",
+        sections: [
+          ["Validate the whole flow", "Review how the application initiates authorization, validates the callback and binds the response to the original browser session. The redirect URI should be tightly controlled, and state should be validated to protect the integrity of the flow."],
+          ["Treat tokens as sensitive credentials", "Check that tokens are validated for the expected issuer, audience, signature and lifetime. Scopes should be limited to what the application needs. Refresh-token handling, revocation and storage deserve the same attention as the initial login."],
+          ["Authentication is not authorization", "A successful login proves an identity claim; it does not automatically prove that the user may access every object or action. Enforce authorization on the server side for each protected operation."],
+          ["The practical takeaway", "Assess OAuth and two-factor authentication as part of the complete identity lifecycle. Strong controls at one step cannot compensate for weak validation somewhere else."]
+        ]
+      },
+      recon: {
+        category: "OFFENSIVE SECURITY",
+        label: "FIELD NOTE 03",
+        readTime: "7 MIN READ",
+        title: "Recon before exploitation: build a map, not a list",
+        deck: "Good reconnaissance is a disciplined process for turning scattered technical signals into a clear, authorized testing plan.",
+        sections: [
+          ["Define the boundary first", "Before discovery begins, confirm the written scope, permitted techniques, testing windows and escalation contacts. Clear boundaries protect the owner of the system and the researcher."],
+          ["Organize the evidence", "Group known domains, subdomains, application entry points, APIs and externally reachable services by business purpose. Separate verified observations from assumptions, and record the source and time of each observation."],
+          ["Prioritize what matters", "A public asset is not automatically a vulnerability. Focus on exposed functionality, sensitive workflows, authentication boundaries and components that could affect important business processes. Validate carefully and avoid unnecessary load or access to real user data."],
+          ["The practical takeaway", "The value of reconnaissance is the quality of the decisions it enables. A concise, verified map is more useful than a noisy inventory that cannot guide safe testing."]
+        ]
+      },
+      idor: {
+        category: "ACCESS CONTROL",
+        label: "FIELD NOTE 04",
+        readTime: "5 MIN READ",
+        title: "IDOR: a small authorization gap with a large impact",
+        deck: "Object-level authorization failures happen when an application checks that a user is signed in but does not correctly check whether that user may access the requested object.",
+        sections: [
+          ["Understand the expected ownership rule", "Start by identifying the intended relationship between a user, role and object. For example, a customer should normally be able to retrieve only records that belong to that customer or that have been explicitly shared with them."],
+          ["Validate with controlled test accounts", "Within an authorized test environment, compare access using two accounts and test records you control. Check both read and write actions. A changed identifier should never be treated as proof of permission."],
+          ["Prove the issue with minimal evidence", "Document the affected endpoint, the expected access rule, the observed behavior and the smallest safe proof. Do not enumerate identifiers, download unrelated records or expose personal data to demonstrate impact."],
+          ["The practical takeaway", "Authorization must be enforced for each object and action on the server side. Hiding a button or changing an identifier in the browser is not an access-control strategy."]
+        ]
+      },
+      remediation: {
+        category: "DEFENSIVE SECURITY",
+        label: "FIELD NOTE 05",
+        readTime: "6 MIN READ",
+        title: "From finding to fix: closing the penetration-test loop",
+        deck: "A report creates value only when the finding is understood, prioritized, fixed and retested.",
+        sections: [
+          ["Explain the risk in context", "A useful finding connects the technical weakness to the affected asset, trust boundary and realistic consequence. Severity should reflect evidence, exposure and potential impact rather than dramatic wording."],
+          ["Make the fix actionable", "Include a concise reproduction path, affected components, the expected security behavior and a practical remediation direction. Share only the evidence needed to understand the issue and protect sensitive information."],
+          ["Retest the original condition", "After remediation, verify the original path and check for regressions in related workflows. Record whether the fix fully resolves the issue, reduces the impact or leaves a residual risk that needs further work."],
+          ["The practical takeaway", "Testing is not complete when a finding is delivered. A clear owner, a verified fix and a documented retest are what turn a security observation into reduced risk."]
+        ]
+      }
+    };
+
+    const dialog = document.getElementById("post-dialog");
+    const dialogCategory = document.getElementById("dialog-category");
+    const dialogMeta = document.getElementById("dialog-meta");
+    const dialogTitle = document.getElementById("dialog-title");
+    const dialogDeck = document.getElementById("dialog-deck");
+    const dialogCopy = document.getElementById("dialog-copy");
+
+    function openPost(key) {
+      const post = posts[key];
+      if (!post) return;
+      dialogCategory.textContent = post.category;
+      dialogMeta.textContent = post.label + "  ·  " + post.readTime + "  ·  SAM / SEC_OPS";
+      dialogTitle.textContent = post.title;
+      dialogDeck.textContent = post.deck;
+      dialogCopy.replaceChildren();
+      post.sections.forEach(([heading, body]) => {
+        const h3 = document.createElement("h3");
+        h3.textContent = heading;
+        const p = document.createElement("p");
+        p.textContent = body;
+        dialogCopy.append(h3, p);
+      });
+      if (typeof dialog.showModal === "function") dialog.showModal();
+      else dialog.setAttribute("open", "");
+    }
+
+    document.querySelectorAll("[data-open-post]").forEach(button => {
+      button.addEventListener("click", () => openPost(button.dataset.openPost));
+    });
+
+    document.getElementById("dialog-close").addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", event => {
+      if (event.target === dialog) dialog.close();
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && dialog.open) dialog.close();
+    });
+
+    let activeFilter = "all";
+    const search = document.getElementById("site-search");
+    const cards = [...document.querySelectorAll(".article-card")];
+    const filterButtons = [...document.querySelectorAll("[data-filter]")];
+    const emptyState = document.getElementById("empty-state");
+    const feedCount = document.getElementById("feed-count");
+
+    function updateFeed() {
+      const term = search.value.trim().toLowerCase();
+      let visible = 0;
+      cards.forEach(card => {
+        const categoryMatch = activeFilter === "all" || card.dataset.category === activeFilter;
+        const searchMatch = !term || (card.dataset.search + " " + card.innerText).toLowerCase().includes(term);
+        const show = categoryMatch && searchMatch;
+        card.hidden = !show;
+        if (show) visible++;
+      });
+      emptyState.style.display = visible ? "none" : "block";
+      feedCount.textContent = String(visible).padStart(2,"0") + " NOTES";
+    }
+
+    filterButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        activeFilter = button.dataset.filter;
+        filterButtons.forEach(item => item.classList.toggle("is-active", item === button));
+        updateFeed();
+      });
+    });
+    search.addEventListener("input", updateFeed);
+    document.querySelectorAll("[data-topic-link]").forEach(link => {
+      link.addEventListener("click", () => {
+        const category = link.dataset.topicLink;
+        activeFilter = category;
+        filterButtons.forEach(item => item.classList.toggle("is-active", item.dataset.filter === category));
+        updateFeed();
+      });
+    });
+    updateFeed();
+  </script>
+</body>
+</html>
