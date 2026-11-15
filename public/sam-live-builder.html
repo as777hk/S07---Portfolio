@@ -312,10 +312,10 @@
     @media (prefers-reduced-motion: reduce) {
       .security-brand-card, .tool-logo-chip { transition: none; }
       #hero-background-video { animation: none; }
-      #vortex-card .galaxy-real-photo { animation: none; transform: scale(1.95); }
+      #vortex-card .galaxy-real-photo { animation: none; transform: scale(1.04); }
     }
 
-    /* The final galaxy is a real Hubble image, revealed as the last build layer. */
+    /* Earth rotation video, revealed with the existing final build layer. */
     #vortex-card .galaxy-real-photo {
       position: absolute;
       inset: 0;
@@ -326,21 +326,15 @@
       object-position: center;
       opacity: 0;
       clip-path: circle(0% at 62% 48%);
-      filter: saturate(1.04) contrast(1.06) brightness(.78);
+      filter: saturate(1.12) contrast(1.08) brightness(.72);
       pointer-events: none;
-      transform: scale(1.95) rotate(0deg);
+      transform: scale(1.04);
       transform-origin: 50% 50%;
-      animation: milky-way-live-rotation 64s linear infinite;
-      animation-play-state: paused;
-      will-change: clip-path, opacity, transform;
+      will-change: clip-path, opacity;
+      background: #05070d;
     }
-    @keyframes milky-way-live-rotation {
-      from { transform: scale(1.95) rotate(0deg); }
-      to { transform: scale(1.95) rotate(360deg); }
-    }
-    #vortex-card.layer-building .galaxy-real-photo,
-    #vortex-card.layer-done .galaxy-real-photo {
-      animation-play-state: running;
+    #vortex-card video.galaxy-real-photo {
+      display: block;
     }
 
 
@@ -925,6 +919,7 @@
         <a href="#raw-to-real" data-build-layer data-wave="1" data-build-type="text">ZERO-TRUST</a>
         <a href="#skills" data-build-layer data-wave="1" data-build-type="text">SKILLS</a>
         <a href="#experience" data-build-layer data-wave="1" data-build-type="text">EXPERIENCE</a>
+        <a href="/blog.html" data-build-layer data-wave="1" data-build-type="text">BLOG</a>
         <a href="#contact" data-build-layer data-wave="1" data-build-type="text">CONTACT</a>
       </nav>
 
@@ -1415,7 +1410,9 @@
 
         <div class="lg:col-span-4">
           <div id="vortex-card" data-build-layer data-wave="8" data-build-type="media" class="relative h-64 rounded-xl bg-[#0a0c12] border border-zinc-800 overflow-hidden p-6 flex flex-col justify-between cursor-pointer">
-            <img id="galaxy-photo" class="galaxy-real-photo" src="https://science.nasa.gov/wp-content/uploads/2023/04/m101-jpg.webp" alt="NASA and ESA Hubble Space Telescope image of the real Pinwheel Galaxy M101" loading="lazy" decoding="async" fetchpriority="low" />
+            <video id="galaxy-photo" class="galaxy-real-photo" autoplay muted loop playsinline webkit-playsinline preload="metadata" poster="https://assets.science.nasa.gov/dynamicimage/assets/science/esd/climate/2023/12/ImageWall5_1920x1200-89.jpg?crop=faces%2Cfocalpoint&amp;fit=clip&amp;h=1200&amp;w=1920" aria-label="Earth slowly rotating in space">
+              <source src="https://videos.pexels.com/video-files/856356/856356-hd_1920_1080_25fps.mp4" type="video/mp4" />
+            </video>
             <canvas id="vortex-canvas" width="380" height="256" class="absolute inset-0 w-full h-full"></canvas>
             <div class="relative z-10 font-mono text-[10px] text-zinc-400">SAM // SEC_OPS</div>
             <div class="relative z-10 pointer-events-none">
@@ -2351,7 +2348,7 @@
       vortexCtx.setTransform(vortexDpr, 0, 0, vortexDpr, 0, 0);
     }
 
-    const galaxyDustStars = Array.from({ length: 34 }, (_, i) => {
+    const spaceDustStars = Array.from({ length: 34 }, (_, i) => {
       const seedX = Math.sin(i * 127.1 + 18.7) * 43758.5453;
       const seedY = Math.sin(i * 269.5 + 63.1) * 24634.6345;
       return {
@@ -2369,9 +2366,9 @@
       ctx.save();
       ctx.globalCompositeOperation = 'screen';
 
-      // The real NASA galaxy photograph supplies the spiral structure.
-      // This lightweight dust pass adds only a few restrained twinkling stars.
-      galaxyDustStars.forEach(star => {
+      // The rotating Earth footage supplies the main visual.
+      // This lightweight space-dust pass adds a few restrained twinkling stars.
+      spaceDustStars.forEach(star => {
         const twinkle = 0.22 + (0.5 + 0.5 * Math.sin(time * 0.85 + star.phase)) * 0.42;
         ctx.globalAlpha = twinkle;
         ctx.fillStyle = star.bright ? '#e0d7ff' : '#dbeafe';
@@ -2396,14 +2393,14 @@
 
     // Avoid animating large canvases while their sections are off-screen.
     let vfxSceneVisible = false;
-    let galaxyCanvasVisible = false;
-    let lastGalaxyDrawAt = 0;
+    let spaceCanvasVisible = false;
+    let lastSpaceDrawAt = 0;
     let lastModalDrawAt = 0;
     if ('IntersectionObserver' in window) {
       const canvasVisibilityObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.target === vortexCanvas || entry.target === vortexCanvas.parentElement) {
-            galaxyCanvasVisible = entry.isIntersecting;
+            spaceCanvasVisible = entry.isIntersecting;
           }
           if (entry.target === vfxContainer) {
             vfxSceneVisible = entry.isIntersecting;
@@ -2415,7 +2412,7 @@
       if (vfxContainer) canvasVisibilityObserver.observe(vfxContainer);
     } else {
       vfxSceneVisible = true;
-      galaxyCanvasVisible = true;
+      spaceCanvasVisible = true;
     }
 
     const hudXY = document.getElementById('hud-xy');
@@ -2962,9 +2959,9 @@
           drawCyberAtmosphere(t);
           lastCyberAtmosphereDrawAt = now;
         }
-        if (galaxyCanvasVisible && now - lastGalaxyDrawAt >= 42) {
+        if (spaceCanvasVisible && now - lastSpaceDrawAt >= 42) {
           drawVortexAnimation(vortexCtx, vortexWidth, vortexHeight, t);
-          lastGalaxyDrawAt = now;
+          lastSpaceDrawAt = now;
         }
         if (modalOpen && now - lastModalDrawAt >= 33) {
           modalCtx.fillStyle = '#07080d';
