@@ -739,6 +739,72 @@
       }
     }
 
+  
+
+    /* Reference-inspired Achievements / Skills / Experience sections */
+    .reference-section-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:22px}
+    .section-init-label{margin:0;color:#f4f4f5;font:800 clamp(17px,2vw,22px)/1.2 'Inter',sans-serif;letter-spacing:-.035em;text-transform:uppercase;text-shadow:1px 0 rgba(239,68,68,.65),-1px 0 rgba(56,189,248,.28)}
+    .section-init-subtitle,.section-init-count{margin:7px 0 0;color:#85818a;font:500 10px/1.5 'JetBrains Mono',monospace;letter-spacing:.13em;text-transform:uppercase}
+    .section-init-count{margin:0 0 2px;text-align:right}
+    .achievements-reference-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .achievement-reference-card{display:grid;grid-template-columns:48px minmax(0,1fr);align-items:start;gap:16px;min-height:154px;padding:24px;border:1px solid rgba(63,63,70,.72);background:rgba(17,13,14,.82);transition:border-color .22s ease,background .22s ease,transform .22s ease}
+    .achievement-reference-card:hover{border-color:rgba(220,38,38,.58);background:rgba(25,13,15,.92);transform:translateY(-2px)}
+    .achievement-reference-icon{display:grid;width:48px;height:48px;place-items:center;border:1px solid rgba(220,38,38,.2);border-radius:13px;background:radial-gradient(circle at 50% 45%,rgba(220,38,38,.25),rgba(91,16,24,.2) 68%,rgba(35,12,15,.55));color:#ef242b;font:700 24px/1 'JetBrains Mono',monospace;text-shadow:0 0 12px rgba(239,36,43,.72);box-shadow:0 0 24px rgba(220,38,38,.08),inset 0 0 16px rgba(220,38,38,.08)}
+    .achievement-reference-copy{min-width:0}
+    .achievement-reference-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:1px 0 9px}
+    .achievement-reference-card h3{margin:0;color:#f4f4f5;font-size:15px;font-weight:750;line-height:1.35}
+    .achievement-reference-card-head>span{flex:0 0 auto;color:#ef4444;font:600 10px/1.4 'JetBrains Mono',monospace}
+    .achievement-reference-card p{margin:0;color:#aaa5ac;font-size:13px;line-height:1.65}
+    .achievement-reference-card small{display:block;margin-top:9px;color:#77717a;font:500 9px/1.5 'JetBrains Mono',monospace;letter-spacing:.055em;text-transform:uppercase}
+    .skills-reference-intro{max-width:760px;margin:-7px 0 22px;color:#99939b;font-size:13px;line-height:1.7}
+    .skills-reference-panel{padding:27px 23px;border:1px solid rgba(63,63,70,.72);background:rgba(17,13,14,.82)}
+    .skills-reference-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+    .skills-reference-column{min-width:0;padding:0 19px}
+    .skills-reference-column:first-child{padding-left:0}
+    .skills-reference-column:last-child{padding-right:0}
+    .skills-reference-column+.skills-reference-column{border-left:1px solid rgba(63,63,70,.65)}
+    .skills-reference-column h3{margin:0 0 22px;color:#f4f4f5;font-size:14px;font-weight:800;line-height:1.35;text-transform:uppercase}
+    .skill-reference-list{display:grid;gap:13px}
+    .skill-reference-item{min-width:0;color:#d5d1d5;font:500 12px/1.45 'JetBrains Mono',monospace}
+    .skill-reference-item i{display:block;height:6px;margin-top:6px;border-radius:999px;background:linear-gradient(90deg,#dc171f,#f5222a);box-shadow:0 0 8px rgba(220,23,31,.12)}
+    .skills-reference-footnote{margin:17px 0 0;color:#827b84;font-size:11px;line-height:1.6}
+    .skills-reference-footnote span{display:inline-block;margin-left:5px;color:#c45a62;font:500 9px/1.4 'JetBrains Mono',monospace;letter-spacing:.08em}
+    .experience-reference-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .experience-reference-card{min-height:170px;padding:23px 24px;border:1px solid rgba(63,63,70,.72);background:rgba(17,13,14,.82);transition:border-color .22s ease,background .22s ease,transform .22s ease}
+    .experience-reference-card:hover{border-color:rgba(220,38,38,.58);background:rgba(25,13,15,.92);transform:translateY(-2px)}
+    .experience-card-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:17px;color:#ef4444;font:600 10px/1.4 'JetBrains Mono',monospace;letter-spacing:.07em}
+    .experience-card-meta span:last-child{color:#706a73}
+    .experience-reference-card h3{margin:0 0 7px;color:#f4f4f5;font-size:16px;font-weight:750;line-height:1.4}
+    .experience-card-context{margin:0;color:#a09aa3;font-size:12px;line-height:1.55}
+    .experience-card-description{margin:12px 0 0;color:#817b84;font-size:11px;line-height:1.65}
+    .experience-milestones{margin-top:18px;padding:20px 22px;border:1px solid rgba(63,63,70,.62);background:rgba(13,11,12,.66)}
+    .experience-milestones-title{margin:0 0 15px;color:#ef4444;font:600 10px/1.4 'JetBrains Mono',monospace;letter-spacing:.13em}
+    .experience-milestones-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+    .experience-milestones-grid>div{display:flex;flex-direction:column;gap:6px;min-width:0}
+    .experience-milestones-grid strong{color:#e7e3e8;font-size:12px;line-height:1.5}
+    .experience-milestones-grid span{color:#827b84;font:500 9px/1.5 'JetBrains Mono',monospace}
+    @media(max-width:900px){
+      .skills-reference-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .skills-reference-column:nth-child(3){grid-column:1/-1;padding:20px 0 0;border-left:0;border-top:1px solid rgba(63,63,70,.65)}
+      .skills-reference-column:nth-child(2){padding-right:0}
+    }
+    @media(max-width:640px){
+      .reference-section-heading{align-items:flex-start;flex-direction:column}
+      .section-init-count{text-align:left}
+      .achievements-reference-grid,.experience-reference-grid,.skills-reference-grid,.experience-milestones-grid{grid-template-columns:1fr}
+      .achievement-reference-card{grid-template-columns:40px minmax(0,1fr);gap:13px;padding:18px}
+      .achievement-reference-icon{width:40px;height:40px;border-radius:11px;font-size:21px}
+      .achievement-reference-card h3{font-size:14px}
+      .achievement-reference-card p{font-size:12px}
+      .skills-reference-panel{padding:20px 17px}
+      .skills-reference-column,.skills-reference-column:first-child,.skills-reference-column:nth-child(2),.skills-reference-column:last-child{grid-column:auto;padding:0 0 19px;border-left:0;border-bottom:1px solid rgba(63,63,70,.65)}
+      .skills-reference-column:nth-child(3){padding-top:0;border-top:0;border-bottom:0}
+      .skills-reference-column h3{margin-bottom:16px}
+      .experience-reference-card{min-height:0;padding:19px}
+      .experience-milestones{padding:18px}
+    }
+    @media(prefers-reduced-motion:reduce){.achievement-reference-card,.experience-reference-card{transition:none}}
+
   </style>
 </head>
 <body class="selection:bg-red-600 selection:text-white">
@@ -854,12 +920,12 @@
       </a>
 
       <nav class="mobile-site-nav hidden md:flex items-center gap-7" aria-label="Primary navigation">
-        <a href="#karya" data-build-layer data-wave="1" data-build-type="text">// OPERATIONS</a>
-        <a href="#achievements" data-build-layer data-wave="1" data-build-type="text">// ACHIEVEMENTS</a>
-        <a href="#raw-to-real" data-build-layer data-wave="1" data-build-type="text">// ZERO-TRUST</a>
-        <a href="#skills" data-build-layer data-wave="1" data-build-type="text">// SKILLS</a>
-        <a href="#experience" data-build-layer data-wave="1" data-build-type="text">// EXPERIENCE</a>
-        <a href="#contact" data-build-layer data-wave="1" data-build-type="text">// CONTACT</a>
+        <a href="#karya" data-build-layer data-wave="1" data-build-type="text">OPERATIONS</a>
+        <a href="#achievements" data-build-layer data-wave="1" data-build-type="text">ACHIEVEMENTS</a>
+        <a href="#raw-to-real" data-build-layer data-wave="1" data-build-type="text">ZERO-TRUST</a>
+        <a href="#skills" data-build-layer data-wave="1" data-build-type="text">SKILLS</a>
+        <a href="#experience" data-build-layer data-wave="1" data-build-type="text">EXPERIENCE</a>
+        <a href="#contact" data-build-layer data-wave="1" data-build-type="text">CONTACT</a>
       </nav>
 
       <div class="flex items-center gap-2.5">
@@ -1102,38 +1168,18 @@
     <!-- =================================================================== -->
     <!-- WAVE 4: RECOGNITION & HALL OF FAME — "THE AUDITS. THE RECOGNITION." -->
     <!-- =================================================================== -->
+    
     <section id="achievements" class="py-20 max-w-7xl mx-auto px-4 sm:px-6 border-b border-zinc-900">
       <span id="awards" class="section-anchor-alias" aria-hidden="true"></span>
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-        <div class="lg:col-span-5 space-y-5">
-          <p data-build-layer data-wave="4" data-build-type="text" class="font-mono text-[10px] uppercase tracking-[.18em] text-zinc-400"><span class="text-red-500">// ACHIEVEMENTS</span><span class="text-zinc-600"> / CERTIFICATIONS, CTFs &amp; BOUNTIES</span></p>
-          <h2 data-build-layer data-wave="4" data-build-type="text" class="font-display text-5xl sm:text-6xl uppercase leading-none text-white">
-            THE AUDITS.<br />
-            <span class="text-red-600">THE RECOGNITION.</span>
-          </h2>
-
-          <div data-build-layer data-wave="4" data-build-type="box" class="py-4 flex items-center gap-4">
-            <span class="text-red-600 text-3xl">🛡️</span>
-            <div>
-              <div class="font-display text-6xl text-white leading-none">12<span class="text-red-600">+</span></div>
-              <div class="font-mono text-[9px] tracking-widest uppercase text-red-500 mt-1">HONORS, CTFs &amp; DISCLOSURES</div>
-            </div>
-            <span class="text-red-600 text-3xl">🛡️</span>
-          </div>
-
-          <p data-build-layer data-wave="4" data-build-type="text" class="text-xs sm:text-sm text-zinc-400 leading-relaxed max-w-sm">
-            Relentless curiosity in offensive research and defensive hardening—validated across national Capture The Flag competitions, responsible disclosures, and production security audits.
-          </p>
-
-          <div id="award-detail-box" data-build-layer data-wave="4" data-build-type="box" class="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 font-mono text-xs">
-            <div id="award-detail-title" class="text-red-400 font-bold">★ Zero-Trust OAuth &amp; 2FA Architecture (2026)</div>
-            <p id="award-detail-desc" class="text-zinc-400 text-[11px] mt-1">Click any recognition row on the right to inspect the technical scope.</p>
-          </div>
+      <div class="reference-section-heading" data-build-layer data-wave="4" data-build-type="text">
+        <div>
+          <p class="section-init-label">[SECTION_INIT: ACHIEVEMENTS]</p>
+          <p class="section-init-subtitle">CERTIFICATIONS, CTFs &amp; DISCLOSURES</p>
         </div>
-
-        <div id="awards-list" class="lg:col-span-7 divide-y divide-zinc-800/80 border-y border-zinc-800/80">
-          <!-- Populated by JS with data-wave="4" -->
-        </div>
+        <span class="section-init-count">12+ HONORS, CTFs &amp; DISCLOSURES</span>
+      </div>
+      <div id="awards-list" class="achievements-reference-grid" aria-label="Achievements and recognition">
+        <!-- Achievement cards are populated from the portfolio's recognition data. -->
       </div>
     </section>
 
@@ -1188,171 +1234,103 @@
     <!-- =================================================================== -->
     <!-- WAVE 6: 03 / BEHIND THE FIREWALL — "MORE THAN TOOLS."               -->
     <!-- =================================================================== -->
+    
     <section id="skills" class="py-20 max-w-7xl mx-auto px-4 sm:px-6 border-b border-zinc-900">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-12">
-        <div class="lg:col-span-7">
-          <p data-build-layer data-wave="6" data-build-type="text" class="font-mono text-[10px] uppercase tracking-[.18em] text-zinc-400 mb-1"><span class="text-red-500">// SKILLS</span><span class="text-zinc-600"> / 03 — BEHIND THE FIREWALL</span></p>
-          <h2 data-build-layer data-wave="6" data-build-type="text" class="font-display text-4xl sm:text-6xl uppercase leading-none text-white">
-            MORE THAN TOOLS.<br />
-            IT'S ADVERSARY <span class="text-red-600">MINDSET.</span>
-          </h2>
+      <div class="reference-section-heading" data-build-layer data-wave="6" data-build-type="text">
+        <div>
+          <p class="section-init-label">[SECTION_INIT: SKILLS]</p>
+          <p class="section-init-subtitle">03 — BEHIND THE FIREWALL</p>
         </div>
-        <p data-build-layer data-wave="6" data-build-type="text" class="lg:col-span-5 text-xs sm:text-sm text-zinc-400 leading-relaxed lg:pt-6">
-          I'm SAM, a cybersecurity researcher and full-stack security engineer. I operate across offensive penetration testing, secure authentication architecture (OAuth / 2FA), and network defense to keep critical assets resilient.
-        </p>
       </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        <div class="lg:col-span-4 space-y-5">
-          <h3 data-build-layer data-wave="6" data-build-type="text" class="font-mono text-[11px] uppercase tracking-widest text-red-500">OFFENSIVE &amp; DEFENSIVE ARSENAL</h3>
-          <div class="flex flex-wrap gap-2">
-            <span data-build-layer data-wave="6" data-build-type="box" class="px-3 py-1.5 rounded bg-zinc-900 border border-zinc-800 text-xs text-zinc-200">Web &amp; API Pentesting</span>
-            <span data-build-layer data-wave="6" data-build-type="box" class="px-3 py-1.5 rounded bg-zinc-900 border border-zinc-800 text-xs text-zinc-200">Red Team Ops</span>
-            <span data-build-layer data-wave="6" data-build-type="box" class="px-3 py-1.5 rounded bg-zinc-900 border border-zinc-800 text-xs text-zinc-200">Active Directory</span>
-            <span data-build-layer data-wave="6" data-build-type="box" class="px-3 py-1.5 rounded bg-zinc-900 border border-zinc-800 text-xs text-zinc-200">Network Forensics</span>
-            <span data-build-layer data-wave="6" data-build-type="box" class="px-3 py-1.5 rounded bg-zinc-900 border border-zinc-800 text-xs text-zinc-200">OSINT &amp; Recon</span>
-            <span data-build-layer data-wave="6" data-build-type="box" class="px-3 py-1.5 rounded bg-zinc-900 border border-zinc-800 text-xs text-zinc-200">Reverse Engineering</span>
-            <span data-build-layer data-wave="6" data-build-type="box" class="px-3 py-1.5 rounded bg-zinc-900 border border-zinc-800 text-xs text-zinc-200">OAuth / 2FA Hardening</span>
-            <span data-build-layer data-wave="6" data-build-type="box" class="px-3 py-1.5 rounded bg-zinc-900 border border-zinc-800 text-xs text-zinc-200">DevSecOps</span>
-          </div>
-
-          <div class="flex flex-wrap gap-2.5 pt-3">
-            <div data-build-layer data-wave="6" data-build-type="box" class="tool-logo-chip tool-logo-chip-kali">
-              <img src="/brand-logos/kalilinux.svg" alt="" loading="lazy" decoding="async" /><span>KALI LINUX</span>
-            </div>
-            <div data-build-layer data-wave="6" data-build-type="box" class="tool-logo-chip tool-logo-chip-burp">
-              <img src="/brand-logos/burpsuite.svg" alt="" loading="lazy" decoding="async" /><span>BURP SUITE</span>
-            </div>
-            <div data-build-layer data-wave="6" data-build-type="box" class="tool-logo-chip tool-logo-chip-nmap">
-              <img src="https://nmap.org/images/nmap-logo-64px.svg" alt="" loading="lazy" decoding="async" /><span>NMAP</span>
-            </div>
-            <div data-build-layer data-wave="6" data-build-type="box" class="tool-logo-chip tool-logo-chip-metasploit">
-              <img src="/brand-logos/metasploit.svg" alt="" loading="lazy" decoding="async" /><span>METASPLOIT</span>
-            </div>
-            <div data-build-layer data-wave="6" data-build-type="box" class="tool-logo-chip tool-logo-chip-wireshark">
-              <img src="/brand-logos/wireshark.svg" alt="" loading="lazy" decoding="async" /><span>WIRESHARK</span>
-            </div>
-            <div data-build-layer data-wave="6" data-build-type="box" class="tool-logo-chip tool-logo-chip-ghidra">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/f/f6/Ghidra_logo.svg" alt="" loading="lazy" decoding="async" /><span>GHIDRA</span>
+      <p class="skills-reference-intro" data-build-layer data-wave="6" data-build-type="text">
+        Cybersecurity research and full-stack security engineering across offensive testing, authentication hardening, infrastructure and network defense.
+      </p>
+      <div class="skills-reference-panel">
+        <div class="skills-reference-grid">
+          <div class="skills-reference-column" data-build-layer data-wave="6" data-build-type="box">
+            <h3>WEB SECURITY</h3>
+            <div class="skill-reference-list">
+              <div class="skill-reference-item"><span>Web &amp; API Pentesting</span><i aria-hidden="true"></i></div>
+              <div class="skill-reference-item"><span>Red Team Operations</span><i aria-hidden="true"></i></div>
+              <div class="skill-reference-item"><span>Active Directory</span><i aria-hidden="true"></i></div>
+              <div class="skill-reference-item"><span>Network Forensics</span><i aria-hidden="true"></i></div>
+              <div class="skill-reference-item"><span>OSINT &amp; Recon</span><i aria-hidden="true"></i></div>
+              <div class="skill-reference-item"><span>Reverse Engineering</span><i aria-hidden="true"></i></div>
             </div>
           </div>
-        </div>
-
-        <div class="lg:col-span-4 border-l border-red-900/60 pl-5 space-y-5">
-          <div data-build-layer data-wave="6" data-build-type="text">
-            <div class="font-display text-lg text-red-500">01 <span class="text-white ml-2 font-sans text-xs font-bold uppercase">RECON &amp; ATTACK SURFACE</span></div>
-            <p class="text-xs text-zinc-400 mt-1">Deep OSINT, subdomain enumeration, and mapping exposed services before an attacker does.</p>
+          <div class="skills-reference-column" data-build-layer data-wave="6" data-build-type="box">
+            <h3>APPLICATION SECURITY</h3>
+            <div class="skill-reference-list">
+              <div class="skill-reference-item"><span>OAuth / 2FA Hardening</span><i aria-hidden="true"></i></div>
+              <div class="skill-reference-item"><span>Authentication Bypass</span><i aria-hidden="true"></i></div>
+              <div class="skill-reference-item"><span>API Security</span><i aria-hidden="true"></i></div>
+              <div class="skill-reference-item"><span>Threat Modeling</span><i aria-hidden="true"></i></div>
+              <div class="skill-reference-item"><span>Controlled Exploitation</span><i aria-hidden="true"></i></div>
+              <div class="skill-reference-item"><span>Patch &amp; Hardening</span><i aria-hidden="true"></i></div>
+            </div>
           </div>
-          <div data-build-layer data-wave="6" data-build-type="text">
-            <div class="font-display text-lg text-red-500">02 <span class="text-white ml-2 font-sans text-xs font-bold uppercase">THREAT MODELING</span></div>
-            <p class="text-xs text-zinc-400 mt-1">Identifying privilege escalation paths, broken auth flows, and logic flaws across APIs.</p>
-          </div>
-          <div data-build-layer data-wave="6" data-build-type="text">
-            <div class="font-display text-lg text-red-500">03 <span class="text-white ml-2 font-sans text-xs font-bold uppercase">CONTROLLED EXPLOITATION</span></div>
-            <p class="text-xs text-zinc-400 mt-1">Executing safe, verifiable Proof-of-Concept (PoC) exploits to demonstrate real business impact.</p>
-          </div>
-          <div data-build-layer data-wave="6" data-build-type="text">
-            <div class="font-display text-lg text-red-500">04 <span class="text-white ml-2 font-sans text-xs font-bold uppercase">PATCHING &amp; HARDENING</span></div>
-            <p class="text-xs text-zinc-400 mt-1">Engineering code-level fixes, strict 2FA/OAuth verification, and WAF rule deployment.</p>
-          </div>
-          <div data-build-layer data-wave="6" data-build-type="text">
-            <div class="font-display text-lg text-red-500">05 <span class="text-white ml-2 font-sans text-xs font-bold uppercase">CONTINUOUS MONITORING</span></div>
-            <p class="text-xs text-zinc-400 mt-1"> Re-testing patched endpoints and deploying automated intrusion detection telemetry.</p>
-          </div>
-        </div>
-
-        <div data-build-layer data-wave="6" data-build-type="media" class="lg:col-span-4 rounded-xl bg-gradient-to-br from-[#6e131d] via-[#4d0b13] to-[#260509] border border-red-500/30 p-6 flex flex-col justify-between min-h-[260px]">
-          <div class="font-display text-4xl text-red-400/50 leading-none">“</div>
-          <blockquote class="text-base sm:text-lg font-medium text-rose-50 leading-relaxed my-3">
-            To defend a system effectively, you must first understand every way an adversary can break it.
-          </blockquote>
-          <div class="pt-3 border-t border-red-400/20 flex items-center justify-between">
-            <span class="font-script text-3xl text-white">SAM</span>
-            <span class="font-mono text-[9px] text-rose-300 uppercase">SECURITY RESEARCHER</span>
+          <div class="skills-reference-column" data-build-layer data-wave="6" data-build-type="box">
+            <h3>ENGINEERING &amp; TOOLS</h3>
+            <div class="skill-reference-list">
+              <div class="skill-reference-item"><span>Full-Stack Security Engineering</span><i aria-hidden="true"></i></div>
+              <div class="skill-reference-item"><span>DevSecOps</span><i aria-hidden="true"></i></div>
+              <div class="skill-reference-item"><span>Kali Linux</span><i aria-hidden="true"></i></div>
+              <div class="skill-reference-item"><span>Burp Suite</span><i aria-hidden="true"></i></div>
+              <div class="skill-reference-item"><span>Nmap</span><i aria-hidden="true"></i></div>
+              <div class="skill-reference-item"><span>Metasploit</span><i aria-hidden="true"></i></div>
+              <div class="skill-reference-item"><span>Wireshark</span><i aria-hidden="true"></i></div>
+              <div class="skill-reference-item"><span>Ghidra</span><i aria-hidden="true"></i></div>
+            </div>
           </div>
         </div>
       </div>
+      <p class="skills-reference-footnote" data-build-layer data-wave="6" data-build-type="text">
+        “To defend a system effectively, you must first understand every way an adversary can break it.” <span>— SAM / SECURITY RESEARCHER</span>
+      </p>
     </section>
 
     <!-- =================================================================== -->
     <!-- WAVE 7: 04 / THE JOURNEY — "ALWAYS PROBING. ALWAYS SECURING."       -->
     <!-- =================================================================== -->
+    
     <section id="experience" class="py-20 max-w-7xl mx-auto px-4 sm:px-6 border-b border-zinc-900">
       <span id="journey" class="section-anchor-alias" aria-hidden="true"></span>
-      <div class="flex items-end justify-between mb-12">
+      <div class="reference-section-heading" data-build-layer data-wave="7" data-build-type="text">
         <div>
-          <p data-build-layer data-wave="7" data-build-type="text" class="font-mono text-[10px] uppercase tracking-[.18em] text-zinc-400 mb-1"><span class="text-red-500">// EXPERIENCE</span><span class="text-zinc-600"> / 04 — THE JOURNEY</span></p>
-          <h2 data-build-layer data-wave="7" data-build-type="text" class="font-display text-4xl sm:text-6xl uppercase text-white">
-            ALWAYS PROBING. ALWAYS SECURING<span class="text-red-600">.</span>
-          </h2>
+          <p class="section-init-label">[SECTION_INIT: EXPERIENCE]</p>
+          <p class="section-init-subtitle">04 — THE JOURNEY</p>
         </div>
-        <span data-build-layer data-wave="7" data-build-type="text" class="font-mono text-xs text-zinc-400">SECURITY CV ↓</span>
+        <span class="section-init-count">SECURITY WORK &amp; PRACTICE</span>
       </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-        <div class="lg:col-span-7 divide-y divide-zinc-900">
-          <div data-build-layer data-wave="7" data-build-type="text" class="py-5 grid grid-cols-1 sm:grid-cols-12 gap-2">
-            <div class="sm:col-span-4 font-mono text-[11px] text-red-500">2025 - PRESENT</div>
-            <div class="sm:col-span-8">
-              <h3 class="text-base font-bold text-white">Offensive Security &amp; Application Pentester</h3>
-              <div class="text-xs text-zinc-400">Independent &amp; Scaleup Security Ops</div>
-              <p class="text-xs text-zinc-500 mt-2 leading-relaxed">Conducting full-scope web application penetration tests, OAuth/2FA authentication hardening, and vulnerability assessments for cloud-hosted platforms.</p>
-            </div>
-          </div>
-
-          <div data-build-layer data-wave="7" data-build-type="text" class="py-5 grid grid-cols-1 sm:grid-cols-12 gap-2">
-            <div class="sm:col-span-4 font-mono text-[11px] text-zinc-400">2024 - 2025</div>
-            <div class="sm:col-span-8">
-              <h3 class="text-base font-bold text-white">Red Team Lab Researcher &amp; CTF Operator</h3>
-              <div class="text-xs text-zinc-400">HackTheBox / TryHackMe / Bug Bounty</div>
-            </div>
-          </div>
-
-          <div data-build-layer data-wave="7" data-build-type="text" class="py-5 grid grid-cols-1 sm:grid-cols-12 gap-2">
-            <div class="sm:col-span-4 font-mono text-[11px] text-zinc-400">2023 - 2024</div>
-            <div class="sm:col-span-8">
-              <h3 class="text-base font-bold text-white">Secure Full-Stack &amp; Infrastructure Auditor</h3>
-              <div class="text-xs text-zinc-400">Cloud Deployment, MongoDB Atlas &amp; API Security</div>
-            </div>
-          </div>
-
-          <div data-build-layer data-wave="7" data-build-type="text" class="py-5 grid grid-cols-1 sm:grid-cols-12 gap-2">
-            <div class="sm:col-span-4 font-mono text-[11px] text-zinc-400">2022 - 2023</div>
-            <div class="sm:col-span-8">
-              <h3 class="text-base font-bold text-white">Network Defense &amp; Linux Hardening</h3>
-              <div class="text-xs text-zinc-400">Packet Analysis &amp; Firewall Architecture</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="lg:col-span-5 space-y-5">
-          <h3 data-build-layer data-wave="7" data-build-type="text" class="font-display text-4xl uppercase leading-none text-white">
-            LITTLE WINS.<br />
-            <span class="text-red-600">BIG IMPACT.</span>
-          </h3>
-          <div class="divide-y divide-zinc-900 border-y border-zinc-900 text-xs">
-            <div data-build-layer data-wave="7" data-build-type="text" class="py-3.5 flex items-center justify-between">
-              <div>
-                <div class="font-semibold text-white">Zero-Trust 2FA &amp; OAuth Hardening</div>
-                <div class="text-zinc-500 text-[11px]">2026 · Production Security</div>
-              </div>
-              <span class="text-zinc-500">↗</span>
-            </div>
-            <div data-build-layer data-wave="7" data-build-type="text" class="py-3.5 flex items-center justify-between">
-              <div>
-                <div class="font-semibold text-white">100+ Offensive Security Labs Pwned</div>
-                <div class="text-zinc-500 text-[11px]">2025 · Red Team Training</div>
-              </div>
-              <span class="text-zinc-500">↗</span>
-            </div>
-            <div data-build-layer data-wave="7" data-build-type="text" class="py-3.5 flex items-center justify-between">
-              <div>
-                <div class="font-semibold text-white">OWASP Top 10 Remediation Lead</div>
-                <div class="text-zinc-500 text-[11px]">2024 · Web App Security</div>
-              </div>
-              <span class="text-zinc-500">↗</span>
-            </div>
-          </div>
+      <div class="experience-reference-grid">
+        <article class="experience-reference-card" data-build-layer data-wave="7" data-build-type="text">
+          <div class="experience-card-meta"><span>2025 — PRESENT</span><span>01</span></div>
+          <h3>Offensive Security &amp; Application Pentester</h3>
+          <p class="experience-card-context">Independent &amp; Scaleup Security Ops</p>
+          <p class="experience-card-description">Conducting full-scope web application penetration tests, OAuth/2FA authentication hardening, and vulnerability assessments for cloud-hosted platforms.</p>
+        </article>
+        <article class="experience-reference-card" data-build-layer data-wave="7" data-build-type="text">
+          <div class="experience-card-meta"><span>2024 — 2025</span><span>02</span></div>
+          <h3>Red Team Lab Researcher &amp; CTF Operator</h3>
+          <p class="experience-card-context">HackTheBox / TryHackMe / Bug Bounty</p>
+        </article>
+        <article class="experience-reference-card" data-build-layer data-wave="7" data-build-type="text">
+          <div class="experience-card-meta"><span>2023 — 2024</span><span>03</span></div>
+          <h3>Secure Full-Stack &amp; Infrastructure Auditor</h3>
+          <p class="experience-card-context">Cloud Deployment, MongoDB Atlas &amp; API Security</p>
+        </article>
+        <article class="experience-reference-card" data-build-layer data-wave="7" data-build-type="text">
+          <div class="experience-card-meta"><span>2022 — 2023</span><span>04</span></div>
+          <h3>Network Defense &amp; Linux Hardening</h3>
+          <p class="experience-card-context">Packet Analysis &amp; Firewall Architecture</p>
+        </article>
+      </div>
+      <div class="experience-milestones" data-build-layer data-wave="7" data-build-type="box">
+        <p class="experience-milestones-title">SELECTED MILESTONES</p>
+        <div class="experience-milestones-grid">
+          <div><strong>Zero-Trust 2FA &amp; OAuth Hardening</strong><span>2026 · Production Security</span></div>
+          <div><strong>100+ Offensive Security Labs Pwned</strong><span>2025 · Red Team Training</span></div>
+          <div><strong>OWASP Top 10 Remediation Lead</strong><span>2024 · Web App Security</span></div>
         </div>
       </div>
     </section>
@@ -1514,12 +1492,12 @@
     ];
 
     const AWARDS = [
-      { num: '01', title: 'Zero-Trust OAuth & Native 2FA Verification', event: 'Production Authentication Hardening', year: '2026' },
-      { num: '02', title: '1st Place, Capture The Flag (CTF) Finals', event: 'National Cyber Range Competition', year: '2025' },
-      { num: '03', title: 'Critical Auth Bypass & IDOR Disclosure', event: 'Responsible Bug Bounty Hall of Fame', year: '2025' },
-      { num: '04', title: 'Top 1% Red Team Lab Operator', event: 'HackTheBox & TryHackMe Offensive Path', year: '2024' },
-      { num: '05', title: 'Best Cloud & API Security Audit', event: 'OWASP Top 10 Compliance Assessment', year: '2024' },
-      { num: '06', title: 'Network Forensics & Intrusion Defense', event: 'Blue Team SOC Incident Response', year: '2023' }
+      { num: '01', icon: '⌘', title: 'Zero-Trust OAuth & Native 2FA Verification', event: 'Production Authentication Hardening', year: '2026', description: 'Production authentication hardening focused on OAuth and native two-factor verification.' },
+      { num: '02', icon: '✦', title: '1st Place, Capture The Flag (CTF) Finals', event: 'National Cyber Range Competition', year: '2025', description: 'First-place finish in the National Cyber Range Capture The Flag finals.' },
+      { num: '03', icon: '⌕', title: 'Critical Auth Bypass & IDOR Disclosure', event: 'Responsible Bug Bounty Hall of Fame', year: '2025', description: 'Responsible disclosure covering critical authentication-bypass and IDOR findings.' },
+      { num: '04', icon: '♜', title: 'Top 1% Red Team Lab Operator', event: 'HackTheBox & TryHackMe Offensive Path', year: '2024', description: 'Top 1% standing across HackTheBox and TryHackMe offensive training paths.' },
+      { num: '05', icon: '◈', title: 'Best Cloud & API Security Audit', event: 'OWASP Top 10 Compliance Assessment', year: '2024', description: 'Cloud and API security audit work aligned with the OWASP Top 10.' },
+      { num: '06', icon: '⌁', title: 'Network Forensics & Intrusion Defense', event: 'Blue Team SOC Incident Response', year: '2023', description: 'Network forensics and intrusion-defense work in a Blue Team SOC incident-response context.' }
     ];
 
     const projectsGrid = document.getElementById('projects-grid');
@@ -1559,33 +1537,22 @@
     }
 
     const awardsListEl = document.getElementById('awards-list');
-    const awardTitleEl = document.getElementById('award-detail-title');
-    const awardDescEl = document.getElementById('award-detail-desc');
-
     function renderAwards() {
       awardsListEl.innerHTML = '';
       AWARDS.forEach((item) => {
-        const row = document.createElement('button');
-        row.type = 'button';
-        row.setAttribute('data-build-layer', '');
-        row.setAttribute('data-wave', '4');
-        row.setAttribute('data-build-type', 'text');
-        row.className = 'w-full text-left py-4 px-3 flex items-center justify-between gap-4 hover:bg-zinc-900/60 transition-colors group';
-        row.innerHTML = `
-          <div class="flex items-baseline gap-4">
-            <span class="font-mono text-[10px] text-zinc-500">${item.num}</span>
-            <div>
-              <div class="font-semibold text-sm text-white group-hover:text-red-400 transition-colors">${item.title}</div>
-              <div class="text-[11px] text-zinc-500">${item.event}</div>
-            </div>
-          </div>
-          <div class="font-display text-2xl text-red-600">${item.year}</div>
-        `;
-        row.addEventListener('click', () => {
-          awardTitleEl.textContent = `★ ${item.title} (${item.year})`;
-          awardDescEl.textContent = `${item.event} — Verified Security Milestone.`;
-        });
-        awardsListEl.appendChild(row);
+        const card = document.createElement('article');
+        card.setAttribute('data-build-layer', '');
+        card.setAttribute('data-wave', '4');
+        card.setAttribute('data-build-type', 'box');
+        card.className = 'achievement-reference-card';
+        card.innerHTML =
+          '<div class="achievement-reference-icon" aria-hidden="true">' + item.icon + '</div>' +
+          '<div class="achievement-reference-copy">' +
+            '<div class="achievement-reference-card-head"><h3>' + item.title + '</h3><span>' + item.year + '</span></div>' +
+            '<p>' + item.description + '</p>' +
+            '<small>' + item.event + '</small>' +
+          '</div>';
+        awardsListEl.appendChild(card);
       });
     }
 
