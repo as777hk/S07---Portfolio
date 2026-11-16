@@ -799,6 +799,47 @@
     }
     @media(prefers-reduced-motion:reduce){.achievement-reference-card,.experience-reference-card{transition:none}}
 
+  
+
+    /* In-site YouTube cybersecurity talk player */
+    #cyber-video-modal{
+      position:fixed;inset:0;z-index:160;display:none;align-items:center;justify-content:center;
+      padding:20px;background:rgba(3,4,8,.9);backdrop-filter:blur(12px);
+    }
+    #cyber-video-modal.is-open{display:flex}
+    .cyber-video-dialog{
+      width:min(920px,100%);overflow:hidden;border:1px solid rgba(220,38,38,.42);
+      border-radius:16px;background:#080a10;box-shadow:0 25px 100px rgba(0,0,0,.72),0 0 45px rgba(220,38,38,.09);
+    }
+    .cyber-video-dialog-head{
+      display:flex;align-items:center;justify-content:space-between;gap:18px;
+      padding:17px 20px;border-bottom:1px solid rgba(63,63,70,.75);
+      background:linear-gradient(120deg,rgba(31,12,17,.95),rgba(8,10,16,.98));
+    }
+    .cyber-video-kicker{
+      margin:0 0 5px;color:#f87171;font:600 9px/1.4 'JetBrains Mono',monospace;letter-spacing:.13em;text-transform:uppercase;
+    }
+    #cyber-video-title{margin:0;color:#fff;font-size:clamp(14px,2.3vw,20px);font-weight:750;line-height:1.3}
+    #close-cyber-video{
+      flex:0 0 36px;width:36px;height:36px;border:1px solid rgba(148,163,184,.28);
+      border-radius:50%;background:#171923;color:#e5e7eb;font-size:15px;cursor:pointer;
+      transition:background .2s ease,border-color .2s ease;
+    }
+    #close-cyber-video:hover{border-color:#ef4444;background:#991b1b;color:#fff}
+    .cyber-video-frame{position:relative;width:100%;aspect-ratio:16/9;background:#000}
+    .cyber-video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+    .cyber-video-dialog-foot{
+      display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+      padding:11px 17px;border-top:1px solid rgba(63,63,70,.65);color:#8b909c;
+      font:500 8px/1.5 'JetBrains Mono',monospace;letter-spacing:.07em;text-transform:uppercase;
+    }
+    @media(max-width:640px){
+      #cyber-video-modal{padding:12px}
+      .cyber-video-dialog{border-radius:12px}
+      .cyber-video-dialog-head{padding:13px 14px;gap:10px}
+      .cyber-video-dialog-foot{padding:9px 12px;font-size:7px}
+    }
+
   </style>
 </head>
 <body class="selection:bg-red-600 selection:text-white">
@@ -1414,7 +1455,7 @@
               <source src="https://videos.pexels.com/video-files/856356/856356-hd_1920_1080_25fps.mp4" type="video/mp4" />
             </video>
             <canvas id="vortex-canvas" width="380" height="256" class="absolute inset-0 w-full h-full"></canvas>
-            <a href="#hero" aria-label="Go to homepage" title="Back to homepage" class="relative z-10 inline-flex self-start font-mono text-[10px] text-zinc-400 hover:text-white transition-colors">SAM // SEC_OPS</a>
+            <div class="relative z-10 inline-flex self-start font-mono text-[10px] text-zinc-400">SAM // SEC_OPS</div>
             <div class="relative z-10 pointer-events-none">
               <div class="font-display text-4xl uppercase leading-none text-white">
                 MAKE IT<br />
@@ -1422,7 +1463,7 @@
               </div>
             </div>
             <div class="relative z-10 flex justify-end">
-              <a href="/sam-live-builder.html#hero" aria-label="Go to homepage" title="Back to homepage" class="w-9 h-9 rounded-full bg-red-600 text-white flex items-center justify-center shadow-[0_0_25px_rgba(220,38,38,0.8)] transition-transform hover:scale-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-red-400">▶</a>
+              <button type="button" data-open-cyber-video aria-label="Play cybersecurity video" title="Watch a cybersecurity talk" class="w-9 h-9 rounded-full bg-red-600 text-white flex items-center justify-center shadow-[0_0_25px_rgba(220,38,38,0.8)] transition-transform hover:scale-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-red-400">▶</button>
             </div>
           </div>
         </div>
@@ -1453,6 +1494,33 @@
           <span id="modal-meta">PROTOCOL: ZERO-TRUST // TLS 1.3</span>
           <span class="text-emerald-400">● SIMULATION ACTIVE</span>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IN-SITE CYBERSECURITY VIDEO PLAYER -->
+  <div id="cyber-video-modal" aria-hidden="true">
+    <div class="cyber-video-dialog" role="dialog" aria-modal="true" aria-labelledby="cyber-video-title">
+      <div class="cyber-video-dialog-head">
+        <div>
+          <p class="cyber-video-kicker">FEATURED SECURITY TALK · DEF CON 32</p>
+          <h2 id="cyber-video-title">Securing Frontends at Scale — A Post-XSS World</h2>
+        </div>
+        <button id="close-cyber-video" type="button" aria-label="Close video player">✕</button>
+      </div>
+      <div class="cyber-video-frame">
+        <iframe
+          id="cyber-video-iframe"
+          title="DEF CON 32 — Securing Frontends at Scale; Paving our Way to Post XSS World"
+          src="about:blank"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen
+        ></iframe>
+      </div>
+      <div class="cyber-video-dialog-foot">
+        <span>DEFCONConference · Application Security / XSS</span>
+        <span>PLAYING INSIDE SAM'S PORTFOLIO</span>
       </div>
     </div>
   </div>
@@ -3008,4 +3076,44 @@
     barProgressFill.style.width = '0%';
     requestAnimationFrame(animate);
   </script>
+
+  <script>
+    (() => {
+      const modal = document.getElementById('cyber-video-modal');
+      const frame = document.getElementById('cyber-video-iframe');
+      const openButton = document.querySelector('[data-open-cyber-video]');
+      const closeButton = document.getElementById('close-cyber-video');
+      const embedUrl = 'https://www.youtube.com/embed/vEzLsRXjatw?autoplay=1&rel=0&playsinline=1';
+
+      if (!modal || !frame || !openButton || !closeButton) return;
+
+      function openCyberVideo() {
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        // Load the YouTube player only after a user click so autoplay is user-initiated.
+        frame.src = embedUrl;
+        closeButton.focus({ preventScroll: true });
+      }
+
+      function closeCyberVideo() {
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        // Clearing the iframe source stops playback immediately.
+        frame.src = 'about:blank';
+        document.body.style.overflow = '';
+        openButton.focus({ preventScroll: true });
+      }
+
+      openButton.addEventListener('click', openCyberVideo);
+      closeButton.addEventListener('click', closeCyberVideo);
+      modal.addEventListener('click', event => {
+        if (event.target === modal) closeCyberVideo();
+      });
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && modal.classList.contains('is-open')) closeCyberVideo();
+      });
+    })();
+  </script>
+
 </body>
