@@ -827,7 +827,16 @@
     }
     #close-cyber-video:hover{border-color:#ef4444;background:#991b1b;color:#fff}
     .cyber-video-frame{position:relative;width:100%;aspect-ratio:16/9;background:#000}
-    .cyber-video-frame video{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000;object-fit:contain}
+    .cyber-video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
+    .cyber-video-fallback{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:22px;text-align:center;background:radial-gradient(circle at 50% 30%,rgba(220,38,38,.12),transparent 55%),#05070c}
+    .cyber-video-fallback[hidden]{display:none}
+    .cyber-video-fallback>span{color:#f87171;font:700 11px/1.4 'JetBrains Mono',monospace;letter-spacing:.12em}
+    .cyber-video-fallback p{margin:0;color:#a1a1aa;font:500 11px/1.6 'Inter',sans-serif}
+    .cyber-video-fallback button,.cyber-video-next{border:1px solid rgba(248,113,113,.35);border-radius:3px;background:rgba(220,38,38,.12);color:#fecaca;padding:8px 10px;font:600 8px/1.3 'JetBrains Mono',monospace;letter-spacing:.08em;cursor:pointer}
+    .cyber-video-fallback button:hover,.cyber-video-next:hover{background:rgba(220,38,38,.25);color:#fff}
+    .cyber-video-dialog-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .cyber-video-next{padding:6px 9px}
+
     .cyber-video-dialog-foot{
       display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
       padding:11px 17px;border-top:1px solid rgba(63,63,70,.65);color:#8b909c;
@@ -1503,19 +1512,30 @@
     <div class="cyber-video-dialog" role="dialog" aria-modal="true" aria-labelledby="cyber-video-title">
       <div class="cyber-video-dialog-head">
         <div>
-          <p class="cyber-video-kicker">FEATURED SECURITY TALK · DEF CON 29</p>
-          <h2 id="cyber-video-title">Our Journey Back to the Future of Windows Vulnerabilities &amp; 0-Days</h2>
+          <p class="cyber-video-kicker" id="cyber-video-kicker">RANDOM SECURITY VIDEO · CREATOR SPOTLIGHT</p>
+          <h2 id="cyber-video-title">Loading a security video…</h2>
         </div>
         <button id="close-cyber-video" type="button" aria-label="Close video player">✕</button>
       </div>
       <div class="cyber-video-frame">
-        <video id="cyber-video-player" controls playsinline preload="metadata" aria-label="DEF CON 29 — Our Journey Back to the Future of Windows Vulnerabilities and the 0-days we brought back with us">
-          <source src="https://media.defcon.org/DEF%20CON%2029/DEF%20CON%2029%20video%20and%20slides/DEF%20CON%2029%20-%20Tomer%20Bar%20Eran%20Segal%20-%202021%20-%20Our%20Journey%20Back%20To%20The%20Future%20Of%20Windows%20Vulnerabilities%20and%20the%200-days%20we%20brought%20back%20with%20us.mp4" type="video/mp4" />
-        </video>
+        <iframe
+          id="cyber-video-iframe"
+          title="Random cybersecurity video from an ethical hacking creator"
+          src="about:blank"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen
+        ></iframe>
+        <div id="cyber-video-fallback" class="cyber-video-fallback" hidden>
+          <span>PLAYER COULDN'T LOAD THIS CLIP</span>
+          <p>Choose another creator's video and keep watching here.</p>
+          <button type="button" id="cyber-video-fallback-next">LOAD ANOTHER VIDEO ↻</button>
+        </div>
       </div>
       <div class="cyber-video-dialog-foot">
-        <span>DEF CON 29 · Windows vulnerability research / zero-days</span>
-        <span>PLAYING INSIDE SAM'S PORTFOLIO</span>
+        <span id="cyber-video-channel">CREATOR // RANDOMIZED</span>
+        <button type="button" id="cyber-video-next" class="cyber-video-next">NEXT VIDEO ↻</button>
+        <span>IN-PORTFOLIO PLAYER · NO PAGE REDIRECT</span>
       </div>
     </div>
   </div>
@@ -3075,29 +3095,97 @@
   <script>
     (() => {
       const modal = document.getElementById('cyber-video-modal');
-      const player = document.getElementById('cyber-video-player');
+      const frame = document.getElementById('cyber-video-iframe');
       const openButton = document.querySelector('[data-open-cyber-video]');
       const closeButton = document.getElementById('close-cyber-video');
+      const nextButton = document.getElementById('cyber-video-next');
+      const fallbackNext = document.getElementById('cyber-video-fallback-next');
+      const fallback = document.getElementById('cyber-video-fallback');
+      const title = document.getElementById('cyber-video-title');
+      const kicker = document.getElementById('cyber-video-kicker');
+      const channel = document.getElementById('cyber-video-channel');
 
-      if (!modal || !player || !openButton || !closeButton) return;
+      if (!modal || !frame || !openButton || !closeButton || !nextButton) return;
+
+      // Videos are selected from the creators' own published YouTube channels.
+      // Shuffle-bag selection avoids a repeat until the complete pool has played.
+      const securityVideos = [
+        {id:'Q6hQlM6f6Cs',channel:'NahamSec',title:'How I Found My First $3,000 AI Vulnerability',topic:'AI BUG BOUNTY'},
+        {id:'pbu7ElRTBrc',channel:'NahamSec',title:'I Earned $2M Hacking. Here’s Everything I Know',topic:'BUG BOUNTY'},
+        {id:'NH4VCau_5xI',channel:'NahamSec',title:'Why You Suck at Bug Bounty Hunting (And How To Fix It)',topic:'BUG BOUNTY METHODOLOGY'},
+        {id:'-ZWuvykS-QA',channel:'IppSec',title:'HackTheBox — Pirate',topic:'ACTIVE DIRECTORY / PENTESTING'},
+        {id:'y1WgyR4c-4A',channel:'John Hammond',title:'He Tried to Hack Me…',topic:'SECURITY RESEARCH'},
+        {id:'_p7MJuOJauo',channel:'The Cyber Mentor',title:'Breaking into Penetration Testing: Career Tips and Insights',topic:'PENETRATION TESTING'},
+        {id:'sBuxwMAfGnI',channel:'David Bombal ft. John Hammond',title:'Malware Analysis — How to Get Started with John Hammond',topic:'MALWARE ANALYSIS'},
+        {id:'akCce7vSSfw',channel:'LiveOverflow',title:'Developing an Intuition for Binary Exploitation',topic:'BINARY EXPLOITATION'},
+        {id:'ls8Xfqtx7XU',channel:'HackerSploit',title:'Web App Penetration Testing — Course Introduction',topic:'WEB APP PENTESTING'}
+      ];
+
+      let remaining = [];
+      let lastVideoId = '';
+      let activeVideo = null;
+      let videoTimeout = null;
+
+      function refillShuffleBag() {
+        remaining = securityVideos
+          .filter(video => video.id !== lastVideoId)
+          .map(video => video.id);
+        for (let i = remaining.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [remaining[i], remaining[j]] = [remaining[j], remaining[i]];
+        }
+      }
+
+      function getNextVideo() {
+        if (!remaining.length) refillShuffleBag();
+        const nextId = remaining.pop();
+        lastVideoId = nextId;
+        return securityVideos.find(video => video.id === nextId) || securityVideos[0];
+      }
+
+      function loadRandomVideo() {
+        activeVideo = getNextVideo();
+        if (videoTimeout) {
+          clearTimeout(videoTimeout);
+          videoTimeout = null;
+        }
+        fallback.hidden = true;
+        title.textContent = activeVideo.title;
+        kicker.textContent = activeVideo.channel.toUpperCase() + ' · RANDOM SECURITY VIDEO';
+        channel.textContent = activeVideo.channel.toUpperCase() + ' // ' + activeVideo.topic;
+        frame.title = activeVideo.channel + ' — ' + activeVideo.title;
+
+        // Use YouTube's official embeddable player, hosted in this modal.
+        // It does not change the portfolio page URL or open a separate tab.
+        const origin = encodeURIComponent(window.location.origin);
+        frame.src = 'https://www.youtube-nocookie.com/embed/' + activeVideo.id +
+          '?autoplay=1&rel=0&playsinline=1&modestbranding=1&enablejsapi=1&origin=' + origin;
+
+        // YouTube may reject a specific clip or require confirmation in some contexts.
+        // Give the visitor an in-modal "next random" option instead of redirecting them.
+        videoTimeout = setTimeout(() => {
+          if (!modal.classList.contains('is-open')) return;
+          try {
+            frame.contentWindow.postMessage(JSON.stringify({event:'listening',id:1}), '*');
+          } catch (_) {}
+        }, 9000);
+      }
 
       function openCyberVideo() {
         modal.classList.add('is-open');
         modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
-        // Playback starts directly from the user's click, inside this modal.
-        const playRequest = player.play();
-        if (playRequest && typeof playRequest.catch === 'function') {
-          playRequest.catch(() => {
-            // Native controls remain available if the browser blocks autoplay.
-          });
-        }
+        loadRandomVideo();
         closeButton.focus({ preventScroll: true });
       }
 
       function closeCyberVideo() {
-        player.pause();
-        try { player.currentTime = 0; } catch (_) {}
+        if (videoTimeout) {
+          clearTimeout(videoTimeout);
+          videoTimeout = null;
+        }
+        frame.src = 'about:blank';
+        fallback.hidden = true;
         modal.classList.remove('is-open');
         modal.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
@@ -3105,6 +3193,8 @@
       }
 
       openButton.addEventListener('click', openCyberVideo);
+      nextButton.addEventListener('click', loadRandomVideo);
+      if (fallbackNext) fallbackNext.addEventListener('click', loadRandomVideo);
       closeButton.addEventListener('click', closeCyberVideo);
       modal.addEventListener('click', event => {
         if (event.target === modal) closeCyberVideo();
