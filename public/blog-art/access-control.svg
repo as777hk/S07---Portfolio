@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 430" fill="none">
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#15101a"/><stop offset="1" stop-color="#07141d"/></linearGradient></defs><rect width="720" height="430" fill="url(#bg)"/>
+<g stroke="#34536a" stroke-opacity=".24"><path d="M0 70H720M0 140H720M0 210H720M0 280H720M0 350H720M72 0V430M144 0V430M216 0V430M288 0V430M360 0V430M432 0V430M504 0V430M576 0V430M648 0V430"/></g>
+<rect x="65" y="75" width="230" height="274" rx="14" fill="#0c1d2b" stroke="#38bdf8" stroke-width="3"/><rect x="425" y="75" width="230" height="274" rx="14" fill="#21101c" stroke="#fb4560" stroke-width="3"/>
+<g fill="#102e43" stroke="#62d8ff" stroke-width="3"><circle cx="180" cy="151" r="44"/><path d="M111 290C120 222 151 202 180 202S241 222 249 290Z"/></g>
+<g fill="#411729" stroke="#ff7186" stroke-width="3"><circle cx="540" cy="151" r="44"/><path d="M471 290C480 222 511 202 540 202S601 222 609 290Z"/></g>
+<path d="M295 212H422" stroke="#ff4b67" stroke-width="4" stroke-dasharray="10 9"/><path d="M403 193L424 212L403 231" stroke="#ff4b67" stroke-width="4"/>
+<rect x="315" y="152" width="90" height="118" rx="13" fill="#07101a" stroke="#effaff" stroke-opacity=".8" stroke-width="3"/><path d="M336 152V130C336 98 384 98 384 130V152" stroke="#effaff" stroke-width="7" stroke-linecap="round"/><circle cx="360" cy="207" r="9" fill="#fb4560"/><path d="M360 216v20" stroke="#fb4560" stroke-width="5"/>
+<g fill="#b9d2dc" font-family="monospace" font-size="14"><text x="125" y="320">USER A / AUTH</text><text x="485" y="320">USER B / DENY</text><text x="316" y="300" fill="#fb7185">OBJECT ID</text></g>
+<path d="M180 52V25H540V52" stroke="#3db8e8" stroke-width="2" stroke-dasharray="6 8"/>
+</svg>
