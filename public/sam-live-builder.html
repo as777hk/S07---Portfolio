@@ -827,7 +827,7 @@
     }
     #close-cyber-video:hover{border-color:#ef4444;background:#991b1b;color:#fff}
     .cyber-video-frame{position:relative;width:100%;aspect-ratio:16/9;background:#000}
-    .cyber-video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+    .cyber-video-frame video{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000;object-fit:contain}
     .cyber-video-dialog-foot{
       display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
       padding:11px 17px;border-top:1px solid rgba(63,63,70,.65);color:#8b909c;
@@ -1503,23 +1503,18 @@
     <div class="cyber-video-dialog" role="dialog" aria-modal="true" aria-labelledby="cyber-video-title">
       <div class="cyber-video-dialog-head">
         <div>
-          <p class="cyber-video-kicker">FEATURED SECURITY TALK · DEF CON 32</p>
-          <h2 id="cyber-video-title">Securing Frontends at Scale — A Post-XSS World</h2>
+          <p class="cyber-video-kicker">FEATURED SECURITY TALK · DEF CON 29</p>
+          <h2 id="cyber-video-title">Our Journey Back to the Future of Windows Vulnerabilities &amp; 0-Days</h2>
         </div>
         <button id="close-cyber-video" type="button" aria-label="Close video player">✕</button>
       </div>
       <div class="cyber-video-frame">
-        <iframe
-          id="cyber-video-iframe"
-          title="DEF CON 32 — Securing Frontends at Scale; Paving our Way to Post XSS World"
-          src="about:blank"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          referrerpolicy="strict-origin-when-cross-origin"
-          allowfullscreen
-        ></iframe>
+        <video id="cyber-video-player" controls playsinline preload="metadata" aria-label="DEF CON 29 — Our Journey Back to the Future of Windows Vulnerabilities and the 0-days we brought back with us">
+          <source src="https://media.defcon.org/DEF%20CON%2029/DEF%20CON%2029%20video%20and%20slides/DEF%20CON%2029%20-%20Tomer%20Bar%20Eran%20Segal%20-%202021%20-%20Our%20Journey%20Back%20To%20The%20Future%20Of%20Windows%20Vulnerabilities%20and%20the%200-days%20we%20brought%20back%20with%20us.mp4" type="video/mp4" />
+        </video>
       </div>
       <div class="cyber-video-dialog-foot">
-        <span>DEFCONConference · Application Security / XSS</span>
+        <span>DEF CON 29 · Windows vulnerability research / zero-days</span>
         <span>PLAYING INSIDE SAM'S PORTFOLIO</span>
       </div>
     </div>
@@ -3080,27 +3075,31 @@
   <script>
     (() => {
       const modal = document.getElementById('cyber-video-modal');
-      const frame = document.getElementById('cyber-video-iframe');
+      const player = document.getElementById('cyber-video-player');
       const openButton = document.querySelector('[data-open-cyber-video]');
       const closeButton = document.getElementById('close-cyber-video');
-      const embedUrl = 'https://www.youtube.com/embed/vEzLsRXjatw?autoplay=1&rel=0&playsinline=1';
 
-      if (!modal || !frame || !openButton || !closeButton) return;
+      if (!modal || !player || !openButton || !closeButton) return;
 
       function openCyberVideo() {
         modal.classList.add('is-open');
         modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
-        // Load the YouTube player only after a user click so autoplay is user-initiated.
-        frame.src = embedUrl;
+        // Playback starts directly from the user's click, inside this modal.
+        const playRequest = player.play();
+        if (playRequest && typeof playRequest.catch === 'function') {
+          playRequest.catch(() => {
+            // Native controls remain available if the browser blocks autoplay.
+          });
+        }
         closeButton.focus({ preventScroll: true });
       }
 
       function closeCyberVideo() {
+        player.pause();
+        try { player.currentTime = 0; } catch (_) {}
         modal.classList.remove('is-open');
         modal.setAttribute('aria-hidden', 'true');
-        // Clearing the iframe source stops playback immediately.
-        frame.src = 'about:blank';
         document.body.style.overflow = '';
         openButton.focus({ preventScroll: true });
       }
