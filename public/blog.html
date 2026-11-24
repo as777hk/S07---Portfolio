@@ -12,7 +12,7 @@
   <meta property="og:site_name" content="SAM — Cybersecurity Portfolio" />
   <meta property="og:title" content="SAM | Security Journal" />
   <meta property="og:description" content="Field notes on penetration testing, application security, red-team research and defensive engineering." />
-  <meta property="og:image" content="https://sam07.vercel.app/blog-art/hero-command-center.svg" />
+  <meta property="og:image" content="https://sam07.vercel.app/blog-art/hero-hacker.webp" />
   <meta property="og:url" content="https://sam07.vercel.app/blog.html" />
   <meta name="twitter:card" content="summary_large_image" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -568,6 +568,15 @@ body:after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opaci
  .article-card,.post-visual img{transition:none!important}
 }
 
+
+/* Cinematic photo artwork layered over the bespoke holographic hero scene */
+.featured-story:after{z-index:0}
+.hero-visual-image{position:absolute;z-index:1;right:1%;top:0;width:61%;height:100%;overflow:hidden;pointer-events:none;mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.22) 9%,#000 24%,#000 100%);-webkit-mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.22) 9%,#000 24%,#000 100%)}
+.hero-visual-image img{width:100%;height:100%;object-fit:cover;object-position:center 43%;opacity:.82;mix-blend-mode:screen;filter:saturate(1.12) contrast(1.08)}
+.featured-content{position:relative;z-index:2}
+@media(max-width:850px){.hero-visual-image{right:-5%;width:70%;opacity:.8}}
+@media(max-width:560px){.hero-visual-image{right:-24%;width:100%;opacity:.55;mask-image:linear-gradient(90deg,transparent,#000 28%);-webkit-mask-image:linear-gradient(90deg,transparent,#000 28%)}}
+
 </style>
 </head>
 <body>
@@ -595,7 +604,7 @@ body:after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opaci
   </header>
 
   <main class="shell">
-    <section class="featured-story" aria-labelledby="featured-title">
+    <section class="featured-story" aria-labelledby="featured-title"><div class="hero-visual-image"><img src="/blog-art/hero-hacker.webp" alt="Hooded security researcher at a cinematic multi-screen cyber operations workstation" fetchpriority="high"/></div>
   <div class="featured-content">
     <div class="blog-terminal-kicker"><span class="terminal-green">sam@secops:~$</span> explore <i></i></div>
     <span class="featured-label"><i></i> SAM'S JOURNAL / OFFENSIVE &amp; DEFENSIVE SECURITY</span>
@@ -627,7 +636,7 @@ body:after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opaci
         <div class="article-list" id="article-list">
           <article class="article-card" data-category="web" data-search="attack surface exposed services infrastructure web security assets">
   <button class="article-open" type="button" data-open-post="surface" aria-label="Read Understanding the Modern Attack Surface">
-    <div class="post-visual"><img src="/blog-art/attack-surface.svg" alt="Cinematic networked city and exposed attack surface" loading="lazy" decoding="async"/><span class="post-art-tag">SECURITY RESEARCH</span><span class="post-art-index">01</span></div>
+    <div class="post-visual"><img src="/blog-art/server-city.webp" alt="Cybersecurity infrastructure and server-city at night" loading="lazy" decoding="async"/><span class="post-art-tag">SECURITY RESEARCH</span><span class="post-art-index">01</span></div>
     <div class="article-copy">
       <div class="article-meta"><span class="article-category">SECURITY RESEARCH</span><span>·</span><span>NOV 24, 2026</span><span>·</span><span>8 MIN READ</span></div>
       <h3>Understanding the Modern Attack Surface</h3><p>Explore how exposed services, forgotten assets and trust paths widen an application's digital footprint.</p>
@@ -638,7 +647,7 @@ body:after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opaci
 
           <article class="article-card" data-category="application" data-search="oauth authentication identity access tokens web application">
   <button class="article-open" type="button" data-open-post="oauth" aria-label="Read OAuth 2.0 & OpenID Connect: A Complete Guide">
-    <div class="post-visual"><img src="/blog-art/oauth-authentication.svg" alt="Glowing authentication shield and locked identity system" loading="lazy" decoding="async"/><span class="post-art-tag">AUTHENTICATION</span><span class="post-art-index">02</span></div>
+    <div class="post-visual"><img src="/blog-art/auth-shield.webp" alt="Glowing authentication shield and identity protection visual" loading="lazy" decoding="async"/><span class="post-art-tag">AUTHENTICATION</span><span class="post-art-index">02</span></div>
     <div class="article-copy">
       <div class="article-meta"><span class="article-category">AUTHENTICATION</span><span>·</span><span>NOV 22, 2026</span><span>·</span><span>7 MIN READ</span></div>
       <h3>OAuth 2.0 & OpenID Connect: A Complete Guide</h3><p>Understand modern authentication flows, token handling, identity boundaries and common implementation pitfalls.</p>
@@ -649,7 +658,7 @@ body:after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opaci
 
           <article class="article-card" data-category="offensive" data-search="recon reconnaissance osint ethical hacking discovery network mapping">
   <button class="article-open" type="button" data-open-post="recon" aria-label="Read Advanced Reconnaissance Techniques">
-    <div class="post-visual"><img src="/blog-art/recon-radar.svg" alt="Red and cyan reconnaissance radar with mapped assets" loading="lazy" decoding="async"/><span class="post-art-tag">RECONNAISSANCE</span><span class="post-art-index">03</span></div>
+    <div class="post-visual"><img src="/blog-art/recon-map.webp" alt="Threat intelligence map with connected global nodes" loading="lazy" decoding="async"/><span class="post-art-tag">RECONNAISSANCE</span><span class="post-art-index">03</span></div>
     <div class="article-copy">
       <div class="article-meta"><span class="article-category">RECONNAISSANCE</span><span>·</span><span>NOV 20, 2026</span><span>·</span><span>6 MIN READ</span></div>
       <h3>Advanced Reconnaissance Techniques</h3><p>Build a disciplined discovery workflow and turn scattered signals into a clear, authorized test map.</p>
@@ -660,7 +669,7 @@ body:after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opaci
 
           <article class="article-card" data-category="application" data-search="idor authorization object access control insecure direct object reference">
   <button class="article-open" type="button" data-open-post="idor" aria-label="Read IDOR: Where Authorization Breaks">
-    <div class="post-visual"><img src="/blog-art/access-control.svg" alt="Two user identities separated by a secure access-control gate" loading="lazy" decoding="async"/><span class="post-art-tag">ACCESS CONTROL</span><span class="post-art-index">04</span></div>
+    <div class="post-visual"><img src="/blog-art/security-key.webp" alt="Hardware security key on a dark keyboard" loading="lazy" decoding="async"/><span class="post-art-tag">ACCESS CONTROL</span><span class="post-art-index">04</span></div>
     <div class="article-copy">
       <div class="article-meta"><span class="article-category">ACCESS CONTROL</span><span>·</span><span>NOV 18, 2026</span><span>·</span><span>6 MIN READ</span></div>
       <h3>IDOR: Where Authorization Breaks</h3><p>Understand object-level access checks, user boundaries and how to validate authorization safely.</p>
@@ -671,7 +680,7 @@ body:after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opaci
 
           <article class="article-card" data-category="defensive" data-search="remediation penetration testing vulnerability retest fix patch security">
   <button class="article-open" type="button" data-open-post="remediation" aria-label="Read From Finding to Fix: The Remediation Loop">
-    <div class="post-visual"><img src="/blog-art/remediation.svg" alt="Vulnerability findings transformed into a verified shield" loading="lazy" decoding="async"/><span class="post-art-tag">DEFENSIVE SECURITY</span><span class="post-art-index">05</span></div>
+    <div class="post-visual"><img src="/blog-art/fiber-network.webp" alt="Red and cyan optical network cables in a server rack" loading="lazy" decoding="async"/><span class="post-art-tag">DEFENSIVE SECURITY</span><span class="post-art-index">05</span></div>
     <div class="article-copy">
       <div class="article-meta"><span class="article-category">DEFENSIVE SECURITY</span><span>·</span><span>NOV 16, 2026</span><span>·</span><span>7 MIN READ</span></div>
       <h3>From Finding to Fix: The Remediation Loop</h3><p>A finding matters when it leads to a verified fix. Explore prioritization, ownership and retesting.</p>
