@@ -600,6 +600,27 @@ body:after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opaci
 }
 @media(prefers-reduced-motion:reduce){.agent-glyph{animation:none;opacity:.6;transform:none}}
 
+
+/* Image clarity correction: remove the haze and grid overlays sitting on top of artwork. */
+.hero-visual-image{opacity:1!important;filter:none!important;mix-blend-mode:normal!important}
+.hero-visual-image img{
+ opacity:1!important;mix-blend-mode:normal!important;filter:none!important;
+ width:100%;height:100%;object-fit:cover;object-position:center 43%;
+ image-rendering:auto;transform:none!important;backface-visibility:hidden;
+}
+.post-visual{background:#06111d}
+.post-visual:before{
+ background:linear-gradient(0deg,rgba(2,6,12,.12),transparent 52%)!important;
+ opacity:1!important;z-index:1;
+}
+.post-visual:after{display:none!important;opacity:0!important}
+.post-visual img{
+ position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+ opacity:1!important;filter:none!important;mix-blend-mode:normal!important;
+ image-rendering:auto;transform:translateZ(0);backface-visibility:hidden;
+}
+.article-card:hover .post-visual img{filter:none!important}
+
 </style>
 </head>
 <body>
