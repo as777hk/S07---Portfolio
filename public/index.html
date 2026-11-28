@@ -3048,11 +3048,12 @@
           }
 
           if (changedTarget) {
+            // Never fly cursors from a shared screen-center spawn point:
+            // that makes otherwise separate agents draw crossing trails over hero copy.
+            // Snap directly to the owned element and begin a fresh local trail.
             ag.history = [];
-            if (ag.x < 0 || ag.x > window.innerWidth || ag.y < 0 || ag.y > window.innerHeight) {
-              ag.x = targetX;
-              ag.y = targetY;
-            }
+            ag.x = targetX;
+            ag.y = targetY;
           }
           ag.targetLayer = targetLayer;
           ag.retireAt = 0;
