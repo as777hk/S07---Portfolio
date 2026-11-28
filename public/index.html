@@ -2950,51 +2950,57 @@
         activeLayers.sort((a, b) => a.progress - b.progress);
         activeLayers.forEach(layer => drawLayerWorkOverlay(trailCtx, layer));
 
-        // Give each visible cursor one unique, non-overlapping element.
-        // Smaller targets are preferred so nested containers cannot share an agent.
+        // A cursor owns exactly one active DOM layer. Keep that ownership stable
+        // while the layer builds, then let it fade after the layer completes.
+        // Only near-identical / fully nested rectangles are treated as the same target;
+        // partial overlap between separate cards or text rows is not a reason to hide agents.
         const responsiveAgentCap = window.innerWidth < 640 ? 6 : window.innerWidth < 1024 ? 12 : 20;
-        const candidateLayers = activeLayers.slice().sort((a, b) => {
-          const areaA = a.screenRect.width * a.screenRect.height;
-          const areaB = b.screenRect.width * b.screenRect.height;
-          return areaA - areaB || a.progress - b.progress;
-        });
-        const distinctAgentLayers = [];
-        candidateLayers.forEach(layer => {
+        const agentLayers = activeLayers.slice();
+        buildLayers.forEach(layer => {
           const rect = layer.screenRect;
-          if (!rect || rect.width < 4 || rect.height < 4) return;
-          const overlapsExistingTarget = distinctAgentLayers.some(existing => {
-            const other = existing.screenRect;
-            const overlapWidth = Math.min(rect.right, other.right) - Math.max(rect.left, other.left);
-            const overlapHeight = Math.min(rect.bottom, other.bottom) - Math.max(rect.top, other.top);
-            return overlapWidth > 2 && overlapHeight > 2;
-          });
-          if (!overlapsExistingTarget) distinctAgentLayers.push(layer);
+          const recentlyCompleted = layer.state === 'DONE' && layer.completedAt > 0 && now - layer.completedAt < 360;
+          const stillVisible = rect && rect.bottom > -60 && rect.top < window.innerHeight + 60 && rect.width > 3;
+          if (recentlyCompleted && stillVisible && !agentLayers.includes(layer)) agentLayers.push(layer);
         });
-        distinctAgentLayers.sort((a, b) => a.progress - b.progress);
-        const eligibleAgentLayers = distinctAgentLayers.slice(0, responsiveAgentCap);
-        const eligibleLayerSet = new Set(eligibleAgentLayers);
-        const claimedLayers = new Set();
 
-        // Preserve stable ownership. A finished or no-longer-visible target retires
-        // its cursor instead of assigning multiple agents to the same replacement element.
-        const agentTargets = agents.map((ag, idx) => {
-          if (idx >= responsiveAgentCap || ag.retireAt) return null;
-          if (ag.targetLayer && (
-            ag.targetLayer.state === 'DONE' ||
-            !eligibleLayerSet.has(ag.targetLayer)
-          )) {
-            ag.retireAt = now;
-            ag.retireOpacity = Math.max(0, ag.opacity || 0);
-            return null;
+        const agentLayerSet = new Set(agentLayers);
+        const assignedLayers = new Set();
+        const assignedRects = [];
+        const agentTargets = agents.map(ag => {
+          if (ag.retireAt || !ag.targetLayer || !agentLayerSet.has(ag.targetLayer)) return null;
+          if (assignedLayers.has(ag.targetLayer)) return null;
+          assignedLayers.add(ag.targetLayer);
+          assignedRects.push(ag.targetLayer.screenRect);
+          return ag.targetLayer;
+        });
+
+        // Fill free cursors with different elements. A strong-overlap threshold
+        // filters duplicate-sized wrappers, but allows genuinely separate nearby targets.
+        const candidates = agentLayers
+          .filter(layer => !assignedLayers.has(layer))
+          .sort((a, b) => {
+            const areaA = a.screenRect.width * a.screenRect.height;
+            const areaB = b.screenRect.width * b.screenRect.height;
+            return areaA - areaB || a.progress - b.progress;
+          });
+        agents.forEach((ag, idx) => {
+          if (agentTargets[idx] || ag.retireAt || idx >= responsiveAgentCap) return;
+          const nextLayer = candidates.find(layer => {
+            if (assignedLayers.has(layer)) return false;
+            const rect = layer.screenRect;
+            const area = Math.max(1, rect.width * rect.height);
+            return !assignedRects.some(other => {
+              const overlapWidth = Math.max(0, Math.min(rect.right, other.right) - Math.max(rect.left, other.left));
+              const overlapHeight = Math.max(0, Math.min(rect.bottom, other.bottom) - Math.max(rect.top, other.top));
+              const overlapRatio = (overlapWidth * overlapHeight) / Math.max(1, Math.min(area, other.width * other.height));
+              return overlapRatio > 0.82;
+            });
+          });
+          if (nextLayer) {
+            agentTargets[idx] = nextLayer;
+            assignedLayers.add(nextLayer);
+            assignedRects.push(nextLayer.screenRect);
           }
-          if (ag.targetLayer && !claimedLayers.has(ag.targetLayer)) {
-            claimedLayers.add(ag.targetLayer);
-            return ag.targetLayer;
-          }
-          const nextLayer = eligibleAgentLayers.find(layer => !claimedLayers.has(layer));
-          if (!nextLayer) return null;
-          claimedLayers.add(nextLayer);
-          return nextLayer;
         });
 
         const follow = 1 - Math.exp(-dt * (27 + Math.min(12, velocity * 1.15)));
@@ -3006,7 +3012,7 @@
               ag.retireOpacity = Math.max(0, ag.opacity || 0);
             }
             if (ag.retireAt) {
-              const fadeProgress = Math.min(1, (now - ag.retireAt) / 260);
+              const fadeProgress = Math.min(1, (now - ag.retireAt) / 320);
               ag.opacity = ag.retireOpacity * (1 - fadeProgress);
               if (fadeProgress >= 1 || ag.opacity <= 0.01) {
                 ag.targetLayer = null;
@@ -3036,22 +3042,15 @@
             const theta = arm * (Math.PI / 2) + radialStep * 5.2 + t * (idx % 2 ? 0.16 : -0.16);
             targetX = r.left + r.width * 0.62 + Math.cos(theta) * r.width * 0.34 * radialStep;
             targetY = r.top + r.height * 0.48 + Math.sin(theta) * r.height * 0.31 * radialStep;
-          } else if (targetLayer.type === 'text' && targetLayer.textChars.length) {
-            targetX = r.left + r.width * progress;
-            targetY = r.top + r.height * 0.5;
-          } else if (targetLayer.type === 'media') {
-            targetX = r.left + r.width * progress;
-            targetY = r.top + r.height * 0.5;
           } else {
-            targetX = r.left + r.width * (0.08 + progress * 0.84);
+            // One builder per element: trace the current build edge through its center.
+            targetX = r.left + r.width * progress;
             targetY = r.top + r.height * 0.5;
           }
 
           if (changedTarget) {
-            // Never fly cursors from a shared screen-center spawn point:
-            // that makes otherwise separate agents draw crossing trails over hero copy.
-            // Snap directly to the owned element and begin a fresh local trail.
             ag.history = [];
+            // Spawn on the owned element to avoid cross-screen trails.
             ag.x = targetX;
             ag.y = targetY;
           }
@@ -3061,7 +3060,7 @@
           ag.taskRect = { left: r.left, top: r.top, width: r.width, height: r.height };
           ag.workProgress = progress;
           ag.laneRatio = r.height > 0 ? (targetY - r.top) / r.height : 0.5;
-          ag.opacity = Math.min(1, Math.max(0, ag.opacity || 0) + dt * 7);
+          ag.opacity = Math.min(1, Math.max(0, ag.opacity || 0) + dt * 5);
 
           ag.history.push({ x: ag.x, y: ag.y });
           if (ag.history.length > 4) ag.history.shift();
